@@ -17,7 +17,7 @@ type BookingService interface {
 	// for this cargo.
 	RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary
 	// Assigns the cargo to a route.
-	AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId)
+	AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) error
 	// Changes the destination of a cargo.
 	ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode)
 }
@@ -52,6 +52,7 @@ func (s *bookingService) BookNewCargo(originLocode location.UNLocode, destinatio
 
 func (s *bookingService) RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary {
 	c, err := s.cargoRepository.Find(trackingId)
+
 	if err != nil {
 		return []cargo.Itinerary{}
 	}
@@ -59,8 +60,22 @@ func (s *bookingService) RequestPossibleRoutesForCargo(trackingId cargo.Tracking
 	return s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
 }
 
-func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) {
+func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) error {
+	var err error
 
+	c, err := s.cargoRepository.Find(trackingId)
+
+	if err != nil {
+		return err
+	}
+
+	c.AssignToRoute(itinerary)
+
+	if err := s.cargoRepository.Store(*c); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) {

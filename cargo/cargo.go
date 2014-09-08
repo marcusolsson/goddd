@@ -87,11 +87,11 @@ func (c *Cargo) Equal(e Equaler) bool {
 }
 
 func (c *Cargo) SpecifyNewRoute(routeSpecification RouteSpecification) {
-	c.RouteSpecification = routeSpecification
+	// TODO: Decide how to port the Delivery entity.
 }
 
 func (c *Cargo) AssignToRoute(itinerary Itinerary) {
-
+	// TODO: Decide how to port the Delivery entity.
 }
 
 // CargoRepository

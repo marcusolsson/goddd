@@ -84,3 +84,30 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
 	c.Check(itineraries, HasLen, 1)
 }
+
+func (s *S) TestAssignCargoToRoute(c *C) {
+	cargoRepository := cargo.NewCargoRepository()
+	locationRepository := location.NewLocationRepository()
+	routingService := &stubRoutingService{}
+
+	var bookingService BookingService = &bookingService{
+		cargoRepository:    cargoRepository,
+		locationRepository: locationRepository,
+		routingService:     routingService,
+	}
+
+	origin, destination := location.Stockholm, location.Melbourne
+	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+
+	trackingId, err := bookingService.BookNewCargo(origin.UNLocode, destination.UNLocode, arrivalDeadline)
+
+	c.Assert(err, IsNil)
+
+	itineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
+
+	c.Assert(itineraries, HasLen, 1)
+
+	err = bookingService.AssignCargoToRoute(itineraries[0], trackingId)
+
+	c.Assert(err, IsNil)
+}
