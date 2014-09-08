@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/marcusolsson/goddd/location"
+	"bitbucket.org/marcus_olsson/goddd/location"
 )
 
 func NewTrackingId() (TrackingId, error) {
