@@ -12,7 +12,7 @@ import (
 type BookingService interface {
 	// BookNewCargo registers a new cargo in the tracking system,
 	// not yet routed.
-	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) cargo.TrackingId
+	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error)
 	// Requests a list of itineraries describing possible routes
 	// for this cargo.
 	RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary
@@ -57,4 +57,12 @@ func (s *bookingService) RequestPossibleRoutesForCargo(trackingId cargo.Tracking
 	}
 
 	return s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
+}
+
+func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) {
+
+}
+
+func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) {
+
 }

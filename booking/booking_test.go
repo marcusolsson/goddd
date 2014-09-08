@@ -67,7 +67,7 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 	locationRepository := location.NewLocationRepository()
 	routingService := &stubRoutingService{}
 
-	bookingService := &bookingService{
+	var bookingService BookingService = &bookingService{
 		cargoRepository:    cargoRepository,
 		locationRepository: locationRepository,
 		routingService:     routingService,
