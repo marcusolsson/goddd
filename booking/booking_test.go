@@ -43,3 +43,44 @@ func (s *S) TestBookNewCargo(c *C) {
 	c.Check(location.Melbourne, Equals, cargo.RouteSpecification.Destination)
 	c.Check(arrivalDeadline, Equals, cargo.RouteSpecification.ArrivalDeadline)
 }
+
+type stubRoutingService struct{}
+
+// Create an itinerary with a single leg from origin to destination.
+func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
+
+	legs := []cargo.Leg{
+		cargo.Leg{
+			LoadLocation:   routeSpecification.Origin,
+			UnloadLocation: routeSpecification.Destination,
+		},
+	}
+
+	return []cargo.Itinerary{
+		cargo.Itinerary{Legs: legs},
+	}
+}
+
+func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
+
+	cargoRepository := cargo.NewCargoRepository()
+	locationRepository := location.NewLocationRepository()
+	routingService := &stubRoutingService{}
+
+	bookingService := &bookingService{
+		cargoRepository:    cargoRepository,
+		locationRepository: locationRepository,
+		routingService:     routingService,
+	}
+
+	origin, destination := location.Stockholm, location.Melbourne
+	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+
+	trackingId, err := bookingService.BookNewCargo(origin.UNLocode, destination.UNLocode, arrivalDeadline)
+
+	c.Assert(err, IsNil)
+
+	itineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
+
+	c.Check(itineraries, HasLen, 1)
+}

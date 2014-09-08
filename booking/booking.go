@@ -5,6 +5,7 @@ import (
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/routing"
 )
 
 // Cargo booking service.
@@ -14,7 +15,7 @@ type BookingService interface {
 	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) cargo.TrackingId
 	// Requests a list of itineraries describing possible routes
 	// for this cargo.
-	RequestPossibleRoutesForCargo(trackingId cargo.TrackingId)
+	RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary
 	// Assigns the cargo to a route.
 	AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId)
 	// Changes the destination of a cargo.
@@ -24,6 +25,7 @@ type BookingService interface {
 type bookingService struct {
 	cargoRepository    cargo.CargoRepository
 	locationRepository location.LocationRepository
+	routingService     routing.RoutingService
 }
 
 func (s *bookingService) BookNewCargo(originLocode location.UNLocode, destinationLocode location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error) {
@@ -46,4 +48,13 @@ func (s *bookingService) BookNewCargo(originLocode location.UNLocode, destinatio
 	s.cargoRepository.Store(*c)
 
 	return c.TrackingId, nil
+}
+
+func (s *bookingService) RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary {
+	c, err := s.cargoRepository.Find(trackingId)
+	if err != nil {
+		return []cargo.Itinerary{}
+	}
+
+	return s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
 }

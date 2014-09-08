@@ -1,7 +1,6 @@
 package cargo
 
 import (
-	"container/list"
 	"errors"
 	"os/exec"
 	"time"
@@ -46,9 +45,14 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 	return true
 }
 
+type Leg struct {
+	LoadLocation   location.Location
+	UnloadLocation location.Location
+}
+
 // Itinerary
 type Itinerary struct {
-	Legs *list.List
+	Legs []Leg
 }
 
 // TrackingId uniquely identifies a particular cargo.
