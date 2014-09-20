@@ -27,9 +27,9 @@
 
       <!-- Search result/cargo information -->
       <div style="margin: 40px 0; :after">
-	<h4>Cargo {{ cargo.trackingId }} is now: {{ cargo.transportStatus}} {{ cargo.location}}</h4>
-	<p>Estimated time of arrival in {{ cargo.destination }}: {{ cargo.estimatedArrival }}</p>
-	<p>Next expected activity is to {{ cargo.nextActivity }}</p>
+	<h4>Cargo {{ cargo.trackingId }} is now: {{ cargo.statusText}}</h4>
+	<p>Estimated time of arrival in {{ cargo.destination }}: {{ cargo.eta }}</p>
+	<p>{{ cargo.nextExpectedActivity }}</p>
       </div>
 
       <!-- Handling history -->
