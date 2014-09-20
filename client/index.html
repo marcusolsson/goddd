@@ -23,9 +23,9 @@
       <span class="help-block">Hint: try tracking "ABC123" or "JKL567".</span>
 
       <div style="margin: 40px 0; :after">
-	<h4>Cargo ABC123 is now: In port New York</h4>
-	<p>Estimated time of arrival in Helsinki: 2009-03-12 12:00</p>
-	<p>Next expected activity is to load cargo onto voyage 0200T in New York</p>
+	<h4>Cargo {{ cargo.trackingId }} is now: {{ cargo.transportStatus}} {{ cargo.location}}</h4>
+	<p>Estimated time of arrival in {{ cargo.destination }}: {{ cargo.estimatedArrival }}</p>
+	<p>Next expected activity is to {{ cargo.nextActivity }}</p>
       </div>
 
       <div>
