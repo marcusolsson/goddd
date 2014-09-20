@@ -5,11 +5,11 @@ trackApp.factory("Cargo", function($resource) {
 });
 
 trackApp.controller('TrackCtrl', function ($scope, Cargo) {
-
-    Cargo.get({ id: 'ABC123' }, function(data) {
-	$scope.cargo = data;
-    });
-
+    $scope.showCargo = function (query) {
+	Cargo.get({ id: query }, function(data) {
+	    $scope.cargo = data;
+	});
+    }
 });
 
 trackApp.filter('expectedIcon', function () {
