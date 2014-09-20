@@ -6,6 +6,7 @@
 
     <script src="scripts/jquery-2.1.1.min.js"></script>
     <script src="scripts/angular.min.js"></script>
+    <script src="scripts/angular-resource.min.js"></script>
     <script src="scripts/controllers.js"></script>
 
     <!-- Bootstrap -->
@@ -30,7 +31,7 @@
       <span class="help-block">Hint: try tracking "ABC123" or "JKL567".</span>
 
       <!-- Search result/cargo information -->
-      <div style="margin: 40px 0; :after">
+      <div style="margin: 40px 0">
 	<h4>Cargo {{ cargo.trackingId }} is now: {{ cargo.statusText}}</h4>
 	<p>Estimated time of arrival in {{ cargo.destination }}: {{ cargo.eta }}</p>
 	<p>{{ cargo.nextExpectedActivity }}</p>

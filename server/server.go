@@ -20,9 +20,9 @@ func main() {
 		IndentJSON: true,
 	}))
 
-	m.Get("/cargos", func(r render.Render) {
+	m.Get("/cargos/:id", func(params martini.Params, r render.Render) {
 		c := Cargo{
-			TrackingId:           "ABC123",
+			TrackingId:           params["id"],
 			StatusText:           "In port New York",
 			Destination:          "Helsinki",
 			ETA:                  "2009-03-12 12:00",
