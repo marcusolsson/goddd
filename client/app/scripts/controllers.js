@@ -1,7 +1,7 @@
 var trackApp = angular.module('trackApp', ['ngResource']);
 
 trackApp.factory("Cargo", function($resource) {
-    return $resource("http://localhost:3000/cargos/:id");
+    return $resource("/cargos/:id");
 });
 
 trackApp.controller('TrackCtrl', function ($scope, Cargo) {

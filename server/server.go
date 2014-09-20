@@ -1,6 +1,8 @@
-package main
+package server
 
 import (
+	"net/http"
+
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"
 )
@@ -19,9 +21,10 @@ type Cargo struct {
 	Events               []Event `json:"events"`
 }
 
-func main() {
+func RegisterHandlers() {
 	m := martini.Classic()
 
+	m.Use(martini.Static("app"))
 	m.Use(render.Renderer(render.Options{
 		IndentJSON: true,
 	}))
@@ -43,5 +46,5 @@ func main() {
 		r.JSON(200, c)
 	})
 
-	m.Run()
+	http.Handle("/", m)
 }

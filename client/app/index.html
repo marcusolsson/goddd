@@ -12,13 +12,15 @@
     <!-- Bootstrap -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+
+    <link href='http://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
   </head>
   <body ng-controller="TrackCtrl">
     <div class="container">
 
       <!-- Header -->
       <div class="page-header text-center">
-	<h1>Domain Driven Delivery <small>We're ubiquitous!</small></h1>
+	<h1 style="font-family: 'Indie Flower', cursive;">Domain Driven Delivery <small>We're ubiquitous!</small></h1>
       </div>
 
       <!-- Search field -->
@@ -45,7 +47,7 @@
 	  <h5 class="text-uppercase">Handling history</h5>
 	  <ul class="list-group">
 	    <li class="list-group-item" ng-repeat="leg in cargo.events">
-	      <span class="glyphicon" ng-class="leg.expected ? 'glyphicon-ok' : 'glyphicon-exclamation-sign'"></span>&nbsp;{{ leg.description }}
+	      <span class="glyphicon" ng-class="leg.expected ? 'glyphicon-ok' : 'glyphicon-exclamation-sign'"></span>&nbsp;&nbsp;{{ leg.description }}
 	    </li>
 	  </ul>
 	</div>
@@ -53,7 +55,7 @@
 
       <!-- Footer -->
       <div class="text-center">
-	This application is written by <a href="http://www.citerus.se/">Citerus</a> and <a href="http://www.domainlanguage.com/">Domain Language</a>
+	<p>Copyright &copy; 2014 <a href="http://www.citerus.se/">Citerus</a>. Code released under the MIT License.</p>
       </div>
     </div>
   </body>
