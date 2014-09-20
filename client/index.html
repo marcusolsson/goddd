@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html>
+<html ng-app="trackApp">
   <head>
     <meta charset="UTF-8">
     <title>Track your cargo</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="js/angular.min.js"></script>
+    <script src="js/controllers.js"></script>
     <script src="js/bootstrap.min.js"></script>
   </head>
-  <body>
+  <body ng-controller="TrackCtrl">
     <div class="container">
       <div class="page-header text-center">
 	<h1>Domain Driven Delivery <small>We're ubiquitous!</small></h1>
@@ -29,9 +31,9 @@
       <div>
 	<h5 class="text-uppercase">Handling history</h5>
 	<ul class="list-group">
-	  <li class="list-group-item"><span class="glyphicon glyphicon-ok"></span>&nbsp;Received in Hongkong, at 3/1/09 12:00 AM.</li>
-	  <li class="list-group-item"><span class="glyphicon glyphicon-ok"></span>&nbsp;Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM.</li>
-	  <li class="list-group-item"><span class="glyphicon glyphicon-ok"></span>&nbsp;Unloaded off voyage 0100S in New York, at 3/5/09 12:00 AM.</li>
+	  <li class="list-group-item" ng-repeat="e in events">
+	    <span class="glyphicon glyphicon-ok"></span>&nbsp;{{ e.text }}
+	  </li>
 	</ul>
       </div>
 
