@@ -10,10 +10,13 @@
   </head>
   <body ng-controller="TrackCtrl">
     <div class="container">
+
+      <!-- Header -->
       <div class="page-header text-center">
 	<h1>Domain Driven Delivery <small>We're ubiquitous!</small></h1>
       </div>
 
+      <!-- Search field -->
       <div class="input-group">
 	<input type="text" class="form-control input-lg" placeholder="Enter your tracking id">
 	<span class="input-group-btn">
@@ -22,12 +25,14 @@
       </div>
       <span class="help-block">Hint: try tracking "ABC123" or "JKL567".</span>
 
+      <!-- Search result/cargo information -->
       <div style="margin: 40px 0; :after">
 	<h4>Cargo {{ cargo.trackingId }} is now: {{ cargo.transportStatus}} {{ cargo.location}}</h4>
 	<p>Estimated time of arrival in {{ cargo.destination }}: {{ cargo.estimatedArrival }}</p>
 	<p>Next expected activity is to {{ cargo.nextActivity }}</p>
       </div>
 
+      <!-- Handling history -->
       <div>
 	<h5 class="text-uppercase">Handling history</h5>
 	<ul class="list-group">
@@ -37,6 +42,7 @@
 	</ul>
       </div>
 
+      <!-- Footer -->
       <div class="text-center">
 	This application is written by <a href="http://www.citerus.se/">Citerus</a> and <a href="http://www.domainlanguage.com/">Domain Language</a>
       </div>
