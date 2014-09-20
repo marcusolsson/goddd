@@ -22,29 +22,33 @@
       </div>
 
       <!-- Search field -->
-      <div class="input-group">
-	<input type="text" class="form-control input-lg" placeholder="Enter your tracking id" ng-model="searchQuery">
-	<span class="input-group-btn">
-          <button class="btn btn-default btn-lg" type="button" ng-click="showCargo(searchQuery)" >Track!</button>
-	</span>
-      </div>
-      <span class="help-block">Hint: try tracking "ABC123" or "JKL567".</span>
+      <form role="form">
+	<div class="form-group">
+	  <div class="input-group">
+	    <input type="text" class="form-control input-lg" placeholder="Enter your tracking id" ng-model="searchQuery" ng-minlength=1>
+	    <span class="input-group-btn">
+              <button class="btn btn-default btn-lg" type="submit" ng-click="showCargo(searchQuery)" >Track!</button>
+	    </span>
+	  </div>
+	  <span class="help-block">Hint: try tracking "ABC123" or "JKL567".</span>
+	</div>
+      </form>
 
-      <!-- Search result/cargo information -->
-      <div style="margin: 40px 0">
-	<h4>Cargo {{ cargo.trackingId }} is now: {{ cargo.statusText}}</h4>
-	<p>Estimated time of arrival in {{ cargo.destination }}: {{ cargo.eta }}</p>
-	<p>{{ cargo.nextExpectedActivity }}</p>
-      </div>
-
-      <!-- Handling history -->
-      <div>
-	<h5 class="text-uppercase">Handling history</h5>
-	<ul class="list-group">
-	  <li class="list-group-item" ng-repeat="leg in cargo.events">
-	    <span class="{{ leg.expected | expectedIcon }}"></span>&nbsp;{{ leg.description }}
-	  </li>
-	</ul>
+      <!-- Cargo information -->
+      <div ng-show="cargo">
+	<div style="margin: 40px 0">
+	  <h4>Cargo {{ cargo.trackingId }} is now: {{ cargo.statusText}}</h4>
+	  <p>Estimated time of arrival in {{ cargo.destination }}: {{ cargo.eta }}</p>
+	  <p>{{ cargo.nextExpectedActivity }}</p>
+	</div>
+	<div>
+	  <h5 class="text-uppercase">Handling history</h5>
+	  <ul class="list-group">
+	    <li class="list-group-item" ng-repeat="leg in cargo.events">
+	      <span class="glyphicon" ng-class="leg.expected ? 'glyphicon-ok' : 'glyphicon-exclamation-sign'"></span>&nbsp;{{ leg.description }}
+	    </li>
+	  </ul>
+	</div>
       </div>
 
       <!-- Footer -->
