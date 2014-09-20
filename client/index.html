@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Track your cargo</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+    <script src="js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <div class="page-header text-center">
+	<h1>Domain Driven Delivery <small>We're ubiquitous!</small></h1>
+      </div>
+
+      <div class="input-group">
+	<input type="text" class="form-control input-lg" placeholder="Enter your tracking id">
+	<span class="input-group-btn">
+          <button class="btn btn-default btn-lg" type="button" >Track!</button>
+	</span>
+      </div>
+      <span class="help-block">Hint: try tracking "ABC123" or "JKL567".</span>
+
+      <div style="margin: 40px 0; :after">
+	<h4>Cargo ABC123 is now: In port New York</h4>
+	<p>Estimated time of arrival in Helsinki: 2009-03-12 12:00</p>
+	<p>Next expected activity is to load cargo onto voyage 0200T in New York</p>
+      </div>
+
+      <div>
+	<h5 class="text-uppercase">Handling history</h5>
+	<ul class="list-group">
+	  <li class="list-group-item"><span class="glyphicon glyphicon-ok"></span>&nbsp;Received in Hongkong, at 3/1/09 12:00 AM.</li>
+	  <li class="list-group-item"><span class="glyphicon glyphicon-ok"></span>&nbsp;Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM.</li>
+	  <li class="list-group-item"><span class="glyphicon glyphicon-ok"></span>&nbsp;Unloaded off voyage 0100S in New York, at 3/5/09 12:00 AM.</li>
+	</ul>
+      </div>
+
+      <div class="text-center">
+	This application is written by <a href="http://www.citerus.se/">Citerus</a> and <a href="http://www.domainlanguage.com/">Domain Language</a>
+      </div>
+    </div>
+  </body>
+</html>
