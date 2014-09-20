@@ -41,8 +41,8 @@
       <div>
 	<h5 class="text-uppercase">Handling history</h5>
 	<ul class="list-group">
-	  <li class="list-group-item" ng-repeat="e in events">
-	    <span class="glyphicon glyphicon-ok"></span>&nbsp;{{ e.text }}
+	  <li class="list-group-item" ng-repeat="leg in cargo.events">
+	    <span class="{{ leg.expected | expectedIcon }}"></span>&nbsp;{{ leg.description }}
 	  </li>
 	</ul>
       </div>
