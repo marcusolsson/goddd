@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"net/http"
 
 	"bitbucket.org/marcus_olsson/goddd/cargo"
@@ -27,8 +28,8 @@ type cargoDTO struct {
 func Assemble(c cargo.Cargo) cargoDTO {
 	dto := cargoDTO{
 		TrackingId:           string(c.TrackingId),
-		StatusText:           "In port New York",
-		Destination:          "Helsinki",
+		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin.Name),
+		Destination:          c.RouteSpecification.Destination.Name,
 		ETA:                  "2009-03-12 12:00",
 		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
 	}

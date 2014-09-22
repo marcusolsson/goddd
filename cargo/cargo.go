@@ -33,6 +33,15 @@ const (
 	Unknown
 )
 
+func (s TransportStatus) String() string {
+	switch s {
+	case InPort:
+		return "In port"
+	default:
+		return ""
+	}
+}
+
 // RouteSpecification describes where a cargo origin and destination
 // is, and the arrival deadline.
 type RouteSpecification struct {
