@@ -99,7 +99,7 @@ type CargoRepository interface {
 	Store(cargo Cargo) error
 	// Finds a cargo using given id.
 	Find(trackingId TrackingId) (*Cargo, error)
-	FindAll() ([]Cargo, error)
+	FindAll() []Cargo
 }
 
 var (
@@ -124,12 +124,12 @@ func (r *cargoRepository) Find(trackingId TrackingId) (*Cargo, error) {
 	return nil, ErrUnknownCargo
 }
 
-func (r *cargoRepository) FindAll() ([]Cargo, error) {
+func (r *cargoRepository) FindAll() []Cargo {
 	c := make([]Cargo, 0, len(r.cargos))
 	for _, val := range r.cargos {
 		c = append(c, val)
 	}
-	return c, nil
+	return c
 }
 
 func NewCargoRepository() CargoRepository {
