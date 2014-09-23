@@ -22,6 +22,7 @@ type Event struct {
 type cargoDTO struct {
 	TrackingId           string  `json:"trackingId"`
 	StatusText           string  `json:"statusText"`
+	Origin               string  `json:"origin"`
 	Destination          string  `json:"destination"`
 	ETA                  string  `json:"eta"`
 	NextExpectedActivity string  `json:"nextExpectedActivity"`
@@ -41,6 +42,7 @@ func Assemble(c cargo.Cargo) cargoDTO {
 	dto := cargoDTO{
 		TrackingId:           string(c.TrackingId),
 		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin.Name),
+		Origin:               c.Origin.Name,
 		Destination:          c.RouteSpecification.Destination.Name,
 		ETA:                  "2009-03-12 12:00",
 		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",

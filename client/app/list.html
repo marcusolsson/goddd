@@ -7,6 +7,9 @@
     <title>Cargo Administration</title>
 
     <script src="scripts/jquery-2.1.1.min.js"></script>
+    <script src="scripts/angular.min.js"></script>
+    <script src="scripts/angular-resource.min.js"></script>
+    <script src="scripts/controllers.js"></script>
 
     <!-- Bootstrap -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
@@ -27,7 +30,7 @@
     </style>
 
   </head>
-  <body ng-controller="TrackCtrl">
+  <body ng-controller="ListCtrl">
     <div class="container-fluid">
 
       <!-- Header -->
@@ -46,10 +49,10 @@
 	    <th>Destination</th>
 	    <th>Routed</th>
 	  </tr>
-	  <tr>
-	    <td><a href="details.html">ABC123</a></td>
-	    <td>CNHKG</td>
-	    <td>FIHEL</td>
+	  <tr ng-repeat="c in cargos">
+	    <td><a href="details.html">{{ c.trackingId }}</a></td>
+	    <td>{{ c.origin }}</td>
+	    <td>{{ c.destination }}</td>
 	    <td>Yes</td>
 	  </tr>
 	</table>

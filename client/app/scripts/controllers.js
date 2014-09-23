@@ -4,6 +4,10 @@ trackApp.factory("Cargo", function($resource) {
     return $resource("/cargos/:id");
 });
 
+trackApp.factory("Cargos", function($resource) {
+    return $resource("/cargos");
+});
+
 trackApp.controller('TrackCtrl', function ($scope, Cargo) {
     $scope.showCargo = function (query) {
 	if (query) {
@@ -14,4 +18,10 @@ trackApp.controller('TrackCtrl', function ($scope, Cargo) {
 	    $scope.cargo = null
 	}
     }
+});
+
+trackApp.controller('ListCtrl', function ($scope, Cargos) {
+    Cargos.query(function(data) {
+	$scope.cargos = data;
+    });
 });
