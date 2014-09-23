@@ -25,3 +25,13 @@ trackApp.controller('ListCtrl', function ($scope, Cargos) {
 	$scope.cargos = data;
     });
 });
+
+trackApp.factory("Locations", function($resource) {
+    return $resource("/locations");
+});
+
+trackApp.controller('BookCargoCtrl', function ($scope, Locations) {
+    Locations.query(function(data) {
+	$scope.locations = data;
+    });
+});

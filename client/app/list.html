@@ -64,7 +64,7 @@
       </button>
 
       <!-- Book new cargo dialog -->
-      <div class="modal fade" id="bookCargoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal fade" ng-controller="BookCargoCtrl" id="bookCargoDialog" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 	  <div class="modal-content">
 	    <div class="modal-header">
@@ -80,14 +80,10 @@
 		  <label class="col-sm-4 control-label">Origin</label>
 		  <div class="btn-group">
 		    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
-		      CNSHA <span class="caret"></span>
+		      {{ locations[0].locode }} <span class="caret"></span>
 		    </button>
 		    <ul class="dropdown-menu">
-		      <li><a href="#">CNSHA</a></li>
-		      <li><a href="#">USNYC</a></li>
-		      <li><a href="#">USCHI</a></li>
-		      <li><a href="#">CNHKG</a></li>
-		      <li><a href="#">DEHAM</a></li>
+		      <li ng-repeat="l in locations"><a href="#">{{ l.locode }}</a><li>
 		    </ul>
 		  </div>
 		</div>
@@ -95,14 +91,10 @@
 		  <label class="col-sm-4 control-label">Destination</label>
 		  <div class="btn-group">
 		    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
-		      CNSHA <span class="caret"></span>
+		      {{ locations[0].locode }} <span class="caret"></span>
 		    </button>
 		    <ul class="dropdown-menu">
-		      <li><a href="#">CNSHA</a></li>
-		      <li><a href="#">USNYC</a></li>
-		      <li><a href="#">USCHI</a></li>
-		      <li><a href="#">CNHKG</a></li>
-		      <li><a href="#">DEHAM</a></li>
+		      <li ng-repeat="l in locations"><a href="#">{{ l.locode }}</a><li>
 		    </ul>
 		  </div>
 		</div>
