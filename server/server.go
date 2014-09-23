@@ -3,6 +3,9 @@ package server
 import (
 	"fmt"
 	"net/http"
+	"net/url"
+	"os"
+	"strings"
 
 	"bitbucket.org/marcus_olsson/goddd/cargo"
 	"bitbucket.org/marcus_olsson/goddd/location"
@@ -25,6 +28,15 @@ type cargoDTO struct {
 	Events               []Event `json:"events"`
 }
 
+func NextTrackingId() cargo.TrackingId {
+	f, _ := os.Open("/dev/urandom")
+	b := make([]byte, 16)
+	f.Read(b)
+	f.Close()
+	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+	return cargo.TrackingId(strings.Split(strings.ToUpper(uuid), "-")[0])
+}
+
 func Assemble(c cargo.Cargo) cargoDTO {
 	dto := cargoDTO{
 		TrackingId:           string(c.TrackingId),
@@ -42,10 +54,28 @@ func Assemble(c cargo.Cargo) cargoDTO {
 	return dto
 }
 
+type QueryParams url.Values
+
+func (p QueryParams) validateQueryParams(params ...string) (found JSONObject, missing []string) {
+	found = make(JSONObject)
+	missing = make([]string, 0)
+
+	for _, param := range params {
+		s := url.Values(p).Get(param)
+		if len(s) > 0 {
+			found[param] = s
+		} else {
+			missing = append(missing, param)
+		}
+	}
+	return found, missing
+}
+
 type JSONObject map[string]interface{}
 
 var (
-	ResourceNotFound = JSONObject{"error": "resource not found"}
+	ResourceNotFound              = JSONObject{"error": "The specified resource does not exist."}
+	MissingRequiredQueryParameter = JSONObject{"error": "A required query parameter was not specified for this request."}
 )
 
 func storeTestData(r cargo.CargoRepository) {
@@ -90,7 +120,44 @@ func RegisterHandlers() {
 		} else {
 			r.JSON(200, Assemble(*c))
 		}
+	})
 
+	m.Post("/cargos", func(req *http.Request, r render.Render) {
+		v := QueryParams(req.URL.Query())
+
+		found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
+
+		if len(missing) > 0 {
+			e := MissingRequiredQueryParameter
+			e["missing"] = missing
+			r.JSON(400, e)
+			return
+		}
+
+		lr := location.NewLocationRepository()
+
+		orgn := lr.Find(location.UNLocode(fmt.Sprintf("%s", found["origin"])))
+
+		if orgn == location.UnknownLocation {
+			r.JSON(404, ResourceNotFound)
+			return
+		}
+
+		dest := lr.Find(location.UNLocode(fmt.Sprintf("%s", found["destination"])))
+
+		if dest == location.UnknownLocation {
+			r.JSON(404, ResourceNotFound)
+			return
+		}
+
+		c := cargo.NewCargo(NextTrackingId(), cargo.RouteSpecification{
+			Origin:      orgn,
+			Destination: dest,
+		})
+
+		repository.Store(*c)
+
+		r.JSON(200, c)
 	})
 
 	http.Handle("/", m)
