@@ -29,6 +29,11 @@ type cargoDTO struct {
 	Events               []Event `json:"events"`
 }
 
+type locationDTO struct {
+	UNLocode string `json:"locode"`
+	Name     string `json:"name"`
+}
+
 func NextTrackingId() cargo.TrackingId {
 	f, _ := os.Open("/dev/urandom")
 	b := make([]byte, 16)
@@ -160,6 +165,20 @@ func RegisterHandlers() {
 		repository.Store(*c)
 
 		r.JSON(200, c)
+	})
+
+	m.Get("/locations", func(r render.Render) {
+		lr := location.NewLocationRepository()
+		locations := lr.FindAll()
+
+		dtos := make([]locationDTO, len(locations))
+		for i, loc := range locations {
+			dtos[i] = locationDTO{
+				UNLocode: string(loc.UNLocode),
+				Name:     loc.Name,
+			}
+		}
+		r.JSON(200, dtos)
 	})
 
 	http.Handle("/", m)

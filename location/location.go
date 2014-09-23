@@ -36,6 +36,8 @@ var (
 type LocationRepository interface {
 	// Finds a location using given unlocode.
 	Find(locode UNLocode) Location
+
+	FindAll() []Location
 }
 
 type locationRepository struct {
@@ -48,6 +50,14 @@ func (r *locationRepository) Find(locode UNLocode) Location {
 	}
 
 	return UnknownLocation
+}
+
+func (r *locationRepository) FindAll() []Location {
+	l := make([]Location, 0, len(r.locations))
+	for _, val := range r.locations {
+		l = append(l, val)
+	}
+	return l
 }
 
 func NewLocationRepository() LocationRepository {
