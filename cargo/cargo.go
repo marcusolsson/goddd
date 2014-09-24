@@ -2,15 +2,21 @@ package cargo
 
 import (
 	"errors"
-	"os/exec"
+	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"bitbucket.org/marcus_olsson/goddd/location"
 )
 
-func NewTrackingId() (TrackingId, error) {
-	out, err := exec.Command("uuidgen").Output()
-	return TrackingId(out), err
+func NextTrackingId() TrackingId {
+	f, _ := os.Open("/dev/urandom")
+	b := make([]byte, 16)
+	f.Read(b)
+	f.Close()
+	uuid := fmt.Sprintf("%x-%x-%x-%x-%x", b[0:4], b[4:6], b[6:8], b[8:10], b[10:])
+	return TrackingId(strings.Split(strings.ToUpper(uuid), "-")[0])
 }
 
 // RoutingStatus
@@ -107,7 +113,7 @@ func (c *Cargo) AssignToRoute(itinerary Itinerary) {
 type CargoRepository interface {
 	Store(cargo Cargo) error
 	// Finds a cargo using given id.
-	Find(trackingId TrackingId) (*Cargo, error)
+	Find(trackingId TrackingId) (Cargo, error)
 	FindAll() []Cargo
 }
 
@@ -121,16 +127,17 @@ type cargoRepository struct {
 
 func (r *cargoRepository) Store(cargo Cargo) error {
 	r.cargos[cargo.TrackingId] = cargo
+
 	return nil
 }
 
-func (r *cargoRepository) Find(trackingId TrackingId) (*Cargo, error) {
+func (r *cargoRepository) Find(trackingId TrackingId) (Cargo, error) {
 
 	if val, ok := r.cargos[trackingId]; ok {
-		return &val, nil
+		return val, nil
 	}
 
-	return nil, ErrUnknownCargo
+	return Cargo{}, ErrUnknownCargo
 }
 
 func (r *cargoRepository) FindAll() []Cargo {

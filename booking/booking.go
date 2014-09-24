@@ -30,12 +30,11 @@ type bookingService struct {
 
 func (s *bookingService) BookNewCargo(originLocode location.UNLocode, destinationLocode location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error) {
 
-	trackingId, err := cargo.NewTrackingId()
-	if err != nil {
-		return "", err
-	}
-	origin := s.locationRepository.Find(originLocode)
-	destination := s.locationRepository.Find(destinationLocode)
+	var (
+		trackingId  = cargo.NextTrackingId()
+		origin      = s.locationRepository.Find(originLocode)
+		destination = s.locationRepository.Find(destinationLocode)
+	)
 
 	routeSpecification := cargo.RouteSpecification{
 		Origin:          origin,
@@ -71,7 +70,7 @@ func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingI
 
 	c.AssignToRoute(itinerary)
 
-	if err := s.cargoRepository.Store(*c); err != nil {
+	if err := s.cargoRepository.Store(c); err != nil {
 		return err
 	}
 
@@ -80,4 +79,12 @@ func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingI
 
 func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) {
 
+}
+
+func NewBookingService(cr cargo.CargoRepository, lr location.LocationRepository, rs routing.RoutingService) BookingService {
+	return &bookingService{
+		cargoRepository:    cr,
+		locationRepository: lr,
+		routingService:     rs,
+	}
 }
