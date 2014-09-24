@@ -1,17 +1,21 @@
 var trackApp = angular.module('trackApp', ['ngResource']);
 
-trackApp.factory("Cargo", function($resource) {
-    return $resource("/cargos/:id");
+trackApp.factory("Location", function($resource) {
+    return $resource("/locations");
 });
 
-trackApp.factory("Cargos", function($resource) {
-    return $resource("/cargos");
+trackApp.factory("Cargo", function($resource) {
+    return $resource("/cargos/:id", null, {
+	'find': {method: 'GET', params: {id: "@id"}},
+	'list': {method: 'GET', isArray: true},
+	'book': {method: 'POST', params: {origin: "AUMEL", destination: "SESTO", arrivalDeadline: 123}}
+    });
 });
 
 trackApp.controller('TrackCtrl', function ($scope, Cargo) {
     $scope.showCargo = function (query) {
 	if (query) {
-	    Cargo.get({ id: query }, function(data) {
+	    Cargo.find({ id: query }, function(data) {
 		$scope.cargo = data;
 	    });
 	} else {
@@ -20,18 +24,20 @@ trackApp.controller('TrackCtrl', function ($scope, Cargo) {
     }
 });
 
-trackApp.controller('ListCtrl', function ($scope, Cargos) {
-    Cargos.query(function(data) {
+trackApp.controller('ListCtrl', function ($scope, Cargo) {
+    Cargo.list(function(data) {
 	$scope.cargos = data;
     });
 });
 
-trackApp.factory("Locations", function($resource) {
-    return $resource("/locations");
-});
-
-trackApp.controller('BookCargoCtrl', function ($scope, Locations) {
-    Locations.query(function(data) {
+trackApp.controller('BookCargoCtrl', function ($scope, Location, Cargo) {
+    Location.query(function(data) {
 	$scope.locations = data;
     });
+
+    $scope.bookCargo = function () {
+	Cargo.book(function(data) {
+	    $scope.bookedCargo = data
+	})
+    }
 });
