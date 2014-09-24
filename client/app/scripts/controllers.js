@@ -52,8 +52,13 @@ trackApp.controller('BookCargoCtrl', function ($scope, Location, Cargo) {
 	    origin: $scope.selectedOrigin,
 	    destination: $scope.selectedDestination,
 	    arrivalDeadline: deadlineDate
-	}, function(data) {
-	    $scope.bookedCargo = data
+	}, function(bookResponse) {
+	    $scope.bookedCargo = bookResponse;
+
+	    // refresh list
+	    Cargo.list(function(listResponse) {
+		$scope.$parent.cargos = listResponse;
+	    });
 	})
     }
 });
