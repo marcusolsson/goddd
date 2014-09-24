@@ -19,14 +19,22 @@
     <script src="scripts/bootstrap-datepicker.js"></script>
     <script>
      $(document).ready(function () {
-       $('#something').datepicker({});
+       $('#something').datepicker();
+
+       var now = new Date();
+       var day = ("0" + now.getDate()).slice(-2);
+       var month = ("0" + (now.getMonth() + 1)).slice(-2);
+       var today = (month) + "/" + (day) + "/" + now.getFullYear();
+
+       $('#something').datepicker('update', now);
+       $('#something').datepicker().children('input').val(today);
      });
     </script>
 
     <link rel="stylesheet" href="styles/datepicker3.css">
     <!-- Make datepicker to sit on top. -->
     <style>
-      .datepicker{z-index:1151 !important;}
+     .datepicker{z-index:1151 !important;}
     </style>
 
   </head>
@@ -80,10 +88,10 @@
 		  <label class="col-sm-4 control-label">Origin</label>
 		  <div class="btn-group">
 		    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
-		      {{ locations[0].locode }} <span class="caret"></span>
+		      {{ selectedOrigin }}&nbsp;<span class="caret"></span>
 		    </button>
 		    <ul class="dropdown-menu">
-		      <li ng-repeat="l in locations"><a href="#">{{ l.locode }}</a><li>
+		      <li ng-repeat="l in locations"><a href="" ng-click="selectOrigin(l.locode)">{{ l.locode }}</a><li>
 		    </ul>
 		  </div>
 		</div>
@@ -91,26 +99,26 @@
 		  <label class="col-sm-4 control-label">Destination</label>
 		  <div class="btn-group">
 		    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
-		      {{ locations[0].locode }} <span class="caret"></span>
+		      {{ selectedDestination }}&nbsp;<span class="caret"></span>
 		    </button>
 		    <ul class="dropdown-menu">
-		      <li ng-repeat="l in locations"><a href="#">{{ l.locode }}</a><li>
+		      <li ng-repeat="l in locations"><a href="" ng-click="selectDestination(l.locode)">{{ l.locode }}</a><li>
 		    </ul>
 		  </div>
 		</div>
 		<div class="form-group">
 		  <label class="col-sm-4 control-label">Arrival deadline</label>
 		  <div class="input-group date" id="something" style="width: 150px;">
-		    <input type="text" class="form-control">
+		    <input type="text" class="form-control" ng-model="deadline">
 		    <span class="input-group-addon"><i class="glyphicon glyphicon-th"></i></span>
 		  </div>
 		</div>
 	      </form>
 	    </div>
 	    <div class="modal-footer">
+	      <label ng-show="bookedCargo">Booked cargo with tracking ID {{ bookedCargo.TrackingId }}</label>
               <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
               <button type="button" class="btn btn-primary" ng-click="bookCargo()">Book</button>
-	      <label>{{ bookedCargo }}</label>
 	    </div>
 	  </div>
 	</div>
