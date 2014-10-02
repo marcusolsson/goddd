@@ -1,6 +1,7 @@
 package cargo
 
 import (
+	"container/list"
 	"testing"
 	"time"
 
@@ -60,7 +61,7 @@ func (s *S) TestRepositoryFind(c *C) {
 	c2, err := r.Find(TrackingId("ABC"))
 
 	c.Assert(err, IsNil)
-	c.Check(true, Equals, c1.Equal(c2))
+	c.Check(true, Equals, c1.Equal(&c2))
 }
 
 func (s *S) TestRepositoryFindAll(c *C) {
@@ -78,8 +79,99 @@ func (s *S) TestRepositoryFindAll(c *C) {
 	r.Store(*c1)
 	r.Store(*c2)
 
-	cargos, err := r.FindAll()
+	cargos := r.FindAll()
 
-	c.Assert(err, IsNil)
 	c.Check(cargos, HasLen, 2)
+}
+
+func (s *S) TestRoutingStatus(c *C) {
+	cargo := NewCargo("ABC", RouteSpecification{
+		Origin:      location.Stockholm,
+		Destination: location.Hongkong,
+	})
+
+	good := Itinerary{Legs: make([]Leg, 1)}
+	good.Legs[0] = Leg{
+		LoadLocation:   location.Stockholm,
+		UnloadLocation: location.Melbourne,
+	}
+
+	bad := Itinerary{Legs: make([]Leg, 1)}
+	bad.Legs[0] = Leg{
+		LoadLocation:   location.Stockholm,
+		UnloadLocation: location.Hongkong,
+	}
+
+	acceptOnlyGood := RouteSpecification{
+		Origin:      location.Stockholm,
+		Destination: location.Melbourne,
+	}
+
+	cargo.SpecifyNewRoute(acceptOnlyGood)
+	c.Check(NotRouted, Equals, cargo.Delivery.RoutingStatus)
+
+	cargo.AssignToRoute(bad)
+	c.Check(Misrouted, Equals, cargo.Delivery.RoutingStatus)
+
+	cargo.AssignToRoute(good)
+	c.Check(Routed, Equals, cargo.Delivery.RoutingStatus)
+}
+
+func (s *S) TestLastKnownLocationUnknownWhenNoEvents(c *C) {
+	cargo := NewCargo("ABC", RouteSpecification{
+		Origin:      location.Stockholm,
+		Destination: location.Hongkong,
+	})
+
+	c.Check(location.UnknownLocation, Equals, cargo.Delivery.LastKnownLocation)
+}
+
+func (s *S) TestLastKnownLocationReceived(c *C) {
+	cargo := populateCargoReceivedInStockholm()
+	c.Check(location.Stockholm, Equals, cargo.Delivery.LastKnownLocation)
+}
+
+func (s *S) TestLastKnownLocationClaimed(c *C) {
+	cargo := populateCargoReceivedInStockholm()
+	c.Check(location.Stockholm, Equals, cargo.Delivery.LastKnownLocation)
+}
+
+func populateCargoReceivedInStockholm() *Cargo {
+	cargo := NewCargo("XYZ", RouteSpecification{
+		Origin:      location.Stockholm,
+		Destination: location.Melbourne,
+	})
+
+	e := HandlingEvent{
+		TrackingId: cargo.TrackingId,
+		Type:       Receive,
+		Location:   location.Stockholm,
+	}
+
+	history := HandlingHistory{HandlingEvents: list.New()}
+	history.HandlingEvents.PushBack(e)
+
+	cargo.DeriveDeliveryProgress(history)
+
+	return cargo
+}
+
+func populateCargoClaimedInMelbourne() *Cargo {
+	cargo := NewCargo("XYZ", RouteSpecification{
+		Origin:      location.Stockholm,
+		Destination: location.Melbourne,
+	})
+
+	e := HandlingEvent{
+		TrackingId: cargo.TrackingId,
+		Type:       Claim,
+		Location:   location.Melbourne,
+	}
+
+	history := HandlingHistory{HandlingEvents: list.New()}
+	history.HandlingEvents.PushBack(e)
+
+	cargo.DeriveDeliveryProgress(history)
+
+	return cargo
 }

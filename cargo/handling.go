@@ -1,11 +1,10 @@
-package handling
+package cargo
 
 import (
 	"container/list"
 	"errors"
 	"time"
 
-	"bitbucket.org/marcus_olsson/goddd/cargo"
 	"bitbucket.org/marcus_olsson/goddd/location"
 )
 
@@ -13,6 +12,8 @@ import (
 // cargo is unloaded from a carrier at a some location at a given
 // time.
 type HandlingEvent struct {
+	TrackingId
+	Type HandlingEventType
 	location.Location
 }
 
@@ -56,7 +57,7 @@ func (r *handlingEventRepository) Store(e HandlingEvent) {
 
 // HandlingEventFactory creates handling events.
 type HandlingEventFactory interface {
-	CreateHandlingEvent(trackingId cargo.TrackingId) (HandlingEvent, error)
+	CreateHandlingEvent(trackingId TrackingId) (HandlingEvent, error)
 }
 
 var (
@@ -64,10 +65,10 @@ var (
 )
 
 type handlingEventFactory struct {
-	cargoRepository cargo.CargoRepository
+	cargoRepository CargoRepository
 }
 
-func (f *handlingEventFactory) CreateHandlingEvent(trackingId cargo.TrackingId) (HandlingEvent, error) {
+func (f *handlingEventFactory) CreateHandlingEvent(trackingId TrackingId) (HandlingEvent, error) {
 	_, err := f.cargoRepository.Find(trackingId)
 
 	if err != nil {
@@ -80,7 +81,7 @@ func (f *handlingEventFactory) CreateHandlingEvent(trackingId cargo.TrackingId) 
 type HandlingEventService interface {
 	// Registers a handling event in the system, and notifies
 	// interested parties that a cargo has been handled.
-	RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, unLocode location.UNLocode, eventType HandlingEventType) error
+	RegisterHandlingEvent(completionTime time.Time, trackingId TrackingId, unLocode location.UNLocode, eventType HandlingEventType) error
 }
 
 type handlingEventService struct {
@@ -88,7 +89,7 @@ type handlingEventService struct {
 	factory    HandlingEventFactory
 }
 
-func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, unLocode location.UNLocode, eventType HandlingEventType) error {
+func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingId TrackingId, unLocode location.UNLocode, eventType HandlingEventType) error {
 	e, _ := s.factory.CreateHandlingEvent(trackingId)
 
 	s.repository.Store(e)
