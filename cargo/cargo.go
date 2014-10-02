@@ -24,6 +24,19 @@ const (
 	Routed
 )
 
+func (s RoutingStatus) String() string {
+	switch s {
+	case NotRouted:
+		return "Not routed"
+	case Misrouted:
+		return "Misrouted"
+	case Routed:
+		return "Routed"
+	default:
+		return ""
+	}
+}
+
 // TransportStatus
 type TransportStatus int
 
@@ -72,14 +85,14 @@ func (i *Itinerary) InitialDepartureLocation() location.Location {
 	if i.Legs == nil || len(i.Legs) == 0 {
 		return location.UnknownLocation
 	}
-	return i.Legs[0].LoadLocation;
+	return i.Legs[0].LoadLocation
 }
 
 func (i *Itinerary) FinalArrivalLocation() location.Location {
 	if i.Legs == nil || len(i.Legs) == 0 {
 		return location.UnknownLocation
 	}
-	return i.Legs[len(i.Legs)-1].LoadLocation;
+	return i.Legs[len(i.Legs)-1].LoadLocation
 }
 
 // Delivery is the actual transportation of the cargo, as opposed to
