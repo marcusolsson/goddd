@@ -112,3 +112,7 @@ __Example:__
         "name": "Hongkong"
       }
     ]
+
+## Copyright
+
+Copyright © 2014 Marcus Olsson. See [LICENSE](LICENSE) for details.
