@@ -49,6 +49,22 @@ Since the struct starts with a lowercase, it will not be exported outside the pa
 
 The application exposes a REST API using [Martini](https://github.com/go-martini/martini). 
 
+### Setup
+
+1. Make sure you have your `$GOPATH` environment set.
+
+    `export GOPATH=$HOME/go`
+
+2. Get the latest version by running:
+
+    `go get -u github.com/marcusolsson/goddd`
+
+3. Navigate into the __server__ directory and run it by typing:
+
+    `go run cmd/local.go`
+
+_Note:_ The `cmd/appengine.go` is used to deploy it on Google App Engine. If you want to deploy it to your own project, edit the `app.yaml` to point to your own project. Read more about [deploying Go applications to App Engine](https://cloud.google.com/appengine/docs/go/).
+
 ### Cargos
 
 #### GET /cargos
