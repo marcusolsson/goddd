@@ -6,7 +6,7 @@ I will update this README along the way, as I gain more insights.
 
 ## Design
 
-The purpose of this sample is because I wanted to learn Go and to see how well it used with Domain Driven Design. When faced with design challenges, I will lean towards the more idiomatic one.
+The purpose of this sample is because I wanted to learn Go and to see how well it can be used with Domain Driven Design. When faced with design challenges, I will lean towards the more idiomatic one.
 
 ### Equality
 
