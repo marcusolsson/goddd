@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
-	"bitbucket.org/marcus_olsson/goddd/cargo"
-	"bitbucket.org/marcus_olsson/goddd/location"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
 
 	. "gopkg.in/check.v1"
 )

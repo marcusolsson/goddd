@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"bitbucket.org/marcus_olsson/goddd/booking"
-	"bitbucket.org/marcus_olsson/goddd/cargo"
-	"bitbucket.org/marcus_olsson/goddd/location"
-	"bitbucket.org/marcus_olsson/goddd/routing"
+	"github.com/marcusolsson/goddd/booking"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/routing"
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/render"

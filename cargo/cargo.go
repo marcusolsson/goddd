@@ -8,7 +8,7 @@ import (
 
 	"code.google.com/p/go-uuid/uuid"
 
-	"bitbucket.org/marcus_olsson/goddd/location"
+	"github.com/marcusolsson/goddd/location"
 )
 
 func NextTrackingId() TrackingId {

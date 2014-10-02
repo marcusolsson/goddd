@@ -3,7 +3,7 @@ package main
 import (
 	"net/http"
 
-	"bitbucket.org/marcus_olsson/goddd/server"
+	"github.com/marcusolsson/goddd/server"
 )
 
 func main() {

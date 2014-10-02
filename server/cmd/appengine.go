@@ -1,6 +1,6 @@
 package main
 
-import "bitbucket.org/marcus_olsson/goddd/server"
+import "github.com/marcusolsson/goddd/server"
 
 func init() {
 	server.RegisterHandlers()

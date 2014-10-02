@@ -5,7 +5,7 @@ import (
 	"errors"
 	"time"
 
-	"bitbucket.org/marcus_olsson/goddd/location"
+	"github.com/marcusolsson/goddd/location"
 )
 
 // A HandlingEvent is used to register the event when, for instance, a
