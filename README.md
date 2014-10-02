@@ -44,3 +44,71 @@ Since the struct starts with a lowercase, it will not be exported outside the pa
 
 - How can we use the zero-initialization idiom effectively in DDD? What does a zero-initialized Itinerary mean?  
 - Concurrency is one area where Go shines, but initial thought is to keep it out of the domain model. This might be interesting if concurrency is a explicit part of the model.
+
+## REST API
+
+The application exposes a REST API using [Martini](https://github.com/go-martini/martini). 
+
+### Cargos
+
+#### GET /cargos
+Returns a list of all currently booked cargos.
+
+#### GET /cargos/:id
+Returns a cargo with a given tracking ID.
+
+__Example:__
+
+    {
+        "trackingId": "ABC123",
+        "statusText": "In port Stockholm",
+        "origin": "Stockholm",
+        "destination": "Hongkong",
+        "eta": "2009-03-12 12:00",
+        "nextExpectedActivity": "Next expected activity is to load cargo onto voyage 0200T in New York",
+        "events": [
+          {
+            "description": "Received in Hongkong, at 3/1/09 12:00 AM.",
+            "expected": true
+          },
+          {
+            "description": "Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM.",
+            "expected": false
+          },
+          {
+            "description": "Unloaded off voyage 0100S in New York, at 3/5/09 12:00 AM.",
+            "expected": false
+          }
+        ]
+      }
+
+#### POST /cargos
+Books a cargo.
+
+| URL Param | Description |
+|:----------|:------------|
+|origin=[string]|UN locode of the origin|
+|destination=[string]|UN locode of the destination|
+|arrivalDeadline=[timestamp]|Timestamp of the arrival deadline|
+
+### Locations
+
+#### GET /locations
+Returns a list of the registered locations.
+
+__Example:__
+
+    [
+      {
+        "locode": "SESTO",
+        "name": "Stockholm"
+      },
+      {
+        "locode": "AUMEL",
+        "name": "Melbourne"
+      },
+      {
+        "locode": "CNHKG",
+        "name": "Hongkong"
+      }
+    ]
