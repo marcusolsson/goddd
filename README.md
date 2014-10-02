@@ -18,7 +18,7 @@ Read more about [comparison operators](http://golang.org/ref/spec#Comparison_ope
 
 ### Immutability
 
-Go does not support means of creating a immutable struct. All exported fields can be altered after creation. It is however possible to used interfaces to handle modification of structs.
+Go does not support means of creating a immutable struct. All exported fields can be altered after creation. It is however possible to use interfaces to handle modification of structs.
 
     type ValueObject interface {
          Name() string
