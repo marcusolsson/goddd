@@ -92,7 +92,7 @@ func (i *Itinerary) FinalArrivalLocation() location.Location {
 	if i.Legs == nil || len(i.Legs) == 0 {
 		return location.UnknownLocation
 	}
-	return i.Legs[len(i.Legs)-1].LoadLocation
+	return i.Legs[len(i.Legs)-1].UnloadLocation
 }
 
 // Delivery is the actual transportation of the cargo, as opposed to
@@ -177,7 +177,7 @@ func calculateTransportStatus(event HandlingEvent) TransportStatus {
 
 func calculateLastKnownLocation(event HandlingEvent) location.Location {
 	zero := HandlingEvent{}
-	if event == zero {
+	if event != zero {
 		return event.Location
 	} else {
 		return location.UnknownLocation

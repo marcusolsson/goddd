@@ -85,10 +85,7 @@ func (s *S) TestRepositoryFindAll(c *C) {
 }
 
 func (s *S) TestRoutingStatus(c *C) {
-	cargo := NewCargo("ABC", RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Hongkong,
-	})
+	cargo := NewCargo("ABC", RouteSpecification{})
 
 	good := Itinerary{Legs: make([]Leg, 1)}
 	good.Legs[0] = Leg{
@@ -108,13 +105,13 @@ func (s *S) TestRoutingStatus(c *C) {
 	}
 
 	cargo.SpecifyNewRoute(acceptOnlyGood)
-	c.Check(NotRouted, Equals, cargo.Delivery.RoutingStatus)
+	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
 
 	cargo.AssignToRoute(bad)
-	c.Check(Misrouted, Equals, cargo.Delivery.RoutingStatus)
+	c.Check(cargo.Delivery.RoutingStatus, Equals, Misrouted)
 
 	cargo.AssignToRoute(good)
-	c.Check(Routed, Equals, cargo.Delivery.RoutingStatus)
+	c.Check(cargo.Delivery.RoutingStatus, Equals, Routed)
 }
 
 func (s *S) TestLastKnownLocationUnknownWhenNoEvents(c *C) {
