@@ -22,7 +22,8 @@ type HandlingEvent struct {
 type HandlingEventType int
 
 const (
-	Load HandlingEventType = iota
+	NotHandled HandlingEventType = iota
+	Load
 	Unload
 	Receive
 	Claim

@@ -25,7 +25,11 @@ func (s *S) TestConstruction(c *C) {
 		ArrivalDeadline: time.Date(2009, time.March, 13, 0, 0, 0, 0, time.UTC),
 	}
 
-	NewCargo(trackingId, specification)
+	cargo := NewCargo(trackingId, specification)
+
+	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
+	c.Check(cargo.Delivery.TransportStatus, Equals, NotReceived)
+	c.Check(cargo.Delivery.LastKnownLocation, Equals, location.UnknownLocation)
 }
 
 func (s *S) TestEquality(c *C) {

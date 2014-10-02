@@ -89,9 +89,8 @@ func (s RoutingStatus) String() string {
 		return "Misrouted"
 	case Routed:
 		return "Routed"
-	default:
-		return ""
 	}
+	return ""
 }
 
 // TransportStatus
@@ -109,9 +108,8 @@ func (s TransportStatus) String() string {
 	switch s {
 	case InPort:
 		return "In port"
-	default:
-		return ""
 	}
+	return ""
 }
 
 // RouteSpecification describes where a cargo origin and destination

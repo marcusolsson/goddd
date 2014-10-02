@@ -43,12 +43,9 @@ func calculateRoutingStatus(itinerary Itinerary, routeSpecification RouteSpecifi
 }
 
 func calculateTransportStatus(event HandlingEvent) TransportStatus {
-	zero := HandlingEvent{}
-	if event == zero {
-		return NotReceived
-	}
-
 	switch event.Type {
+	case NotHandled:
+		return NotReceived
 	case Load:
 		return OnboardCarrier
 	case Unload:
@@ -57,20 +54,12 @@ func calculateTransportStatus(event HandlingEvent) TransportStatus {
 		return InPort
 	case Claim:
 		return Claimed
-	default:
-		return Unknown
 	}
-
 	return Unknown
 }
 
 func calculateLastKnownLocation(event HandlingEvent) location.Location {
-	zero := HandlingEvent{}
-	if event != zero {
-		return event.Location
-	} else {
-		return location.UnknownLocation
-	}
+	return event.Location
 }
 
 func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecification RouteSpecification) Delivery {
