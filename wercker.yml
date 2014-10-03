@@ -1,4 +1,4 @@
-box: pjvds/golang
+box: wercker/golang
 
 build:
   steps:
@@ -27,7 +27,7 @@ deploy:
     - script:
         name: get dependencies
         code: |-
-	    go get ./...
+            go get ./... && go get gopkg.in/check.v1
 
     - pjvds/appengine-deploy:
         email: ninjasinventedphysics@gmail.com
