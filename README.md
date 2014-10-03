@@ -1,6 +1,6 @@
-# GoDDD #
+# GoDDD [![wercker status](https://app.wercker.com/status/12b6c3ee4ea86efc7fd5184b589916b7/s "wercker status")](https://app.wercker.com/project/bykey/12b6c3ee4ea86efc7fd5184b589916b7)
 
-This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net/) to Go. The purpose is to explore how to write idiomatic Go applications using Domain-Driven Design. 
+This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net/) to Go. The purpose is to explore how to write idiomatic Go applications using Domain-Driven Design.
 
 I will update this README along the way, as I gain more insights.
 
@@ -23,31 +23,31 @@ Go does not support means of creating a immutable struct. All exported fields ca
     type ValueObject interface {
          Name() string
     }
-    
+
     type valueObject struct {
          name string
     }
-    
+
     func (v *valueObject) Name() {
          return v.name
     }
-    
+
     func NewValueObject(s string) ValueObject {
          return valueObject {name: s}
     }
 
-Since the struct starts with a lowercase, it will not be exported outside the package. This however, does not prevent internal functions to modify the state of the value object after it has been created. 
+Since the struct starts with a lowercase, it will not be exported outside the package. This however, does not prevent internal functions to modify the state of the value object after it has been created.
 
 [Read more](https://groups.google.com/forum/#!topic/golang-nuts/BnjG3N77Ico) about immutable objects in this forum thread.
 
 ### Other thoughts ...
 
-- How can we use the zero-initialization idiom effectively in DDD? What does a zero-initialized Itinerary mean?  
+- How can we use the zero-initialization idiom effectively in DDD? What does a zero-initialized Itinerary mean?
 - Concurrency is one area where Go shines, but initial thought is to keep it out of the domain model. This might be interesting if concurrency is a explicit part of the model.
 
 ## REST API
 
-The application exposes a REST API using [Martini](https://github.com/go-martini/martini). 
+The application exposes a REST API using [Martini](https://github.com/go-martini/martini).
 
 ### Setup
 

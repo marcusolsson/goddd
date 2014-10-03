@@ -1,0 +1,28 @@
+box: pjvds/golang
+
+build:
+  steps:
+    - setup-go-workspace
+
+    - script:
+        name: get dependencies
+        code: |-
+            go get ./... && go get gopkg.in/check.v1
+
+
+    - script:
+        name: build
+        code: |-
+            go build ./...
+
+    - script:
+        name: test
+        code: |-
+            go test ./...
+
+deploy:
+  steps:
+    - setup-go-workspace
+    - pjvds/appengine-deploy:
+        email: pj@wercker.com
+        password: $APP_ENGINE_PASS
