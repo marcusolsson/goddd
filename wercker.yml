@@ -23,6 +23,12 @@ build:
 deploy:
   steps:
     - setup-go-workspace
+
+    - script:
+        name: get dependencies
+        code: |-
+	    go get ./...
+
     - pjvds/appengine-deploy:
         email: ninjasinventedphysics@gmail.com
         password: $APP_ENGINE_PASS
