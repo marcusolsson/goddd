@@ -13,6 +13,7 @@ import (
 	"github.com/marcusolsson/goddd/routing"
 
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/cors"
 	"github.com/martini-contrib/render"
 )
 
@@ -78,6 +79,12 @@ func RegisterHandlers() {
 
 	m := martini.Classic()
 
+	allowCORSHandler := cors.Allow(&cors.Options{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"GET", "POST"},
+		AllowHeaders: []string{"Origin"},
+	})
+
 	m.Use(martini.Static("app"))
 	m.Use(render.Renderer(render.Options{
 		IndentJSON: true,
@@ -85,7 +92,7 @@ func RegisterHandlers() {
 
 	// GET /cargos
 	// Returns an array of all booked cargos.
-	m.Get("/cargos", func(r render.Render) {
+	m.Get("/cargos", allowCORSHandler, func(r render.Render) {
 		cargos := cargoRepository.FindAll()
 		dtos := make([]cargoDTO, len(cargos))
 
@@ -98,7 +105,7 @@ func RegisterHandlers() {
 
 	// GET /cargos/:id
 	// Finds and returns a cargo with a specified tracking id.
-	m.Get("/cargos/:id", func(params martini.Params, r render.Render) {
+	m.Get("/cargos/:id", allowCORSHandler, func(params martini.Params, r render.Render) {
 		trackingId := cargo.TrackingId(params["id"])
 		c, err := cargoRepository.Find(trackingId)
 
@@ -111,7 +118,7 @@ func RegisterHandlers() {
 
 	// POST /cargos
 	// Books a cargo from an origin to a destination within a specified arrival deadline.
-	m.Post("/cargos", func(req *http.Request, r render.Render) {
+	m.Post("/cargos", allowCORSHandler, func(req *http.Request, r render.Render) {
 		v := QueryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
 
@@ -149,7 +156,7 @@ func RegisterHandlers() {
 
 	// GET /locations
 	// Returns an array of known locations.
-	m.Get("/locations", func(r render.Render) {
+	m.Get("/locations", allowCORSHandler, func(r render.Render) {
 		locationRepository := location.NewLocationRepository()
 		locations := locationRepository.FindAll()
 
