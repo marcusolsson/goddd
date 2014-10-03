@@ -24,5 +24,5 @@ deploy:
   steps:
     - setup-go-workspace
     - pjvds/appengine-deploy:
-        email: pj@wercker.com
+        email: ninjasinventedphysics@gmail.com
         password: $APP_ENGINE_PASS
