@@ -123,6 +123,30 @@ func RegisterHandlers() {
 		}
 	})
 
+	m.Post("/cargos/:id/change_destination", allowCORSHandler, func(req *http.Request, params martini.Params, r render.Render) {
+		v := QueryParams(req.URL.Query())
+		found, missing := v.validateQueryParams("destination")
+
+		if len(missing) > 0 {
+			e := MissingRequiredQueryParameter
+			e["missing"] = missing
+			r.JSON(400, e)
+			return
+		}
+
+		var (
+			trackingId  = cargo.TrackingId(params["id"])
+			destination = location.UNLocode(fmt.Sprintf("%s", found["destination"]))
+		)
+
+		if err := bookingService.ChangeDestination(trackingId, destination); err != nil {
+			r.JSON(400, InvalidInput)
+			return
+		}
+
+		r.JSON(200, JSONObject{})
+	})
+
 	// POST /cargos
 	// Books a cargo from an origin to a destination within a specified arrival deadline.
 	m.Post("/cargos", allowCORSHandler, func(req *http.Request, r render.Render) {

@@ -111,3 +111,38 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 
 	c.Assert(err, IsNil)
 }
+
+func (s *S) TestChangeCargoDestination(c *C) {
+
+	var (
+		cargoRepository    = cargo.NewCargoRepository()
+		locationRepository = location.NewLocationRepository()
+		routingService     = &stubRoutingService{}
+	)
+
+	var bookingService BookingService = &bookingService{
+		cargoRepository:    cargoRepository,
+		locationRepository: locationRepository,
+		routingService:     routingService,
+	}
+
+	c1 := cargo.NewCargo("ABC", cargo.RouteSpecification{
+		Origin:          location.Stockholm,
+		Destination:     location.Hongkong,
+		ArrivalDeadline: time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC),
+	})
+
+	var err error
+
+	err = cargoRepository.Store(*c1)
+	c.Assert(err, IsNil)
+	c.Assert(c1.RouteSpecification.Destination, Equals, location.Hongkong)
+
+	err = bookingService.ChangeDestination(c1.TrackingId, location.Melbourne.UNLocode)
+	c.Assert(err, IsNil)
+
+	updatedCargo, err := cargoRepository.Find(c1.TrackingId)
+
+	c.Assert(err, IsNil)
+	c.Assert(updatedCargo.RouteSpecification.Destination, Equals, location.Melbourne)
+}

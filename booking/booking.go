@@ -1,6 +1,8 @@
 package booking
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
@@ -19,7 +21,7 @@ type BookingService interface {
 	// Assigns the cargo to a route.
 	AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) error
 	// Changes the destination of a cargo.
-	ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode)
+	ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) error
 }
 
 type bookingService struct {
@@ -77,8 +79,32 @@ func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingI
 	return nil
 }
 
-func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) {
+func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) error {
+	c, err := s.cargoRepository.Find(trackingId)
 
+	if err != nil {
+		return errors.New("Could not find cargo.")
+	}
+
+	l := s.locationRepository.Find(unLocode)
+
+	if l == location.UnknownLocation {
+		return errors.New(fmt.Sprintf("Could not find location %s", unLocode))
+	}
+
+	routeSpecification := cargo.RouteSpecification{
+		Origin:          c.Origin,
+		Destination:     l,
+		ArrivalDeadline: c.RouteSpecification.ArrivalDeadline,
+	}
+
+	c.SpecifyNewRoute(routeSpecification)
+
+	if err := s.cargoRepository.Store(c); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func NewBookingService(cr cargo.CargoRepository, lr location.LocationRepository, rs routing.RoutingService) BookingService {
