@@ -34,6 +34,8 @@ type cargoDTO struct {
 	Destination          string     `json:"destination"`
 	ETA                  string     `json:"eta"`
 	NextExpectedActivity string     `json:"nextExpectedActivity"`
+	Misrouted            bool       `json:"misrouted"`
+	Routed               bool       `json:"routed"`
 	Events               []eventDTO `json:"events"`
 }
 
@@ -46,6 +48,8 @@ func Assemble(c cargo.Cargo) cargoDTO {
 		Destination:          c.RouteSpecification.Destination.Name,
 		ETA:                  "2009-03-12 12:00",
 		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
+		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
+		Routed:               c.Itinerary.IsEmpty(),
 	}
 
 	dto.Events = make([]eventDTO, 3)
