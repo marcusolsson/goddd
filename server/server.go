@@ -36,20 +36,23 @@ type cargoDTO struct {
 	NextExpectedActivity string     `json:"nextExpectedActivity"`
 	Misrouted            bool       `json:"misrouted"`
 	Routed               bool       `json:"routed"`
+	ArrivalDeadline      string     `json:"arrivalDeadline"`
 	Events               []eventDTO `json:"events"`
 }
 
 // Assemble converts the Cargo domain object to a serializable DTO.
 func Assemble(c cargo.Cargo) cargoDTO {
+	eta := time.Date(2009, time.March, 12, 12, 0, 0, 0, time.UTC)
 	dto := cargoDTO{
 		TrackingId:           string(c.TrackingId),
 		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin.Name),
 		Origin:               c.Origin.Name,
 		Destination:          c.RouteSpecification.Destination.Name,
-		ETA:                  "2009-03-12 12:00",
+		ETA:                  eta.Format(time.RFC3339),
 		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
 		Routed:               c.Itinerary.IsEmpty(),
+		ArrivalDeadline:      c.ArrivalDeadline.Format(time.RFC3339),
 	}
 
 	dto.Events = make([]eventDTO, 3)
