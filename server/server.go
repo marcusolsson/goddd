@@ -51,7 +51,7 @@ func Assemble(c cargo.Cargo) cargoDTO {
 		ETA:                  eta.Format(time.RFC3339),
 		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
-		Routed:               c.Itinerary.IsEmpty(),
+		Routed:               !c.Itinerary.IsEmpty(),
 		ArrivalDeadline:      c.ArrivalDeadline.Format(time.RFC3339),
 	}
 
