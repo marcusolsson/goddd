@@ -107,6 +107,13 @@ Books a cargo.
 |destination=[string]|UN locode of the destination|
 |arrivalDeadline=[timestamp]|Timestamp of the arrival deadline|
 
+#### POST /cargos/:id/change_destination
+Updates the route of a cargo with a new destination.
+
+| URL Param | Description |
+|:----------|:------------|
+|destination=[string]|UN locode of the destination|
+
 ### Locations
 
 #### GET /locations

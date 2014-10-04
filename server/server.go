@@ -123,6 +123,8 @@ func RegisterHandlers() {
 		}
 	})
 
+	// POST /cargos/:id/change_destination
+	// Updates the route specification of a cargo with a new destination.
 	m.Post("/cargos/:id/change_destination", allowCORSHandler, func(req *http.Request, params martini.Params, r render.Render) {
 		v := QueryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("destination")
