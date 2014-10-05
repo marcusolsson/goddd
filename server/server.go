@@ -40,6 +40,18 @@ type cargoDTO struct {
 	Events               []eventDTO `json:"events"`
 }
 
+type legDTO struct {
+	VoyageNumber string `json:"voyage"`
+	From         string `json:"from"`
+	To           string `json:"to"`
+	LoadTime     string `json:"loadTime"`
+	UnloadTime   string `json:"unloadTime"`
+}
+
+type routeCandidate struct {
+	Legs []legDTO `json:"legs"`
+}
+
 // Assemble converts the Cargo domain object to a serializable DTO.
 func Assemble(c cargo.Cargo) cargoDTO {
 	eta := time.Date(2009, time.March, 12, 12, 0, 0, 0, time.UTC)
@@ -75,7 +87,7 @@ var (
 var (
 	cargoRepository    = cargo.NewCargoRepository()
 	locationRepository = location.NewLocationRepository()
-	routingService     = routing.NewRoutingService()
+	routingService     = routing.NewRoutingService(locationRepository)
 	bookingService     = booking.NewBookingService(cargoRepository, locationRepository, routingService)
 )
 
@@ -147,6 +159,30 @@ func RegisterHandlers() {
 		}
 
 		r.JSON(200, JSONObject{})
+	})
+
+	// GET /cargos/:id/request_routes
+	// Requests the possible routes for a booked cargo.
+	m.Get("/cargos/:id/request_routes", allowCORSHandler, func(params martini.Params, r render.Render) {
+		trackingId := cargo.TrackingId(params["id"])
+		itineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
+
+		candidates := make([]routeCandidate, 0)
+		for _, itin := range itineraries {
+			legs := make([]legDTO, 0)
+			for _, leg := range itin.Legs {
+				legs = append(legs, legDTO{
+					VoyageNumber: "S0001",
+					From:         string(leg.LoadLocation.UNLocode),
+					To:           string(leg.UnloadLocation.UNLocode),
+					LoadTime:     "N/A",
+					UnloadTime:   "N/A",
+				})
+			}
+			candidates = append(candidates, routeCandidate{Legs: legs})
+		}
+
+		r.JSON(200, candidates)
 	})
 
 	// POST /cargos
