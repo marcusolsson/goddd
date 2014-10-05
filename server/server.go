@@ -111,7 +111,7 @@ func RegisterHandlers() {
 
 	allowCORSHandler := cors.Allow(&cors.Options{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{"GET", "POST"},
+		AllowMethods: []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders: []string{"Origin"},
 	})
 
