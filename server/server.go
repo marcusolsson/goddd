@@ -13,6 +13,7 @@ import (
 	"github.com/marcusolsson/goddd/routing"
 
 	"github.com/go-martini/martini"
+	"github.com/martini-contrib/binding"
 	"github.com/martini-contrib/cors"
 	"github.com/martini-contrib/render"
 )
@@ -38,6 +39,7 @@ type cargoDTO struct {
 	Routed               bool       `json:"routed"`
 	ArrivalDeadline      string     `json:"arrivalDeadline"`
 	Events               []eventDTO `json:"events"`
+	Legs                 []legDTO   `json:"legs"`
 }
 
 type legDTO struct {
@@ -66,6 +68,15 @@ func Assemble(c cargo.Cargo) cargoDTO {
 		Routed:               !c.Itinerary.IsEmpty(),
 		ArrivalDeadline:      c.ArrivalDeadline.Format(time.RFC3339),
 	}
+
+	legs := make([]legDTO, 0)
+	for _, l := range c.Itinerary.Legs {
+		legs = append(legs, legDTO{
+			From: string(l.LoadLocation.UNLocode),
+			To:   string(l.UnloadLocation.UNLocode),
+		})
+	}
+	dto.Legs = legs
 
 	dto.Events = make([]eventDTO, 3)
 	dto.Events[0] = eventDTO{Description: "Received in Hongkong, at 3/1/09 12:00 AM.", Expected: true}
@@ -159,6 +170,33 @@ func RegisterHandlers() {
 		}
 
 		r.JSON(200, JSONObject{})
+	})
+
+	m.Post("/cargos/:id/assign_to_route", allowCORSHandler, binding.Bind(routeCandidate{}), func(rc routeCandidate, params martini.Params, r render.Render) {
+		trackingId := cargo.TrackingId(params["id"])
+
+		legs := make([]cargo.Leg, 0)
+		for _, l := range rc.Legs {
+
+			var (
+				loadLocation   = locationRepository.Find(location.UNLocode(l.From))
+				unloadLocation = locationRepository.Find(location.UNLocode(l.To))
+			)
+
+			legs = append(legs, cargo.Leg{
+				LoadLocation:   loadLocation,
+				UnloadLocation: unloadLocation,
+			})
+		}
+
+		itinerary := cargo.Itinerary{Legs: legs}
+
+		if err := bookingService.AssignCargoToRoute(itinerary, trackingId); err != nil {
+			r.JSON(400, InvalidInput)
+			return
+		}
+
+		r.JSON(200, itinerary)
 	})
 
 	// GET /cargos/:id/request_routes
