@@ -60,8 +60,8 @@ func Assemble(c cargo.Cargo) cargoDTO {
 	dto := cargoDTO{
 		TrackingId:           string(c.TrackingId),
 		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin.Name),
-		Origin:               c.Origin.Name,
-		Destination:          c.RouteSpecification.Destination.Name,
+		Origin:               string(c.Origin.UNLocode),
+		Destination:          string(c.RouteSpecification.Destination.UNLocode),
 		ETA:                  eta.Format(time.RFC3339),
 		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
