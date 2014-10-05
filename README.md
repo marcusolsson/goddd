@@ -114,6 +114,33 @@ Updates the route of a cargo with a new destination.
 |:----------|:------------|
 |destination=[string]|UN locode of the destination|
 
+#### GET /cargos/:id/request_routes
+Requests the possible routes for a booked cargo.
+
+__Example:__
+
+    [
+      {
+        "legs": [
+          {
+            "voyage": "S0001",
+            "from": "SESTO",
+            "to": "CNHKG",
+            "loadTime": "2009-03-12 12:00",
+            "unloadTime": "2009-03-23 14:50"
+          },
+		  {
+            "voyage": "S0002",
+            "from": "CNHKG",
+            "to": "AUMEL",
+            "loadTime": "2009-03-24 12:00",
+            "unloadTime": "2009-03-30 11:20"
+          }
+        ]
+      }
+    ]
+
+
 ### Locations
 
 #### GET /locations
