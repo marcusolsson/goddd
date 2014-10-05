@@ -172,6 +172,8 @@ func RegisterHandlers() {
 		r.JSON(200, JSONObject{})
 	})
 
+	// POST /cargos/:id/assign_to_route
+	// Assigns the cargo to a route.
 	m.Post("/cargos/:id/assign_to_route", allowCORSHandler, binding.Bind(routeCandidate{}), func(rc routeCandidate, params martini.Params, r render.Render) {
 		trackingId := cargo.TrackingId(params["id"])
 

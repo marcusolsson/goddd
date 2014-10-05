@@ -140,6 +140,28 @@ __Example:__
       }
     ]
 
+#### POST /cargos/:id/assign_to_route
+Assigns the cargo to a route. Typically one of the routes returned by `/cargos/:id/request_routes`.
+
+__Example:__
+    {
+      "legs": [
+        {
+          "voyage": "S0001",
+          "from": "SESTO",
+          "to": "CNHKG",
+          "loadTime": "2009-03-12 12:00",
+          "unloadTime": "2009-03-23 14:50"
+        },
+	    {
+          "voyage": "S0002",
+          "from": "CNHKG",
+          "to": "AUMEL",
+          "loadTime": "2009-03-24 12:00",
+          "unloadTime": "2009-03-30 11:20"
+        }
+      ]
+    }
 
 ### Locations
 
