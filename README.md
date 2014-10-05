@@ -144,6 +144,7 @@ __Example:__
 Assigns the cargo to a route. Typically one of the routes returned by `/cargos/:id/request_routes`.
 
 __Example:__
+
     {
       "legs": [
         {
