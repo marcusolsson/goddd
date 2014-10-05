@@ -112,7 +112,7 @@ func RegisterHandlers() {
 	m.Use(cors.Allow(&cors.Options{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "OPTIONS"},
-		AllowHeaders: []string{"Origin, Content-Type"},
+		AllowHeaders: []string{"Origin", "Content-Type"},
 	}))
 
 	m.Use(martini.Static("app"))
