@@ -26,5 +26,5 @@ func (s *S) TestAssembleDTO(c *C) {
 
 	c.Check("FTL456", Equals, dto.TrackingId)
 	c.Check("In port Melbourne", Equals, dto.StatusText)
-	c.Check("Stockholm", Equals, dto.Destination)
+	c.Check("SESTO", Equals, dto.Destination)
 }
