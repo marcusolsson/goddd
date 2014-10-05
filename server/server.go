@@ -72,8 +72,9 @@ func Assemble(c cargo.Cargo) cargoDTO {
 	legs := make([]legDTO, 0)
 	for _, l := range c.Itinerary.Legs {
 		legs = append(legs, legDTO{
-			From: string(l.LoadLocation.UNLocode),
-			To:   string(l.UnloadLocation.UNLocode),
+			VoyageNumber: l.Voyage,
+			From:         string(l.LoadLocation.UNLocode),
+			To:           string(l.UnloadLocation.UNLocode),
 		})
 	}
 	dto.Legs = legs
@@ -186,6 +187,7 @@ func RegisterHandlers() {
 			)
 
 			legs = append(legs, cargo.Leg{
+				Voyage:         l.VoyageNumber,
 				LoadLocation:   loadLocation,
 				UnloadLocation: unloadLocation,
 			})

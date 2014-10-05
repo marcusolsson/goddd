@@ -127,6 +127,7 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 }
 
 type Leg struct {
+	Voyage         string
 	LoadLocation   location.Location
 	UnloadLocation location.Location
 }
