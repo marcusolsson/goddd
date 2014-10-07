@@ -4,6 +4,8 @@ This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net
 
 I will update this README along the way, as I gain more insights. Therefore, the implementation may be different from the information in this document.
 
+This project is __not__ intended as a tutorial or guide on how to do DDD in Go. It is meant to be a learning experience.
+
 ## Design
 
 The purpose of this sample is because I wanted to learn Go and to see how well it can be used with Domain Driven Design. When faced with design challenges, I will lean towards the more idiomatic solution.
