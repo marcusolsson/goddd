@@ -22,7 +22,7 @@ func (s *S) TestAssembleDTO(c *C) {
 		Destination: location.Stockholm,
 	})
 
-	dto := Assemble(*cargo)
+	dto := assemble(*cargo)
 
 	c.Check("FTL456", Equals, dto.TrackingId)
 	c.Check("In port Melbourne", Equals, dto.StatusText)

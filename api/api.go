@@ -54,8 +54,7 @@ type routeCandidate struct {
 	Legs []legDTO `json:"legs"`
 }
 
-// Assemble converts the Cargo domain object to a serializable DTO.
-func Assemble(c cargo.Cargo) cargoDTO {
+func assemble(c cargo.Cargo) cargoDTO {
 	eta := time.Date(2009, time.March, 12, 12, 0, 0, 0, time.UTC)
 	dto := cargoDTO{
 		TrackingId:           string(c.TrackingId),
@@ -87,13 +86,7 @@ func Assemble(c cargo.Cargo) cargoDTO {
 	return dto
 }
 
-type JSONObject map[string]interface{}
-
-var (
-	ResourceNotFound              = JSONObject{"error": "The specified resource does not exist."}
-	MissingRequiredQueryParameter = JSONObject{"error": "A required query parameter was not specified for this request."}
-	InvalidInput                  = JSONObject{"error": "One of the request inputs is not valid."}
-)
+type jsonObject map[string]interface{}
 
 // TODO: Globals are bad!
 var (
@@ -103,7 +96,13 @@ var (
 	bookingService     = booking.NewBookingService(cargoRepository, locationRepository, routingService)
 )
 
+// RegisterHandlers registers the handlers
 func RegisterHandlers() {
+	var (
+		ResourceNotFound              = jsonObject{"error": "The specified resource does not exist."}
+		MissingRequiredQueryParameter = jsonObject{"error": "A required query parameter was not specified for this request."}
+		InvalidInput                  = jsonObject{"error": "One of the request inputs is not valid."}
+	)
 
 	// Store some sample cargos.
 	storeTestData(cargoRepository)
@@ -128,7 +127,7 @@ func RegisterHandlers() {
 		dtos := make([]cargoDTO, len(cargos))
 
 		for i, c := range cargos {
-			dtos[i] = Assemble(c)
+			dtos[i] = assemble(c)
 		}
 
 		r.JSON(200, dtos)
@@ -143,14 +142,14 @@ func RegisterHandlers() {
 		if err != nil {
 			r.JSON(404, ResourceNotFound)
 		} else {
-			r.JSON(200, Assemble(c))
+			r.JSON(200, assemble(c))
 		}
 	})
 
 	// POST /cargos/:id/change_destination
 	// Updates the route specification of a cargo with a new destination.
 	m.Post("/cargos/:id/change_destination", func(req *http.Request, params martini.Params, r render.Render) {
-		v := QueryParams(req.URL.Query())
+		v := queryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("destination")
 
 		if len(missing) > 0 {
@@ -170,7 +169,7 @@ func RegisterHandlers() {
 			return
 		}
 
-		r.JSON(200, JSONObject{})
+		r.JSON(200, jsonObject{})
 	})
 
 	// POST /cargos/:id/assign_to_route
@@ -230,7 +229,7 @@ func RegisterHandlers() {
 	// POST /cargos
 	// Books a cargo from an origin to a destination within a specified arrival deadline.
 	m.Post("/cargos", func(req *http.Request, r render.Render) {
-		v := QueryParams(req.URL.Query())
+		v := queryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
 
 		if len(missing) > 0 {
@@ -262,7 +261,7 @@ func RegisterHandlers() {
 			return
 		}
 
-		r.JSON(200, Assemble(c))
+		r.JSON(200, assemble(c))
 	})
 
 	// GET /locations
@@ -299,10 +298,10 @@ func storeTestData(r cargo.CargoRepository) {
 	r.Store(*test2)
 }
 
-type QueryParams url.Values
+type queryParams url.Values
 
-func (p QueryParams) validateQueryParams(params ...string) (found JSONObject, missing []string) {
-	found = make(JSONObject)
+func (p queryParams) validateQueryParams(params ...string) (found jsonObject, missing []string) {
+	found = make(jsonObject)
 	missing = make([]string, 0)
 
 	for _, param := range params {
