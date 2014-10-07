@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/booking"
+	"github.com/marcusolsson/goddd/application/booking"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
 	"github.com/marcusolsson/goddd/domain/routing"
