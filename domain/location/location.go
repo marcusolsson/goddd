@@ -2,7 +2,6 @@ package location
 
 import "github.com/marcusolsson/goddd/domain/shared"
 
-// Some samples locations
 var (
 	Stockholm = Location{UNLocode: "SESTO", Name: "Stockholm"}
 	Melbourne = Location{UNLocode: "AUMEL", Name: "Melbourne"}
@@ -11,8 +10,6 @@ var (
 
 type UNLocode string
 
-// Location is our model is stops on a journey, such as cargo origin
-// or destination, or carrier movement endpoints.
 type Location struct {
 	UNLocode UNLocode
 	Name     string
@@ -22,8 +19,6 @@ func (l Location) SameIdentity(e shared.Entity) bool {
 	return l.UNLocode == e.(Location).UNLocode
 }
 
-// Special Location object that marks an unknown location.
-// What is the best way to handle this?
 var UnknownLocation = Location{}
 
 type LocationRepository interface {
@@ -56,7 +51,6 @@ func NewLocationRepository() LocationRepository {
 		locations: make(map[UNLocode]Location),
 	}
 
-	// Populate with test data
 	r.locations[Stockholm.UNLocode] = Stockholm
 	r.locations[Melbourne.UNLocode] = Melbourne
 	r.locations[Hongkong.UNLocode] = Hongkong

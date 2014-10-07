@@ -9,7 +9,6 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-// Hook gocheck up to the "go test" runner
 func Test(t *testing.T) { TestingT(t) }
 
 type S struct{}

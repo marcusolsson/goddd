@@ -10,9 +10,6 @@ import (
 	"github.com/marcusolsson/goddd/domain/shared"
 )
 
-// A HandlingEvent is used to register the event when, for instance, a
-// cargo is unloaded from a carrier at a some location at a given
-// time.
 type HandlingEvent struct {
 	TrackingId
 	Type HandlingEventType
@@ -23,8 +20,6 @@ func (e HandlingEvent) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(e, v.(HandlingEvent))
 }
 
-// HandlingEventType either requires or prohibits a carrier movement
-// association, it's never optional.
 type HandlingEventType int
 
 const (
@@ -36,7 +31,6 @@ const (
 	Customs
 )
 
-// HandlingHistory is the handling history of a cargo.
 type HandlingHistory struct {
 	HandlingEvents *list.List
 }
@@ -53,7 +47,6 @@ func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(h, v.(HandlingHistory))
 }
 
-// HandlingEventRepository
 type HandlingEventRepository interface {
 	Store(e HandlingEvent)
 }
@@ -64,7 +57,6 @@ type HandlingEventRepositoryInMem struct {
 func (r *HandlingEventRepositoryInMem) Store(e HandlingEvent) {
 }
 
-// HandlingEventFactory creates handling events.
 type HandlingEventFactory struct {
 	CargoRepository
 }

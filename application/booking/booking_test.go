@@ -10,7 +10,6 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-// Hook gocheck up to the "go test" runner
 func Test(t *testing.T) { TestingT(t) }
 
 type S struct{}
@@ -46,7 +45,6 @@ func (s *S) TestBookNewCargo(c *C) {
 
 type stubRoutingService struct{}
 
-// Create an itinerary with a single leg from origin to destination.
 func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 
 	legs := []cargo.Leg{

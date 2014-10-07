@@ -22,9 +22,7 @@ func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, t
 
 	registrationTime := time.Now()
 	event, _ := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingId, voyageNumber, unLocode, eventType)
-	// Store the new handling event, which updates the persistent
-	// state of the handling event aggregate (but not the cargo
-	// aggregate - that happens asynchronously!)
+
 	s.handlingEventRepository.Store(event)
 
 	return nil

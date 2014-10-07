@@ -10,17 +10,10 @@ import (
 	"github.com/marcusolsson/goddd/domain/routing"
 )
 
-// Cargo booking service.
 type BookingService interface {
-	// BookNewCargo registers a new cargo in the tracking system,
-	// not yet routed.
 	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error)
-	// Requests a list of itineraries describing possible routes
-	// for this cargo.
 	RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary
-	// Assigns the cargo to a route.
 	AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) error
-	// Changes the destination of a cargo.
 	ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) error
 }
 

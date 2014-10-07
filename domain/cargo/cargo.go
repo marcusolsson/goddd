@@ -13,10 +13,8 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 )
 
-// TrackingId uniquely identifies a particular cargo.
 type TrackingId string
 
-// Cargo is the central class in the domain model,
 type Cargo struct {
 	TrackingId         TrackingId
 	Origin             location.Location
@@ -25,20 +23,16 @@ type Cargo struct {
 	Delivery
 }
 
-// SpecifyNewRoute specifies a new route for this cargo.
 func (c *Cargo) SpecifyNewRoute(routeSpecification RouteSpecification) {
 	c.RouteSpecification = routeSpecification
 	c.Delivery = c.Delivery.UpdateOnRouting(c.RouteSpecification, c.Itinerary)
 }
 
-// AssignToRoute attaches a new itinerary to this cargo.
 func (c *Cargo) AssignToRoute(itinerary Itinerary) {
 	c.Itinerary = itinerary
 	c.Delivery = c.Delivery.UpdateOnRouting(c.RouteSpecification, c.Itinerary)
 }
 
-// Updates all aspects of the cargo aggregate status based on the
-// current route specification, itinerary and handling of the cargo.
 func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
 }
@@ -47,16 +41,12 @@ func (c *Cargo) SameIdentity(e shared.Entity) bool {
 	return c.TrackingId == e.(*Cargo).TrackingId
 }
 
-// NewCargo creates a new cargo in a consistent state.
 func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Cargo {
 	emptyItinerary := Itinerary{}
 
 	emptyHistory := HandlingHistory{}
 	emptyHistory.HandlingEvents = list.New()
 
-	// Cargo origin never changes, even if the route specification
-	// changes. However, at creation, cargo orgin can be derived
-	// from the initial route specification.
 	return &Cargo{
 		TrackingId:         trackingId,
 		Origin:             routeSpecification.Origin,
@@ -65,7 +55,6 @@ func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Car
 	}
 }
 
-// RoutingStatus
 type RoutingStatus int
 
 const (
@@ -86,7 +75,6 @@ func (s RoutingStatus) String() string {
 	return ""
 }
 
-// TransportStatus
 type TransportStatus int
 
 const (
@@ -105,8 +93,6 @@ func (s TransportStatus) String() string {
 	return ""
 }
 
-// RouteSpecification describes where a cargo origin and destination
-// is, and the arrival deadline.
 type RouteSpecification struct {
 	Origin          location.Location
 	Destination     location.Location
@@ -123,7 +109,6 @@ func (s RouteSpecification) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(s, v.(RouteSpecification))
 }
 
-// Leg
 type Leg struct {
 	Voyage         string
 	LoadLocation   location.Location
@@ -134,7 +119,6 @@ func (l Leg) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(l, v.(Leg))
 }
 
-// Itinerary
 type Itinerary struct {
 	Legs []Leg
 }
@@ -161,10 +145,8 @@ func (i Itinerary) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(i, v.(Itinerary))
 }
 
-// CargoRepository
 type CargoRepository interface {
 	Store(cargo Cargo) error
-	// Finds a cargo using given id.
 	Find(trackingId TrackingId) (Cargo, error)
 	FindAll() []Cargo
 }

@@ -88,16 +88,14 @@ func assemble(c cargo.Cargo) cargoDTO {
 
 type jsonObject map[string]interface{}
 
-// TODO: Globals are bad!
-var (
-	cargoRepository    = cargo.NewCargoRepository()
-	locationRepository = location.NewLocationRepository()
-	routingService     = routing.NewRoutingService(locationRepository)
-	bookingService     = booking.NewBookingService(cargoRepository, locationRepository, routingService)
-)
-
-// RegisterHandlers registers the handlers
 func RegisterHandlers() {
+	var (
+		cargoRepository    = cargo.NewCargoRepository()
+		locationRepository = location.NewLocationRepository()
+		routingService     = routing.NewRoutingService(locationRepository)
+		bookingService     = booking.NewBookingService(cargoRepository, locationRepository, routingService)
+	)
+
 	var (
 		ResourceNotFound              = jsonObject{"error": "The specified resource does not exist."}
 		MissingRequiredQueryParameter = jsonObject{"error": "A required query parameter was not specified for this request."}
@@ -120,8 +118,6 @@ func RegisterHandlers() {
 		IndentJSON: true,
 	}))
 
-	// GET /cargos
-	// Returns an array of all booked cargos.
 	m.Get("/cargos", func(r render.Render) {
 		cargos := cargoRepository.FindAll()
 		dtos := make([]cargoDTO, len(cargos))
@@ -133,8 +129,6 @@ func RegisterHandlers() {
 		r.JSON(200, dtos)
 	})
 
-	// GET /cargos/:id
-	// Finds and returns a cargo with a specified tracking id.
 	m.Get("/cargos/:id", func(params martini.Params, r render.Render) {
 		trackingId := cargo.TrackingId(params["id"])
 		c, err := cargoRepository.Find(trackingId)
@@ -146,8 +140,6 @@ func RegisterHandlers() {
 		}
 	})
 
-	// POST /cargos/:id/change_destination
-	// Updates the route specification of a cargo with a new destination.
 	m.Post("/cargos/:id/change_destination", func(req *http.Request, params martini.Params, r render.Render) {
 		v := queryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("destination")
@@ -172,8 +164,6 @@ func RegisterHandlers() {
 		r.JSON(200, jsonObject{})
 	})
 
-	// POST /cargos/:id/assign_to_route
-	// Assigns the cargo to a route.
 	m.Post("/cargos/:id/assign_to_route", binding.Bind(routeCandidate{}), func(rc routeCandidate, params martini.Params, r render.Render) {
 		trackingId := cargo.TrackingId(params["id"])
 
@@ -202,8 +192,6 @@ func RegisterHandlers() {
 		r.JSON(200, itinerary)
 	})
 
-	// GET /cargos/:id/request_routes
-	// Requests the possible routes for a booked cargo.
 	m.Get("/cargos/:id/request_routes", func(params martini.Params, r render.Render) {
 		trackingId := cargo.TrackingId(params["id"])
 		itineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
@@ -226,8 +214,6 @@ func RegisterHandlers() {
 		r.JSON(200, candidates)
 	})
 
-	// POST /cargos
-	// Books a cargo from an origin to a destination within a specified arrival deadline.
 	m.Post("/cargos", func(req *http.Request, r render.Render) {
 		v := queryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
@@ -264,8 +250,6 @@ func RegisterHandlers() {
 		r.JSON(200, assemble(c))
 	})
 
-	// GET /locations
-	// Returns an array of known locations.
 	m.Get("/locations", func(r render.Render) {
 		locationRepository := location.NewLocationRepository()
 		locations := locationRepository.FindAll()
