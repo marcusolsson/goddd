@@ -39,7 +39,6 @@ func calculateRoutingStatus(itinerary Itinerary, routeSpecification RouteSpecifi
 			return Misrouted
 		}
 	}
-
 }
 
 func calculateTransportStatus(event HandlingEvent) TransportStatus {

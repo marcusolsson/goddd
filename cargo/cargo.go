@@ -27,7 +27,6 @@ type Cargo struct {
 func (c *Cargo) SpecifyNewRoute(routeSpecification RouteSpecification) {
 	c.RouteSpecification = routeSpecification
 	c.Delivery = c.Delivery.UpdateOnRouting(c.RouteSpecification, c.Itinerary)
-
 }
 
 // AssignToRoute attaches a new itinerary to this cargo.
