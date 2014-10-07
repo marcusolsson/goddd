@@ -169,9 +169,7 @@ type CargoRepository interface {
 	FindAll() []Cargo
 }
 
-var (
-	ErrUnknownCargo = errors.New("Unknown cargo")
-)
+var ErrUnknownCargo = errors.New("Unknown cargo")
 
 type cargoRepository struct {
 	cargos map[TrackingId]Cargo

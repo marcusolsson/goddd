@@ -4,18 +4,9 @@ import "github.com/marcusolsson/goddd/domain/shared"
 
 // Some samples locations
 var (
-	Stockholm = Location{
-		UNLocode: "SESTO",
-		Name:     "Stockholm",
-	}
-	Melbourne = Location{
-		UNLocode: "AUMEL",
-		Name:     "Melbourne",
-	}
-	Hongkong = Location{
-		UNLocode: "CNHKG",
-		Name:     "Hongkong",
-	}
+	Stockholm = Location{UNLocode: "SESTO", Name: "Stockholm"}
+	Melbourne = Location{UNLocode: "AUMEL", Name: "Melbourne"}
+	Hongkong  = Location{UNLocode: "CNHKG", Name: "Hongkong"}
 )
 
 type UNLocode string
@@ -31,16 +22,12 @@ func (l Location) SameIdentity(e shared.Entity) bool {
 	return l.UNLocode == e.(Location).UNLocode
 }
 
-var (
-	// Special Location object that marks an unknown location.
-	// What is the best way to handle this?
-	UnknownLocation = Location{}
-)
+// Special Location object that marks an unknown location.
+// What is the best way to handle this?
+var UnknownLocation = Location{}
 
 type LocationRepository interface {
-	// Finds a location using given unlocode.
 	Find(locode UNLocode) Location
-
 	FindAll() []Location
 }
 
