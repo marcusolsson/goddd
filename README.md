@@ -23,7 +23,7 @@ The reason is because `==` does a shallow comparison and that is probably not wh
 	}
 
     func (i Itinerary) SameValue(other ValueObject) bool {
-		    return reflect.DeepEqual(i, other.(Itinerary)
+		    return reflect.DeepEqual(i, other.(Itinerary))
     }
 
 For entities we can then similarly implement a `Entity` interface*:
