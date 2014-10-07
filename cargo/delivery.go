@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/shared"
 )
 
 // Delivery is the actual transportation of the cargo, as opposed to
@@ -25,7 +26,7 @@ func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinera
 	return newDelivery(d.LastEvent, itinerary, routeSpecification)
 }
 
-func (d Delivery) SameValue(v ValueObject) bool {
+func (d Delivery) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(d, v.(Delivery))
 }
 

@@ -10,17 +10,8 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/shared"
 )
-
-// Entity is used to compare entities by identity.
-type Entity interface {
-	SameIdentity(Entity) bool
-}
-
-// ValueObject is used to compare value object by value.
-type ValueObject interface {
-	SameValue(ValueObject) bool
-}
 
 // TrackingId uniquely identifies a particular cargo.
 type TrackingId string
@@ -52,7 +43,7 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
 }
 
-func (c *Cargo) SameIdentity(e Entity) bool {
+func (c *Cargo) SameIdentity(e shared.Entity) bool {
 	return c.TrackingId == e.(*Cargo).TrackingId
 }
 
@@ -128,7 +119,7 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 		s.Destination.UNLocode == itinerary.FinalArrivalLocation().UNLocode
 }
 
-func (s RouteSpecification) SameValue(v ValueObject) bool {
+func (s RouteSpecification) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(s, v.(RouteSpecification))
 }
 
@@ -139,7 +130,7 @@ type Leg struct {
 	UnloadLocation location.Location
 }
 
-func (l Leg) SameValue(v ValueObject) bool {
+func (l Leg) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(l, v.(Leg))
 }
 
@@ -166,7 +157,7 @@ func (i Itinerary) IsEmpty() bool {
 	return i.Legs == nil || len(i.Legs) == 0
 }
 
-func (i Itinerary) SameValue(v ValueObject) bool {
+func (i Itinerary) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(i, v.(Itinerary))
 }
 

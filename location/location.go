@@ -1,5 +1,7 @@
 package location
 
+import "github.com/marcusolsson/goddd/shared"
+
 // Some samples locations
 var (
 	Stockholm = Location{
@@ -20,11 +22,13 @@ type UNLocode string
 
 // Location is our model is stops on a journey, such as cargo origin
 // or destination, or carrier movement endpoints.
-//
-// It is uniquely identified by a UN Locode.
 type Location struct {
 	UNLocode UNLocode
 	Name     string
+}
+
+func (l Location) SameIdentity(e shared.Entity) bool {
+	return l.UNLocode == e.(Location).UNLocode
 }
 
 var (

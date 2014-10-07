@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/shared"
 )
 
 // A HandlingEvent is used to register the event when, for instance, a
@@ -18,7 +19,7 @@ type HandlingEvent struct {
 	location.Location
 }
 
-func (e HandlingEvent) SameValue(v ValueObject) bool {
+func (e HandlingEvent) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(e, v.(HandlingEvent))
 }
 
@@ -48,7 +49,7 @@ func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
 	return h.HandlingEvents.Back().Value.(HandlingEvent), nil
 }
 
-func (h HandlingHistory) SameValue(v ValueObject) bool {
+func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(h, v.(HandlingHistory))
 }
 
