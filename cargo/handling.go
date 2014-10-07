@@ -3,6 +3,7 @@ package cargo
 import (
 	"container/list"
 	"errors"
+	"reflect"
 	"time"
 
 	"github.com/marcusolsson/goddd/location"
@@ -15,6 +16,10 @@ type HandlingEvent struct {
 	TrackingId
 	Type HandlingEventType
 	location.Location
+}
+
+func (e HandlingEvent) SameValue(v ValueObject) bool {
+	return reflect.DeepEqual(e, v.(HandlingEvent))
 }
 
 // HandlingEventType either requires or prohibits a carrier movement
@@ -43,6 +48,11 @@ func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
 	return h.HandlingEvents.Back().Value.(HandlingEvent), nil
 }
 
+func (h HandlingHistory) SameValue(v ValueObject) bool {
+	return reflect.DeepEqual(h, v.(HandlingHistory))
+}
+
+// HandlingEventRepository
 type HandlingEventRepository interface {
 	// Stores a (new) handling event.
 	Store(e HandlingEvent)

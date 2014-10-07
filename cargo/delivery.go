@@ -1,6 +1,10 @@
 package cargo
 
-import "github.com/marcusolsson/goddd/location"
+import (
+	"reflect"
+
+	"github.com/marcusolsson/goddd/location"
+)
 
 // Delivery is the actual transportation of the cargo, as opposed to
 // the customer requirement (RouteSpecification) and the plan
@@ -17,8 +21,12 @@ type Delivery struct {
 // UpdateOnRouting creates a new delivery snapshot to reflect changes
 // in routing, i.e.  when the route specification or the itinerary has
 // changed but no additional handling of the cargo has been performed.
-func (d *Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
+func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
 	return newDelivery(d.LastEvent, itinerary, routeSpecification)
+}
+
+func (d Delivery) SameValue(v ValueObject) bool {
+	return reflect.DeepEqual(d, v.(Delivery))
 }
 
 // DerivedFrom creates a new delivery snapshot based on the complete

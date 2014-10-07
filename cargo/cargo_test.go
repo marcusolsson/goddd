@@ -42,6 +42,9 @@ func (s *S) TestEquality(c *C) {
 		Destination: location.Melbourne,
 	}
 
+	c.Check(spec1.SameValue(spec1), Equals, true)
+	c.Check(spec1.SameValue(spec2), Equals, false)
+
 	c1 := NewCargo("ABC", spec1)
 	c2 := NewCargo("CBA", spec1)
 	c3 := NewCargo("ABC", spec2)
@@ -51,6 +54,29 @@ func (s *S) TestEquality(c *C) {
 	c.Check(c1.SameIdentity(c3), Equals, true)
 	c.Check(c3.SameIdentity(c4), Equals, true)
 	c.Check(c1.SameIdentity(c2), Equals, false)
+}
+
+func (s *S) TestItineraryEquality(c *C) {
+
+	i1 := Itinerary{Legs: []Leg{
+		Leg{LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
+		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
+	}}
+
+	i2 := Itinerary{Legs: []Leg{
+		Leg{LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
+		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
+	}}
+
+	i3 := Itinerary{Legs: []Leg{
+		Leg{LoadLocation: location.Hongkong, UnloadLocation: location.Melbourne},
+		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Stockholm},
+	}}
+
+	c.Check(i1.SameValue(i1), Equals, true)
+	c.Check(i1.SameValue(i2), Equals, true)
+	c.Check(i1.SameValue(i3), Equals, false)
+	c.Check(i2.SameValue(i3), Equals, false)
 }
 
 func (s *S) TestRepositoryFind(c *C) {

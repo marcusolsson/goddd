@@ -3,6 +3,7 @@ package cargo
 import (
 	"container/list"
 	"errors"
+	"reflect"
 	"strings"
 	"time"
 
@@ -10,6 +11,16 @@ import (
 
 	"github.com/marcusolsson/goddd/location"
 )
+
+// Entity is used to compare entities by identity.
+type Entity interface {
+	SameIdentity(Entity) bool
+}
+
+// ValueObject is used to compare value object by value.
+type ValueObject interface {
+	SameValue(ValueObject) bool
+}
 
 // TrackingId uniquely identifies a particular cargo.
 type TrackingId string
@@ -39,11 +50,6 @@ func (c *Cargo) AssignToRoute(itinerary Itinerary) {
 // current route specification, itinerary and handling of the cargo.
 func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
-}
-
-// Entity is used to compare entities by identity.
-type Entity interface {
-	SameIdentity(Entity) bool
 }
 
 func (c *Cargo) SameIdentity(e Entity) bool {
@@ -122,10 +128,19 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 		s.Destination.UNLocode == itinerary.FinalArrivalLocation().UNLocode
 }
 
+func (s RouteSpecification) SameValue(v ValueObject) bool {
+	return reflect.DeepEqual(s, v.(RouteSpecification))
+}
+
+// Leg
 type Leg struct {
 	Voyage         string
 	LoadLocation   location.Location
 	UnloadLocation location.Location
+}
+
+func (l Leg) SameValue(v ValueObject) bool {
+	return reflect.DeepEqual(l, v.(Leg))
 }
 
 // Itinerary
@@ -133,22 +148,26 @@ type Itinerary struct {
 	Legs []Leg
 }
 
-func (i *Itinerary) InitialDepartureLocation() location.Location {
+func (i Itinerary) InitialDepartureLocation() location.Location {
 	if i.IsEmpty() {
 		return location.UnknownLocation
 	}
 	return i.Legs[0].LoadLocation
 }
 
-func (i *Itinerary) FinalArrivalLocation() location.Location {
+func (i Itinerary) FinalArrivalLocation() location.Location {
 	if i.IsEmpty() {
 		return location.UnknownLocation
 	}
 	return i.Legs[len(i.Legs)-1].UnloadLocation
 }
 
-func (i *Itinerary) IsEmpty() bool {
+func (i Itinerary) IsEmpty() bool {
 	return i.Legs == nil || len(i.Legs) == 0
+}
+
+func (i Itinerary) SameValue(v ValueObject) bool {
+	return reflect.DeepEqual(i, v.(Itinerary))
 }
 
 // CargoRepository
