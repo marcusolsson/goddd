@@ -90,11 +90,11 @@ The application exposes a REST API using [Martini](https://github.com/go-martini
 
     `go get -u github.com/marcusolsson/goddd`
 
-3. Navigate into the __server__ directory and run it by typing:
+3. Run it!:
 
-    `go run cmd/local.go`
+    `go run local.go`
 
-_Note:_ The `cmd/appengine.go` is used to deploy it on Google App Engine. If you want to deploy it to your own project, edit the `app.yaml` to point to your own project. Read more about [deploying Go applications to App Engine](https://cloud.google.com/appengine/docs/go/).
+_Note:_ The `appengine.go` is used to deploy it on Google App Engine. If you want to deploy it to your own project, edit the `app.yaml` to point to your own project. Read more about [deploying Go applications to App Engine](https://cloud.google.com/appengine/docs/go/).
 
 ### Cargos
 
