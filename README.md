@@ -2,7 +2,7 @@
 
 This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net/) to Go. The purpose is to explore how to write idiomatic Go applications using Domain-Driven Design.
 
-I will update this README along the way, as I gain more insights.
+I will update this README along the way, as I gain more insights. Therefore, the implementation may be different from the information in this document.
 
 ## Design
 
@@ -10,35 +10,64 @@ The purpose of this sample is because I wanted to learn Go and to see how well i
 
 ### Equality
 
-In Go, two struct values are equal if their corresponding non-blank fields are equal. You cannot overload equality for structs and there is no standard interface for equality. The question is rather how to implement entities. You can create your own interface but it will still be tempting to use the == operator.
+In Go, two struct values are equal if their corresponding non-blank fields are equal. You cannot overload equality for structs and there is no standard interface for equality. For value objects, this seems nice at first but when comparing `Itinerary` structs you will get an error.
 
-The current implementation uses the _Equaler_ interface from the [golang FAQ](https://golang.org/doc/faq#t_and_equal_interface).
+    type Itinerary struct {
+	        Legs []Leg
+    }
 
-Read more about [comparison operators](http://golang.org/ref/spec#Comparison_operators).
+The reason is because `==` does a shallow comparison and that is probably not what you want in this case. The solution is to use [DeepEqual](http://golang.org/pkg/reflect/#DeepEqual) function, which will scan all the arrays and maps (if any) as well. One alternative is to implement a `ValueObject` interface:
+
+	type ValueObject interface {
+			SameValue(other ValueObject) bool
+	}
+
+    func (i Itinerary) SameValue(other ValueObject) bool {
+		    return reflect.DeepEqual(i, other.(Itinerary)
+    }
+
+For entities we can then similarly implement a `Entity` interface*:
+
+	type Entity interface {
+			SameValue(other Entity) bool
+	}
+
+    func (c Cargo) SameIdentity(other Entity) bool {
+		    return c.TrackingId == other.(Cargo).TrackingId
+    }
+
+*In both of cases though, it will still be very tempting to use the `==`.
+
+__Read more__
+
+- [Comparison operators](http://golang.org/ref/spec#Comparison_operators).
+- [Equaler interface](https://golang.org/doc/faq#t_and_equal_interface)
 
 ### Immutability
 
-Go does not support means of creating a immutable struct. All exported fields can be altered after creation. It is however possible to use interfaces to handle modification of structs.
+Go does not support means of creating a immutable struct. All fields can be altered after creation. It is however possible to use interfaces to limit altering structs after creation.
 
-    type ValueObject interface {
-         Name() string
+    type Leg struct {
+			LoadLocation() location.Location
     }
 
-    type valueObject struct {
-         name string
+    type leg struct {
+         loadLocation location.Location
     }
 
-    func (v *valueObject) Name() {
-         return v.name
+    func (l leg) LoadLocation() location.Location {
+         return l.loadLocation
     }
 
-    func NewValueObject(s string) ValueObject {
-         return valueObject {name: s}
+    func NewLeg(load location.Location) Leg {
+         return leg{loadLocation: load}
     }
 
-Since the struct starts with a lowercase, it will not be exported outside the package. This however, does not prevent internal functions to modify the state of the value object after it has been created.
+Since the `leg` struct starts with a lowercase, it will not be exported outside the package. This however, does not prevent internal functions to modify the state of the value object after it has been created. The jury is still out on this one though. On one hand, it makes it possible to use the `func New...` idiom to initialize the value object. On the other hand, it kind of feels non-idiomatic. A more idiomatic alternative would probably be to use _zero-initialization_ to construct a valid value object, and make sure the developers understand the concept of value objects.
 
-[Read more](https://groups.google.com/forum/#!topic/golang-nuts/BnjG3N77Ico) about immutable objects in this forum thread.
+__Read more__
+
+- [Immutable objects](https://groups.google.com/forum/#!topic/golang-nuts/BnjG3N77Ico)
 
 ### Other thoughts ...
 
