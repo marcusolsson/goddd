@@ -32,8 +32,8 @@ For entities we can then similarly implement a `Entity` interface*:
 			SameValue(other Entity) bool
 	}
 
-    func (c Cargo) SameIdentity(other Entity) bool {
-		    return c.TrackingId == other.(Cargo).TrackingId
+    func (c *Cargo) SameIdentity(other Entity) bool {
+		    return c.TrackingId == other.(*Cargo).TrackingId
     }
 
 *In both of cases though, it will still be very tempting to use the `==`.
@@ -64,6 +64,8 @@ Go does not support means of creating a immutable struct. All fields can be alte
     }
 
 Since the `leg` struct starts with a lowercase, it will not be exported outside the package. This however, does not prevent internal functions to modify the state of the value object after it has been created. The jury is still out on this one though. On one hand, it makes it possible to use the `func New...` idiom to initialize the value object. On the other hand, it kind of feels non-idiomatic. A more idiomatic alternative would probably be to use _zero-initialization_ to construct a valid value object, and make sure the developers understand the concept of value objects.
+
+Also, making sure that the _method receiver_ is of _non-pointer_ type, feels like a good way to handle the temptation to alter value object after creation. Entities though, are more likely to have a pointer type receiver so that they may change during their life cycle.
 
 __Read more__
 
