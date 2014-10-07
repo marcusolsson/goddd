@@ -1,6 +1,6 @@
 package location
 
-import "github.com/marcusolsson/goddd/shared"
+import "github.com/marcusolsson/goddd/domain/shared"
 
 // Some samples locations
 var (

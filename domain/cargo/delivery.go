@@ -3,8 +3,8 @@ package cargo
 import (
 	"reflect"
 
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/shared"
+	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/shared"
 )
 
 // Delivery is the actual transportation of the cargo, as opposed to

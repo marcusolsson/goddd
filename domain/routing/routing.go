@@ -1,8 +1,8 @@
 package routing
 
 import (
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/domain/cargo"
+	"github.com/marcusolsson/goddd/domain/location"
 )
 
 // Our end of the routing service. This is basically a data model

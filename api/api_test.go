@@ -1,10 +1,10 @@
-package server
+package api
 
 import (
 	"testing"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/domain/cargo"
+	"github.com/marcusolsson/goddd/domain/location"
 
 	. "gopkg.in/check.v1"
 )

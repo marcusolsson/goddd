@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/routing"
+	"github.com/marcusolsson/goddd/domain/cargo"
+	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/routing"
 )
 
 // Cargo booking service.

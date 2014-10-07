@@ -1,4 +1,4 @@
-package server
+package api
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/marcusolsson/goddd/booking"
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/routing"
+	"github.com/marcusolsson/goddd/domain/booking"
+	"github.com/marcusolsson/goddd/domain/cargo"
+	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/routing"
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"

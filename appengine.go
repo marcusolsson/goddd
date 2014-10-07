@@ -1,7 +1,7 @@
 package main
 
-import "github.com/marcusolsson/goddd/server"
+import "github.com/marcusolsson/goddd/api"
 
 func init() {
-	server.RegisterHandlers()
+	api.RegisterHandlers()
 }

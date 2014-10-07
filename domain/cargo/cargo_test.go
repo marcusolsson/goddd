@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/domain/location"
 
 	. "gopkg.in/check.v1"
 )

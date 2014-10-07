@@ -6,8 +6,8 @@ import (
 	"reflect"
 	"time"
 
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/shared"
+	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/shared"
 )
 
 // A HandlingEvent is used to register the event when, for instance, a
