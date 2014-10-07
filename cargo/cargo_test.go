@@ -47,10 +47,10 @@ func (s *S) TestEquality(c *C) {
 	c3 := NewCargo("ABC", spec2)
 	c4 := NewCargo("ABC", spec1)
 
-	c.Check(c1.Equal(c4), Equals, true)
-	c.Check(c1.Equal(c3), Equals, true)
-	c.Check(c3.Equal(c4), Equals, true)
-	c.Check(c1.Equal(c2), Equals, false)
+	c.Check(c1.SameIdentity(c4), Equals, true)
+	c.Check(c1.SameIdentity(c3), Equals, true)
+	c.Check(c3.SameIdentity(c4), Equals, true)
+	c.Check(c1.SameIdentity(c2), Equals, false)
 }
 
 func (s *S) TestRepositoryFind(c *C) {
@@ -65,7 +65,7 @@ func (s *S) TestRepositoryFind(c *C) {
 	c2, err := r.Find(TrackingId("ABC"))
 
 	c.Assert(err, IsNil)
-	c.Check(c1.Equal(&c2), Equals, true)
+	c.Check(c1.SameIdentity(&c2), Equals, true)
 }
 
 func (s *S) TestRepositoryFindAll(c *C) {

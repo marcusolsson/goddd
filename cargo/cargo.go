@@ -41,17 +41,14 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
 }
 
-// Equaler is used to compare entities by identity.
-type Equaler interface {
-	Equal(Equaler) bool
+// Entity is used to compare entities by identity.
+type Entity interface {
+	SameIdentity(Entity) bool
 }
 
-func (c *Cargo) Equal(e Equaler) bool {
+func (c *Cargo) SameIdentity(e Entity) bool {
 	return c.TrackingId == e.(*Cargo).TrackingId
 }
-
-// Assert that Cargo implements the Equaler interface.
-var _ Equaler = &Cargo{}
 
 // NewCargo creates a new cargo in a consistent state.
 func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Cargo {
