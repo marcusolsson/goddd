@@ -73,6 +73,13 @@ __Read more__
 
 - [Immutable objects](https://groups.google.com/forum/#!topic/golang-nuts/BnjG3N77Ico)
 
+### Clean Architecture
+
+__Read more__
+
+- [The Clean Architecture](http://blog.8thlight.com/uncle-bob/2012/08/13/the-clean-architecture.html)
+- [Applying The Clean Architecture to Go applications](http://manuel.kiessling.net/2012/09/28/applying-the-clean-architecture-to-go-applications/)
+
 ### Other thoughts ...
 
 - How can we use the zero-initialization idiom effectively in DDD? What does a zero-initialized Itinerary mean?

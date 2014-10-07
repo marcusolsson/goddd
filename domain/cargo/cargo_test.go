@@ -78,41 +78,6 @@ func (s *S) TestItineraryEquality(c *C) {
 	c.Check(i2.SameValue(i3), Equals, false)
 }
 
-func (s *S) TestRepositoryFind(c *C) {
-	c1 := NewCargo("ABC", RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Hongkong,
-	})
-
-	r := NewCargoRepository()
-	r.Store(*c1)
-
-	c2, err := r.Find(TrackingId("ABC"))
-
-	c.Assert(err, IsNil)
-	c.Check(c1.SameIdentity(&c2), Equals, true)
-}
-
-func (s *S) TestRepositoryFindAll(c *C) {
-	c1 := NewCargo("ABC", RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Hongkong,
-	})
-
-	c2 := NewCargo("CBA", RouteSpecification{
-		Origin:      location.Hongkong,
-		Destination: location.Stockholm,
-	})
-
-	r := NewCargoRepository()
-	r.Store(*c1)
-	r.Store(*c2)
-
-	cargos := r.FindAll()
-
-	c.Check(cargos, HasLen, 2)
-}
-
 func (s *S) TestRoutingStatus(c *C) {
 	cargo := NewCargo("ABC", RouteSpecification{})
 

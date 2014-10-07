@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/marcusolsson/goddd/application/booking"
+	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/routing"
+	"github.com/marcusolsson/goddd/infrastructure"
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"
@@ -90,10 +90,10 @@ type jsonObject map[string]interface{}
 
 func RegisterHandlers() {
 	var (
-		cargoRepository    = cargo.NewCargoRepository()
-		locationRepository = location.NewLocationRepository()
-		routingService     = routing.NewRoutingService(locationRepository)
-		bookingService     = booking.NewBookingService(cargoRepository, locationRepository, routingService)
+		cargoRepository    = infrastructure.NewInMemCargoRepository()
+		locationRepository = infrastructure.NewInMemLocationRepository()
+		routingService     = infrastructure.NewExternalRoutingService(locationRepository)
+		bookingService     = application.NewBookingService(cargoRepository, locationRepository, routingService)
 	)
 
 	var (
@@ -251,7 +251,7 @@ func RegisterHandlers() {
 	})
 
 	m.Get("/locations", func(r render.Render) {
-		locationRepository := location.NewLocationRepository()
+		locationRepository := infrastructure.NewInMemLocationRepository()
 		locations := locationRepository.FindAll()
 
 		dtos := make([]locationDTO, len(locations))

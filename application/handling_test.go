@@ -1,24 +1,18 @@
-package handling
+package application
 
 import (
-	"testing"
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/infrastructure"
 	. "gopkg.in/check.v1"
 )
-
-func Test(t *testing.T) { TestingT(t) }
-
-type S struct{}
-
-var _ = Suite(&S{})
 
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
-		cargoRepository         = cargo.NewCargoRepository()
+		cargoRepository         = infrastructure.NewInMemCargoRepository()
 		handlingEventRepository = &cargo.HandlingEventRepositoryInMem{}
 		handlingEventFactory    = cargo.HandlingEventFactory{
 			CargoRepository: cargoRepository,

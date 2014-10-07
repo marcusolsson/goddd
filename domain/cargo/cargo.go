@@ -153,39 +153,6 @@ type CargoRepository interface {
 
 var ErrUnknownCargo = errors.New("Unknown cargo")
 
-type cargoRepository struct {
-	cargos map[TrackingId]Cargo
-}
-
-func (r *cargoRepository) Store(cargo Cargo) error {
-	r.cargos[cargo.TrackingId] = cargo
-
-	return nil
-}
-
-func (r *cargoRepository) Find(trackingId TrackingId) (Cargo, error) {
-
-	if val, ok := r.cargos[trackingId]; ok {
-		return val, nil
-	}
-
-	return Cargo{}, ErrUnknownCargo
-}
-
-func (r *cargoRepository) FindAll() []Cargo {
-	c := make([]Cargo, 0, len(r.cargos))
-	for _, val := range r.cargos {
-		c = append(c, val)
-	}
-	return c
-}
-
-func NewCargoRepository() CargoRepository {
-	return &cargoRepository{
-		cargos: make(map[TrackingId]Cargo),
-	}
-}
-
 func NextTrackingId() TrackingId {
 	return TrackingId(strings.Split(strings.ToUpper(uuid.New()), "-")[0])
 }

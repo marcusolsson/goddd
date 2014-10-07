@@ -1,4 +1,4 @@
-package booking
+package application
 
 import (
 	"errors"

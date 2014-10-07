@@ -1,4 +1,4 @@
-package booking
+package application
 
 import (
 	"testing"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/infrastructure"
 
 	. "gopkg.in/check.v1"
 )
@@ -18,8 +19,8 @@ var _ = Suite(&S{})
 
 func (s *S) TestBookNewCargo(c *C) {
 
-	cargoRepository := cargo.NewCargoRepository()
-	locationRepository := location.NewLocationRepository()
+	cargoRepository := infrastructure.NewInMemCargoRepository()
+	locationRepository := infrastructure.NewInMemLocationRepository()
 
 	bookingService := &bookingService{
 		cargoRepository:    cargoRepository,
@@ -61,8 +62,8 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
-	cargoRepository := cargo.NewCargoRepository()
-	locationRepository := location.NewLocationRepository()
+	cargoRepository := infrastructure.NewInMemCargoRepository()
+	locationRepository := infrastructure.NewInMemLocationRepository()
 	routingService := &stubRoutingService{}
 
 	var bookingService BookingService = &bookingService{
@@ -84,8 +85,8 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 }
 
 func (s *S) TestAssignCargoToRoute(c *C) {
-	cargoRepository := cargo.NewCargoRepository()
-	locationRepository := location.NewLocationRepository()
+	cargoRepository := infrastructure.NewInMemCargoRepository()
+	locationRepository := infrastructure.NewInMemLocationRepository()
 	routingService := &stubRoutingService{}
 
 	var bookingService BookingService = &bookingService{
@@ -113,8 +114,8 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 func (s *S) TestChangeCargoDestination(c *C) {
 
 	var (
-		cargoRepository    = cargo.NewCargoRepository()
-		locationRepository = location.NewLocationRepository()
+		cargoRepository    = infrastructure.NewInMemCargoRepository()
+		locationRepository = infrastructure.NewInMemLocationRepository()
 		routingService     = &stubRoutingService{}
 	)
 
