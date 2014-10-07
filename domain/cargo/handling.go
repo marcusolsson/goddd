@@ -55,63 +55,29 @@ func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
 
 // HandlingEventRepository
 type HandlingEventRepository interface {
-	// Stores a (new) handling event.
 	Store(e HandlingEvent)
 }
 
-type handlingEventRepository struct {
-	events *list.List
+type HandlingEventRepositoryInMem struct {
 }
 
-func (r *handlingEventRepository) Store(e HandlingEvent) {
-
+func (r *HandlingEventRepositoryInMem) Store(e HandlingEvent) {
 }
 
 // HandlingEventFactory creates handling events.
-type HandlingEventFactory interface {
-	CreateHandlingEvent(trackingId TrackingId) (HandlingEvent, error)
+type HandlingEventFactory struct {
+	CargoRepository
 }
 
-var (
-	ErrCannotCreateHandlingEvent = errors.New("Cannot create handling event")
-)
+var ErrCannotCreateHandlingEvent = errors.New("Cannot create handling event")
 
-type handlingEventFactory struct {
-	cargoRepository CargoRepository
-}
-
-func (f *handlingEventFactory) CreateHandlingEvent(trackingId TrackingId) (HandlingEvent, error) {
-	_, err := f.cargoRepository.Find(trackingId)
+func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingId TrackingId,
+	voyageNumber string, unLocode location.UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
+	_, err := f.CargoRepository.Find(trackingId)
 
 	if err != nil {
 		return HandlingEvent{}, ErrCannotCreateHandlingEvent
 	}
 
 	return HandlingEvent{}, nil
-}
-
-type HandlingEventService interface {
-	// Registers a handling event in the system, and notifies
-	// interested parties that a cargo has been handled.
-	RegisterHandlingEvent(completionTime time.Time, trackingId TrackingId, unLocode location.UNLocode, eventType HandlingEventType) error
-}
-
-type handlingEventService struct {
-	repository HandlingEventRepository
-	factory    HandlingEventFactory
-}
-
-func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingId TrackingId, unLocode location.UNLocode, eventType HandlingEventType) error {
-	e, _ := s.factory.CreateHandlingEvent(trackingId)
-
-	s.repository.Store(e)
-
-	return nil
-}
-
-func NewHandlingEventService(r HandlingEventRepository, f HandlingEventFactory) HandlingEventService {
-	return &handlingEventService{
-		repository: r,
-		factory:    f,
-	}
 }
