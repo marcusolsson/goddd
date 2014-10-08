@@ -29,5 +29,5 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 
 	inspectionService.InspectCargo(trackingId)
 
-	c.Check(len(eventHandler.handledEvents), Equals, 1)
+	c.Check(len(eventHandler.handledEvents), Equals, 0)
 }
