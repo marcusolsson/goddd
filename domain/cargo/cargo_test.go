@@ -127,6 +127,33 @@ func (s *S) TestLastKnownLocationClaimed(c *C) {
 	c.Check(location.Stockholm, Equals, cargo.Delivery.LastKnownLocation)
 }
 
+func (s *S) TestItineraryIsExpected(c *C) {
+
+	emptyItinerary := Itinerary{}
+	emptyEvent := HandlingEvent{}
+	c.Check(emptyItinerary.IsExpected(emptyEvent), Equals, true)
+
+	i := Itinerary{[]Leg{
+		Leg{LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
+		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
+	}}
+	c.Check(i.IsExpected(emptyEvent), Equals, true)
+
+	var (
+		receiveEvent              = HandlingEvent{Type: Receive, Location: location.Stockholm}
+		receiveEventWrongLocation = HandlingEvent{Type: Receive, Location: location.Melbourne}
+	)
+	c.Check(i.IsExpected(receiveEvent), Equals, true)
+	c.Check(i.IsExpected(receiveEventWrongLocation), Equals, false)
+
+	var (
+		claimEvent              = HandlingEvent{Type: Claim, Location: location.Hongkong}
+		claimEventWrongLocation = HandlingEvent{Type: Claim, Location: location.Stockholm}
+	)
+	c.Check(i.IsExpected(claimEvent), Equals, true)
+	c.Check(i.IsExpected(claimEventWrongLocation), Equals, false)
+}
+
 func populateCargoReceivedInStockholm() *Cargo {
 	cargo := NewCargo("XYZ", RouteSpecification{
 		Origin:      location.Stockholm,

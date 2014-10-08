@@ -142,7 +142,18 @@ func (i Itinerary) IsEmpty() bool {
 }
 
 func (i Itinerary) IsExpected(event HandlingEvent) bool {
-	return false
+	if i.IsEmpty() {
+		return true
+	}
+
+	switch event.Type {
+	case Receive:
+		return i.InitialDepartureLocation().SameIdentity(event.Location)
+	case Claim:
+		return i.FinalArrivalLocation().SameIdentity(event.Location)
+	}
+
+	return true
 }
 
 func (i Itinerary) SameValue(v shared.ValueObject) bool {
