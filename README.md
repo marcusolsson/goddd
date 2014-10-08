@@ -65,7 +65,7 @@ Go does not support means of creating a immutable struct. All fields can be alte
          return leg{loadLocation: load}
     }
 
-Since the `leg` struct starts with a lowercase, it will not be exported outside the package. This however, does not prevent internal functions to modify the state of the value object after it has been created. The jury is still out on this one though. On one hand, it makes it natural to use the `func New...` idiom to initialize the value object. On the other hand, it kind of feels non-idiomatic. A more idiomatic alternative would probably be to use _zero-initialization_ to construct a valid value object, and make sure the developers understand the concept of value objects.
+Since the `leg` struct starts with a lowercase, it will not be exported outside the package. The jury is still out on this one though. On one hand, it makes it natural to use the `func New...` idiom to initialize the value object. On the other hand, it kind of feels non-idiomatic. A more idiomatic alternative would probably be to use _zero-initialization_ to construct a valid value object, and make sure the developers understand the concept of value objects.
 
 Also, making sure that the _method receiver_ is of _non-pointer_ type feels like a good way to handle the temptation to modify a value object. Entities though, are more likely to have a pointer type receiver so that they may change during their life cycle.
 
