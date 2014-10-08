@@ -8,6 +8,7 @@ import (
 
 	"github.com/marcusolsson/goddd/domain/location"
 	"github.com/marcusolsson/goddd/domain/shared"
+	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
 type HandlingEvent struct {
@@ -64,7 +65,7 @@ type HandlingEventFactory struct {
 var ErrCannotCreateHandlingEvent = errors.New("Cannot create handling event")
 
 func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingId TrackingId,
-	voyageNumber string, unLocode location.UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
+	voyageNumber voyage.VoyageNumber, unLocode location.UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
 	_, err := f.CargoRepository.Find(trackingId)
 
 	if err != nil {

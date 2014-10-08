@@ -5,10 +5,11 @@ import (
 
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
 type HandlingEventService interface {
-	RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, voyageNumber string,
+	RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, voyageNumber voyage.VoyageNumber,
 		unLocode location.UNLocode, eventType cargo.HandlingEventType) error
 }
 
@@ -18,7 +19,7 @@ type handlingEventService struct {
 	eventHandler            EventHandler
 }
 
-func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, voyageNumber string,
+func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, voyageNumber voyage.VoyageNumber,
 	unLocode location.UNLocode, eventType cargo.HandlingEventType) error {
 
 	registrationTime := time.Now()

@@ -9,6 +9,7 @@ import (
 
 	"github.com/marcusolsson/goddd/domain/location"
 	"github.com/marcusolsson/goddd/domain/shared"
+	"github.com/marcusolsson/goddd/domain/voyage"
 
 	"code.google.com/p/go-uuid/uuid"
 )
@@ -110,7 +111,7 @@ func (s RouteSpecification) SameValue(v shared.ValueObject) bool {
 }
 
 type Leg struct {
-	Voyage         string
+	VoyageNumber   voyage.VoyageNumber
 	LoadLocation   location.Location
 	UnloadLocation location.Location
 }

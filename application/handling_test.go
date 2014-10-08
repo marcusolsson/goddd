@@ -5,6 +5,7 @@ import (
 
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/voyage"
 	"github.com/marcusolsson/goddd/infrastructure"
 	. "gopkg.in/check.v1"
 )
@@ -41,7 +42,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	var (
 		completionTime = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 		trackingId     = cargo.TrackingId("ABC123")
-		voyageNumber   = "CM001"
+		voyageNumber   = voyage.VoyageNumber("CM001")
 		unLocode       = location.Stockholm.UNLocode
 		eventType      = cargo.Load
 	)

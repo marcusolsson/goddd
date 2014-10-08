@@ -10,6 +10,7 @@ import (
 	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/voyage"
 	"github.com/marcusolsson/goddd/infrastructure"
 
 	"github.com/go-martini/martini"
@@ -43,7 +44,7 @@ type cargoDTO struct {
 }
 
 type legDTO struct {
-	VoyageNumber string `json:"voyage"`
+	VoyageNumber string `json:"voyageNumber"`
 	From         string `json:"from"`
 	To           string `json:"to"`
 	LoadTime     string `json:"loadTime"`
@@ -71,7 +72,7 @@ func assemble(c cargo.Cargo) cargoDTO {
 	legs := make([]legDTO, 0)
 	for _, l := range c.Itinerary.Legs {
 		legs = append(legs, legDTO{
-			VoyageNumber: l.Voyage,
+			VoyageNumber: string(l.VoyageNumber),
 			From:         string(l.LoadLocation.UNLocode),
 			To:           string(l.UnloadLocation.UNLocode),
 		})
@@ -173,10 +174,11 @@ func RegisterHandlers() {
 			var (
 				loadLocation   = locationRepository.Find(location.UNLocode(l.From))
 				unloadLocation = locationRepository.Find(location.UNLocode(l.To))
+				voyageNumber   = voyage.VoyageNumber(l.VoyageNumber)
 			)
 
 			legs = append(legs, cargo.Leg{
-				Voyage:         l.VoyageNumber,
+				VoyageNumber:   voyageNumber,
 				LoadLocation:   loadLocation,
 				UnloadLocation: unloadLocation,
 			})
