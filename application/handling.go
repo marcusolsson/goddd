@@ -15,6 +15,7 @@ type HandlingEventService interface {
 type handlingEventService struct {
 	handlingEventRepository cargo.HandlingEventRepository
 	handlingEventFactory    cargo.HandlingEventFactory
+	eventHandler            EventHandler
 }
 
 func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, voyageNumber string,
@@ -24,6 +25,8 @@ func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, t
 	event, _ := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingId, voyageNumber, unLocode, eventType)
 
 	s.handlingEventRepository.Store(event)
+
+	s.eventHandler.CargoWasHandled(event)
 
 	return nil
 }

@@ -9,9 +9,18 @@ import (
 	. "gopkg.in/check.v1"
 )
 
+type stubEventHandler struct {
+	handledEvents []cargo.HandlingEvent
+}
+
+func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
+	h.handledEvents = append(h.handledEvents, event)
+}
+
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
+		eventHandler            = &stubEventHandler{make([]cargo.HandlingEvent, 0)}
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
 		handlingEventRepository = &cargo.HandlingEventRepositoryInMem{}
 		handlingEventFactory    = cargo.HandlingEventFactory{
@@ -22,6 +31,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	var service HandlingEventService = &handlingEventService{
 		handlingEventRepository: handlingEventRepository,
 		handlingEventFactory:    handlingEventFactory,
+		eventHandler:            eventHandler,
 	}
 
 	var (
@@ -33,4 +43,6 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	)
 
 	service.RegisterHandlingEvent(completionTime, trackingId, voyageNumber, unLocode, eventType)
+
+	c.Check(len(eventHandler.handledEvents), Equals, 1)
 }
