@@ -24,5 +24,7 @@ func (s *cargoInspectionService) InspectCargo(trackingId cargo.TrackingId) {
 
 	c.DeriveDeliveryProgress(cargo.HandlingHistory{list.New()})
 
-	s.eventHandler.CargoWasMisdirected(c)
+	if c.Delivery.IsMisdirected {
+		s.eventHandler.CargoWasMisdirected(c)
+	}
 }

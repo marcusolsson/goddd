@@ -14,6 +14,7 @@ type Delivery struct {
 	RouteSpecification
 	RoutingStatus
 	TransportStatus
+	IsMisdirected bool
 }
 
 func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
@@ -38,6 +39,14 @@ func calculateRoutingStatus(itinerary Itinerary, routeSpecification RouteSpecifi
 		} else {
 			return Misrouted
 		}
+	}
+}
+
+func calculateMisdirectedStatus(event HandlingEvent, itinerary Itinerary) bool {
+	if event.Type == NotHandled {
+		return false
+	} else {
+		return !itinerary.IsExpected(event)
 	}
 }
 
@@ -67,6 +76,7 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 		routingStatus     = calculateRoutingStatus(itinerary, routeSpecification)
 		TransportStatus   = calculateTransportStatus(lastEvent)
 		lastKnownLocation = calculateLastKnownLocation(lastEvent)
+		isMisdirected     = calculateMisdirectedStatus(lastEvent, itinerary)
 	)
 
 	return Delivery{
@@ -76,5 +86,6 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 		RoutingStatus:      routingStatus,
 		TransportStatus:    TransportStatus,
 		LastKnownLocation:  lastKnownLocation,
+		IsMisdirected:      isMisdirected,
 	}
 }

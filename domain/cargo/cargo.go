@@ -141,6 +141,10 @@ func (i Itinerary) IsEmpty() bool {
 	return i.Legs == nil || len(i.Legs) == 0
 }
 
+func (i Itinerary) IsExpected(event HandlingEvent) bool {
+	return false
+}
+
 func (i Itinerary) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(i, v.(Itinerary))
 }
