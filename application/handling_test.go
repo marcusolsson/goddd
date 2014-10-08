@@ -10,17 +10,21 @@ import (
 )
 
 type stubEventHandler struct {
-	handledEvents []cargo.HandlingEvent
+	handledEvents []interface{}
 }
 
 func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 	h.handledEvents = append(h.handledEvents, event)
 }
 
+func (h *stubEventHandler) CargoWasMisdirected(c cargo.Cargo) {
+	h.handledEvents = append(h.handledEvents, c)
+}
+
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
-		eventHandler            = &stubEventHandler{make([]cargo.HandlingEvent, 0)}
+		eventHandler            = &stubEventHandler{make([]interface{}, 0)}
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
 		handlingEventRepository = &cargo.HandlingEventRepositoryInMem{}
 		handlingEventFactory    = cargo.HandlingEventFactory{
