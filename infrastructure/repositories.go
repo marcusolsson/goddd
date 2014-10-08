@@ -3,6 +3,7 @@ package infrastructure
 import (
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
 type cargoRepositoryInMem struct {
@@ -66,6 +67,28 @@ func NewInMemLocationRepository() location.LocationRepository {
 	r.locations[location.Stockholm.UNLocode] = location.Stockholm
 	r.locations[location.Melbourne.UNLocode] = location.Melbourne
 	r.locations[location.Hongkong.UNLocode] = location.Hongkong
+
+	return r
+}
+
+type voyageRepositoryInMem struct {
+	voyages map[voyage.VoyageNumber]voyage.Voyage
+}
+
+func (r *voyageRepositoryInMem) Find(voyageNumber voyage.VoyageNumber) voyage.Voyage {
+	if v, ok := r.voyages[voyageNumber]; ok {
+		return v
+	}
+
+	return voyage.Voyage{}
+}
+
+func NewInMemVoyageRepository() voyage.VoyageRepository {
+	r := &voyageRepositoryInMem{
+		voyages: make(map[voyage.VoyageNumber]voyage.Voyage),
+	}
+
+	r.voyages[voyage.MelbourneToStockholm.VoyageNumber] = *voyage.MelbourneToStockholm
 
 	return r
 }
