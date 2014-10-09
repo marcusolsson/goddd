@@ -150,6 +150,20 @@ func (i Itinerary) IsExpected(event HandlingEvent) bool {
 	switch event.Type {
 	case Receive:
 		return i.InitialDepartureLocation().SameIdentity(event.Location)
+	case Load:
+		for _, l := range i.Legs {
+			if l.LoadLocation.SameIdentity(event.Location) && l.VoyageNumber == event.VoyageNumber {
+				return true
+			}
+		}
+		return false
+	case Unload:
+		for _, l := range i.Legs {
+			if l.UnloadLocation.SameIdentity(event.Location) && l.VoyageNumber == event.VoyageNumber {
+				return true
+			}
+		}
+		return false
 	case Claim:
 		return i.FinalArrivalLocation().SameIdentity(event.Location)
 	}

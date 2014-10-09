@@ -134,8 +134,8 @@ func (s *S) TestItineraryIsExpected(c *C) {
 	c.Check(emptyItinerary.IsExpected(emptyEvent), Equals, true)
 
 	i := Itinerary{[]Leg{
-		Leg{LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
-		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
+		Leg{VoyageNumber: "001A", LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
+		Leg{VoyageNumber: "001A", LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
 	}}
 	c.Check(i.IsExpected(emptyEvent), Equals, true)
 
@@ -145,6 +145,13 @@ func (s *S) TestItineraryIsExpected(c *C) {
 	)
 	c.Check(i.IsExpected(receiveEvent), Equals, true)
 	c.Check(i.IsExpected(receiveEventWrongLocation), Equals, false)
+
+	var (
+		loadEvent              = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.Melbourne}
+		loadEventWrongLocation = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.Hongkong}
+	)
+	c.Check(i.IsExpected(loadEvent), Equals, true)
+	c.Check(i.IsExpected(loadEventWrongLocation), Equals, false)
 
 	var (
 		claimEvent              = HandlingEvent{Type: Claim, Location: location.Hongkong}

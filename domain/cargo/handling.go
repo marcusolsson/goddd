@@ -15,6 +15,7 @@ type HandlingEvent struct {
 	TrackingId
 	Type HandlingEventType
 	location.Location
+	voyage.VoyageNumber
 }
 
 func (e HandlingEvent) SameValue(v shared.ValueObject) bool {
