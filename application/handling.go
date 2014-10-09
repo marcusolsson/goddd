@@ -23,7 +23,11 @@ func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, t
 	unLocode location.UNLocode, eventType cargo.HandlingEventType) error {
 
 	registrationTime := time.Now()
-	event, _ := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingId, voyageNumber, unLocode, eventType)
+	event, err := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingId, voyageNumber, unLocode, eventType)
+
+	if err != nil {
+		return err
+	}
 
 	s.handlingEventRepository.Store(event)
 
