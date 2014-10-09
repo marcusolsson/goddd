@@ -27,7 +27,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	var (
 		eventHandler            = &stubEventHandler{make([]interface{}, 0)}
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
-		handlingEventRepository = &cargo.HandlingEventRepositoryInMem{}
+		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
 		handlingEventFactory    = cargo.HandlingEventFactory{
 			CargoRepository: cargoRepository,
 		}

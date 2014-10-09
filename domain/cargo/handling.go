@@ -1,7 +1,6 @@
 package cargo
 
 import (
-	"container/list"
 	"errors"
 	"reflect"
 	"time"
@@ -34,15 +33,15 @@ const (
 )
 
 type HandlingHistory struct {
-	HandlingEvents *list.List
+	HandlingEvents []HandlingEvent
 }
 
 func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
-	if h.HandlingEvents.Len() == 0 {
+	if len(h.HandlingEvents) == 0 {
 		return HandlingEvent{}, errors.New("Delivery history is empty")
 	}
 
-	return h.HandlingEvents.Back().Value.(HandlingEvent), nil
+	return h.HandlingEvents[len(h.HandlingEvents)-1], nil
 }
 
 func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
@@ -51,12 +50,7 @@ func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
 
 type HandlingEventRepository interface {
 	Store(e HandlingEvent)
-}
-
-type HandlingEventRepositoryInMem struct {
-}
-
-func (r *HandlingEventRepositoryInMem) Store(e HandlingEvent) {
+	QueryHandlingHistory(TrackingId) HandlingHistory
 }
 
 type HandlingEventFactory struct {

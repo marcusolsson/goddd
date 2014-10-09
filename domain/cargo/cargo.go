@@ -1,7 +1,6 @@
 package cargo
 
 import (
-	"container/list"
 	"errors"
 	"reflect"
 	"strings"
@@ -45,8 +44,7 @@ func (c *Cargo) SameIdentity(e shared.Entity) bool {
 func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Cargo {
 	emptyItinerary := Itinerary{}
 
-	emptyHistory := HandlingHistory{}
-	emptyHistory.HandlingEvents = list.New()
+	emptyHistory := HandlingHistory{make([]HandlingEvent, 0)}
 
 	return &Cargo{
 		TrackingId:         trackingId,

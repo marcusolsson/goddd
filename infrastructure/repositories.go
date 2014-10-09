@@ -92,3 +92,25 @@ func NewInMemVoyageRepository() voyage.VoyageRepository {
 
 	return r
 }
+
+type handlingEventRepositoryInMem struct {
+	events map[cargo.TrackingId][]cargo.HandlingEvent
+}
+
+func (r *handlingEventRepositoryInMem) Store(e cargo.HandlingEvent) {
+	// Make array if it's the first event with this tracking ID.
+	if _, ok := r.events[e.TrackingId]; !ok {
+		r.events[e.TrackingId] = make([]cargo.HandlingEvent, 0)
+	}
+	r.events[e.TrackingId] = append(r.events[e.TrackingId], e)
+}
+
+func (r *handlingEventRepositoryInMem) QueryHandlingHistory(trackingId cargo.TrackingId) cargo.HandlingHistory {
+	return cargo.HandlingHistory{r.events[trackingId]}
+}
+
+func NewInMemHandlingEventRepository() cargo.HandlingEventRepository {
+	return &handlingEventRepositoryInMem{
+		events: make(map[cargo.TrackingId][]cargo.HandlingEvent),
+	}
+}

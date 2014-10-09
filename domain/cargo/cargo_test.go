@@ -1,7 +1,6 @@
 package cargo
 
 import (
-	"container/list"
 	"testing"
 	"time"
 
@@ -173,8 +172,8 @@ func populateCargoReceivedInStockholm() *Cargo {
 		Location:   location.Stockholm,
 	}
 
-	history := HandlingHistory{HandlingEvents: list.New()}
-	history.HandlingEvents.PushBack(e)
+	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}
+	history.HandlingEvents = append(history.HandlingEvents, e)
 
 	cargo.DeriveDeliveryProgress(history)
 
@@ -193,8 +192,8 @@ func populateCargoClaimedInMelbourne() *Cargo {
 		Location:   location.Melbourne,
 	}
 
-	history := HandlingHistory{HandlingEvents: list.New()}
-	history.HandlingEvents.PushBack(e)
+	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}
+	history.HandlingEvents = append(history.HandlingEvents, e)
 
 	cargo.DeriveDeliveryProgress(history)
 
