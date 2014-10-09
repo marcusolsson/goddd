@@ -12,6 +12,7 @@ type cargoInspectionService struct {
 	eventHandler            EventHandler
 }
 
+// TODO: Should be transactional
 func (s *cargoInspectionService) InspectCargo(trackingId cargo.TrackingId) {
 	c, err := s.cargoRepository.Find(trackingId)
 
