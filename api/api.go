@@ -4,14 +4,12 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
-	"strconv"
-	"time"
 
 	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
 	"github.com/marcusolsson/goddd/infrastructure"
+	"github.com/marcusolsson/goddd/interfaces"
 
 	"github.com/go-martini/martini"
 	"github.com/martini-contrib/binding"
@@ -19,83 +17,19 @@ import (
 	"github.com/martini-contrib/render"
 )
 
-type eventDTO struct {
-	Description string `json:"description"`
-	Expected    bool   `json:"expected"`
-}
-
-type locationDTO struct {
-	UNLocode string `json:"locode"`
-	Name     string `json:"name"`
-}
-
-type cargoDTO struct {
-	TrackingId           string     `json:"trackingId"`
-	StatusText           string     `json:"statusText"`
-	Origin               string     `json:"origin"`
-	Destination          string     `json:"destination"`
-	ETA                  string     `json:"eta"`
-	NextExpectedActivity string     `json:"nextExpectedActivity"`
-	Misrouted            bool       `json:"misrouted"`
-	Routed               bool       `json:"routed"`
-	ArrivalDeadline      string     `json:"arrivalDeadline"`
-	Events               []eventDTO `json:"events"`
-	Legs                 []legDTO   `json:"legs"`
-}
-
-type legDTO struct {
-	VoyageNumber string `json:"voyageNumber"`
-	From         string `json:"from"`
-	To           string `json:"to"`
-	LoadTime     string `json:"loadTime"`
-	UnloadTime   string `json:"unloadTime"`
-}
-
-type routeCandidate struct {
-	Legs []legDTO `json:"legs"`
-}
-
-func assemble(c cargo.Cargo) cargoDTO {
-	eta := time.Date(2009, time.March, 12, 12, 0, 0, 0, time.UTC)
-	dto := cargoDTO{
-		TrackingId:           string(c.TrackingId),
-		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin.Name),
-		Origin:               string(c.Origin.UNLocode),
-		Destination:          string(c.RouteSpecification.Destination.UNLocode),
-		ETA:                  eta.Format(time.RFC3339),
-		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
-		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
-		Routed:               !c.Itinerary.IsEmpty(),
-		ArrivalDeadline:      c.ArrivalDeadline.Format(time.RFC3339),
-	}
-
-	legs := make([]legDTO, 0)
-	for _, l := range c.Itinerary.Legs {
-		legs = append(legs, legDTO{
-			VoyageNumber: string(l.VoyageNumber),
-			From:         string(l.LoadLocation.UNLocode),
-			To:           string(l.UnloadLocation.UNLocode),
-		})
-	}
-	dto.Legs = legs
-
-	dto.Events = make([]eventDTO, 3)
-	dto.Events[0] = eventDTO{Description: "Received in Hongkong, at 3/1/09 12:00 AM.", Expected: true}
-	dto.Events[1] = eventDTO{Description: "Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM."}
-	dto.Events[2] = eventDTO{Description: "Unloaded off voyage 0100S in New York, at 3/5/09 12:00 AM."}
-
-	return dto
-}
-
 type jsonObject map[string]interface{}
 
 func RegisterHandlers() {
 	var (
-		cargoRepository    = infrastructure.NewInMemCargoRepository()
-		locationRepository = infrastructure.NewInMemLocationRepository()
-		routingService     = infrastructure.NewExternalRoutingService(locationRepository)
-		bookingService     = application.NewBookingService(cargoRepository, locationRepository, routingService)
+		cargoRepository      = infrastructure.NewInMemCargoRepository()
+		locationRepository   = infrastructure.NewInMemLocationRepository()
+		routingService       = infrastructure.NewExternalRoutingService(locationRepository)
+		bookingService       = application.NewBookingService(cargoRepository, locationRepository, routingService)
+		bookingServiceFacade = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, bookingService)
 	)
+
+	// Store some sample cargos.
+	storeTestData(cargoRepository)
 
 	var (
 		ResourceNotFound              = jsonObject{"error": "The specified resource does not exist."}
@@ -103,10 +37,9 @@ func RegisterHandlers() {
 		InvalidInput                  = jsonObject{"error": "One of the request inputs is not valid."}
 	)
 
-	// Store some sample cargos.
-	storeTestData(cargoRepository)
-
 	m := martini.Classic()
+
+	m.Use(martini.Static("app"))
 
 	m.Use(cors.Allow(&cors.Options{
 		AllowOrigins: []string{"*"},
@@ -114,33 +47,27 @@ func RegisterHandlers() {
 		AllowHeaders: []string{"Origin", "Content-Type"},
 	}))
 
-	m.Use(martini.Static("app"))
 	m.Use(render.Renderer(render.Options{
 		IndentJSON: true,
 	}))
 
+	// GET /cargos
 	m.Get("/cargos", func(r render.Render) {
-		cargos := cargoRepository.FindAll()
-		dtos := make([]cargoDTO, len(cargos))
-
-		for i, c := range cargos {
-			dtos[i] = assemble(c)
-		}
-
-		r.JSON(200, dtos)
+		r.JSON(200, bookingServiceFacade.ListAllCargos())
 	})
 
 	m.Get("/cargos/:id", func(params martini.Params, r render.Render) {
-		trackingId := cargo.TrackingId(params["id"])
-		c, err := cargoRepository.Find(trackingId)
+		c, err := bookingServiceFacade.LoadCargoForRouting(params["id"])
 
 		if err != nil {
 			r.JSON(404, ResourceNotFound)
-		} else {
-			r.JSON(200, assemble(c))
+			return
 		}
+
+		r.JSON(200, c)
 	})
 
+	// POST /cargos/:id/change_destination
 	m.Post("/cargos/:id/change_destination", func(req *http.Request, params martini.Params, r render.Render) {
 		v := queryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("destination")
@@ -152,12 +79,7 @@ func RegisterHandlers() {
 			return
 		}
 
-		var (
-			trackingId  = cargo.TrackingId(params["id"])
-			destination = location.UNLocode(fmt.Sprintf("%s", found["destination"]))
-		)
-
-		if err := bookingService.ChangeDestination(trackingId, destination); err != nil {
+		if err := bookingServiceFacade.ChangeDestination(params["id"], fmt.Sprintf("%s", found["destination"])); err != nil {
 			r.JSON(400, InvalidInput)
 			return
 		}
@@ -165,57 +87,22 @@ func RegisterHandlers() {
 		r.JSON(200, jsonObject{})
 	})
 
-	m.Post("/cargos/:id/assign_to_route", binding.Bind(routeCandidate{}), func(rc routeCandidate, params martini.Params, r render.Render) {
-		trackingId := cargo.TrackingId(params["id"])
-
-		legs := make([]cargo.Leg, 0)
-		for _, l := range rc.Legs {
-
-			var (
-				loadLocation   = locationRepository.Find(location.UNLocode(l.From))
-				unloadLocation = locationRepository.Find(location.UNLocode(l.To))
-				voyageNumber   = voyage.VoyageNumber(l.VoyageNumber)
-			)
-
-			legs = append(legs, cargo.Leg{
-				VoyageNumber:   voyageNumber,
-				LoadLocation:   loadLocation,
-				UnloadLocation: unloadLocation,
-			})
-		}
-
-		itinerary := cargo.Itinerary{Legs: legs}
-
-		if err := bookingService.AssignCargoToRoute(itinerary, trackingId); err != nil {
+	// POST /cargos/:id/assign_to_route
+	m.Post("/cargos/:id/assign_to_route", binding.Bind(interfaces.RouteCandidateDTO{}), func(c interfaces.RouteCandidateDTO, params martini.Params, r render.Render) {
+		if err := bookingServiceFacade.AssignCargoToRoute(params["id"], c); err != nil {
 			r.JSON(400, InvalidInput)
 			return
 		}
 
-		r.JSON(200, itinerary)
+		r.JSON(200, jsonObject{})
 	})
 
+	// GET /cargos/:id/request_routes
 	m.Get("/cargos/:id/request_routes", func(params martini.Params, r render.Render) {
-		trackingId := cargo.TrackingId(params["id"])
-		itineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
-
-		candidates := make([]routeCandidate, 0)
-		for _, itin := range itineraries {
-			legs := make([]legDTO, 0)
-			for _, leg := range itin.Legs {
-				legs = append(legs, legDTO{
-					VoyageNumber: "S0001",
-					From:         string(leg.LoadLocation.UNLocode),
-					To:           string(leg.UnloadLocation.UNLocode),
-					LoadTime:     "N/A",
-					UnloadTime:   "N/A",
-				})
-			}
-			candidates = append(candidates, routeCandidate{Legs: legs})
-		}
-
-		r.JSON(200, candidates)
+		r.JSON(200, bookingServiceFacade.RequestRoutesForCargo(params["id"]))
 	})
 
+	// POST /cargos
 	m.Post("/cargos", func(req *http.Request, r render.Render) {
 		v := queryParams(req.URL.Query())
 		found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
@@ -228,43 +115,31 @@ func RegisterHandlers() {
 		}
 
 		var (
-			origin      = location.UNLocode(fmt.Sprintf("%s", found["origin"]))
-			destination = location.UNLocode(fmt.Sprintf("%s", found["destination"]))
+			origin          = found["origin"].(string)
+			destination     = found["destination"].(string)
+			arrivalDeadline = found["arrivalDeadline"].(string)
 		)
 
-		millis, _ := strconv.ParseInt(fmt.Sprintf("%s", found["arrivalDeadline"]), 10, 64)
-		arrivalDeadline := time.Unix(millis/1000, 0)
-
-		trackingId, err := bookingService.BookNewCargo(origin, destination, arrivalDeadline)
+		trackingId, err := bookingServiceFacade.BookNewCargo(origin, destination, arrivalDeadline)
 
 		if err != nil {
 			r.JSON(400, InvalidInput)
 			return
 		}
 
-		c, err := cargoRepository.Find(trackingId)
+		c, err := bookingServiceFacade.LoadCargoForRouting(trackingId)
 
 		if err != nil {
 			r.JSON(404, ResourceNotFound)
 			return
 		}
 
-		r.JSON(200, assemble(c))
+		r.JSON(200, c)
 	})
 
+	// GET /locations
 	m.Get("/locations", func(r render.Render) {
-		locationRepository := infrastructure.NewInMemLocationRepository()
-		locations := locationRepository.FindAll()
-
-		dtos := make([]locationDTO, len(locations))
-		for i, loc := range locations {
-			dtos[i] = locationDTO{
-				UNLocode: string(loc.UNLocode),
-				Name:     loc.Name,
-			}
-		}
-
-		r.JSON(200, dtos)
+		r.JSON(200, bookingServiceFacade.ListShippingLocations())
 	})
 
 	http.Handle("/", m)
