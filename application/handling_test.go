@@ -22,6 +22,10 @@ func (h *stubEventHandler) CargoWasMisdirected(c cargo.Cargo) {
 	h.handledEvents = append(h.handledEvents, c)
 }
 
+func (h *stubEventHandler) CargoHasArrived(c cargo.Cargo) {
+	h.handledEvents = append(h.handledEvents, c)
+}
+
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (

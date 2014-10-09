@@ -14,7 +14,8 @@ type Delivery struct {
 	RouteSpecification
 	RoutingStatus
 	TransportStatus
-	IsMisdirected bool
+	IsMisdirected           bool
+	IsUnloadedAtDestination bool
 }
 
 func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
@@ -45,9 +46,17 @@ func calculateRoutingStatus(itinerary Itinerary, routeSpecification RouteSpecifi
 func calculateMisdirectedStatus(event HandlingEvent, itinerary Itinerary) bool {
 	if event.Type == NotHandled {
 		return false
-	} else {
-		return !itinerary.IsExpected(event)
 	}
+
+	return !itinerary.IsExpected(event)
+}
+
+func calculateUnloadedAtDestination(event HandlingEvent, routeSpecification RouteSpecification) bool {
+	if event.Type == NotHandled {
+		return false
+	}
+
+	return event.Type == Unload && routeSpecification.Destination.SameIdentity(event.Location)
 }
 
 func calculateTransportStatus(event HandlingEvent) TransportStatus {
@@ -73,19 +82,21 @@ func calculateLastKnownLocation(event HandlingEvent) location.Location {
 func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecification RouteSpecification) Delivery {
 
 	var (
-		routingStatus     = calculateRoutingStatus(itinerary, routeSpecification)
-		TransportStatus   = calculateTransportStatus(lastEvent)
-		lastKnownLocation = calculateLastKnownLocation(lastEvent)
-		isMisdirected     = calculateMisdirectedStatus(lastEvent, itinerary)
+		routingStatus           = calculateRoutingStatus(itinerary, routeSpecification)
+		TransportStatus         = calculateTransportStatus(lastEvent)
+		lastKnownLocation       = calculateLastKnownLocation(lastEvent)
+		isMisdirected           = calculateMisdirectedStatus(lastEvent, itinerary)
+		isUnloadedAtDestination = calculateUnloadedAtDestination(lastEvent, routeSpecification)
 	)
 
 	return Delivery{
-		LastEvent:          lastEvent,
-		Itinerary:          itinerary,
-		RouteSpecification: routeSpecification,
-		RoutingStatus:      routingStatus,
-		TransportStatus:    TransportStatus,
-		LastKnownLocation:  lastKnownLocation,
-		IsMisdirected:      isMisdirected,
+		LastEvent:               lastEvent,
+		Itinerary:               itinerary,
+		RouteSpecification:      routeSpecification,
+		RoutingStatus:           routingStatus,
+		TransportStatus:         TransportStatus,
+		LastKnownLocation:       lastKnownLocation,
+		IsMisdirected:           isMisdirected,
+		IsUnloadedAtDestination: isUnloadedAtDestination,
 	}
 }

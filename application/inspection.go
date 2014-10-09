@@ -26,4 +26,10 @@ func (s *cargoInspectionService) InspectCargo(trackingId cargo.TrackingId) {
 	if c.Delivery.IsMisdirected {
 		s.eventHandler.CargoWasMisdirected(c)
 	}
+
+	if c.Delivery.IsUnloadedAtDestination {
+		s.eventHandler.CargoHasArrived(c)
+	}
+
+	s.cargoRepository.Store(c)
 }
