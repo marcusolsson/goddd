@@ -35,3 +35,11 @@ func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, t
 
 	return nil
 }
+
+func NewHandlingEventService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h EventHandler) HandlingEventService {
+	return &handlingEventService{
+		handlingEventRepository: r,
+		handlingEventFactory:    f,
+		eventHandler:            h,
+	}
+}
