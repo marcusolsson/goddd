@@ -178,6 +178,7 @@ func assemble(c cargo.Cargo) cargoDTO {
 	}
 	dto.Legs = legs
 
+	// TODO: Query real handling history from handlingEventRepository
 	dto.Events = make([]eventDTO, 3)
 	dto.Events[0] = eventDTO{Description: "Received in Hongkong, at 3/1/09 12:00 AM.", Expected: true}
 	dto.Events[1] = eventDTO{Description: "Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM."}
