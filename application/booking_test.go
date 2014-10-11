@@ -27,10 +27,10 @@ func (s *S) TestBookNewCargo(c *C) {
 		locationRepository: locationRepository,
 	}
 
-	origin, destination := location.Stockholm, location.Melbourne
+	origin, destination := location.SESTO, location.AUMEL
 	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 
-	trackingId, err := bookingService.BookNewCargo(origin.UNLocode, destination.UNLocode, arrivalDeadline)
+	trackingId, err := bookingService.BookNewCargo(origin, destination, arrivalDeadline)
 
 	c.Assert(err, IsNil)
 
@@ -39,8 +39,8 @@ func (s *S) TestBookNewCargo(c *C) {
 	c.Assert(err, IsNil)
 
 	c.Check(trackingId, Equals, cargo.TrackingId)
-	c.Check(location.Stockholm, Equals, cargo.Origin)
-	c.Check(location.Melbourne, Equals, cargo.RouteSpecification.Destination)
+	c.Check(location.SESTO, Equals, cargo.Origin)
+	c.Check(location.AUMEL, Equals, cargo.RouteSpecification.Destination)
 	c.Check(arrivalDeadline, Equals, cargo.RouteSpecification.ArrivalDeadline)
 }
 
@@ -126,8 +126,8 @@ func (s *S) TestChangeCargoDestination(c *C) {
 	}
 
 	c1 := cargo.NewCargo("ABC", cargo.RouteSpecification{
-		Origin:          location.Stockholm,
-		Destination:     location.Hongkong,
+		Origin:          location.Stockholm.UNLocode,
+		Destination:     location.Hongkong.UNLocode,
 		ArrivalDeadline: time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC),
 	})
 
@@ -135,13 +135,13 @@ func (s *S) TestChangeCargoDestination(c *C) {
 
 	err = cargoRepository.Store(*c1)
 	c.Assert(err, IsNil)
-	c.Assert(c1.RouteSpecification.Destination, Equals, location.Hongkong)
+	c.Assert(c1.RouteSpecification.Destination, Equals, location.CNHKG)
 
-	err = bookingService.ChangeDestination(c1.TrackingId, location.Melbourne.UNLocode)
+	err = bookingService.ChangeDestination(c1.TrackingId, location.AUMEL)
 	c.Assert(err, IsNil)
 
 	updatedCargo, err := cargoRepository.Find(c1.TrackingId)
 
 	c.Assert(err, IsNil)
-	c.Assert(updatedCargo.RouteSpecification.Destination, Equals, location.Melbourne)
+	c.Assert(updatedCargo.RouteSpecification.Destination, Equals, location.AUMEL)
 }

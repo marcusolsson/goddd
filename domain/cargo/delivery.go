@@ -9,7 +9,7 @@ import (
 
 type Delivery struct {
 	LastEvent         HandlingEvent
-	LastKnownLocation location.Location
+	LastKnownLocation location.UNLocode
 	Itinerary
 	RouteSpecification
 	RoutingStatus
@@ -56,7 +56,7 @@ func calculateUnloadedAtDestination(event HandlingEvent, routeSpecification Rout
 		return false
 	}
 
-	return event.Type == Unload && routeSpecification.Destination.SameIdentity(event.Location)
+	return event.Type == Unload && routeSpecification.Destination == event.Location
 }
 
 func calculateTransportStatus(event HandlingEvent) TransportStatus {
@@ -75,7 +75,7 @@ func calculateTransportStatus(event HandlingEvent) TransportStatus {
 	return Unknown
 }
 
-func calculateLastKnownLocation(event HandlingEvent) location.Location {
+func calculateLastKnownLocation(event HandlingEvent) location.UNLocode {
 	return event.Location
 }
 

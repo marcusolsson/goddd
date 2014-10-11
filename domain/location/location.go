@@ -3,10 +3,17 @@ package location
 import "github.com/marcusolsson/goddd/domain/shared"
 
 var (
-	Stockholm = Location{UNLocode: "SESTO", Name: "Stockholm"}
-	Melbourne = Location{UNLocode: "AUMEL", Name: "Melbourne"}
-	Hongkong  = Location{UNLocode: "CNHKG", Name: "Hongkong"}
-	NewYork   = Location{UNLocode: "USNYC", Name: "New York"}
+	SESTO UNLocode = "SESTO"
+	AUMEL UNLocode = "AUMEL"
+	CNHKG UNLocode = "CNHKG"
+	USNYC UNLocode = "USNYC"
+)
+
+var (
+	Stockholm = Location{UNLocode: SESTO, Name: "Stockholm"}
+	Melbourne = Location{UNLocode: AUMEL, Name: "Melbourne"}
+	Hongkong  = Location{UNLocode: CNHKG, Name: "Hongkong"}
+	NewYork   = Location{UNLocode: USNYC, Name: "New York"}
 )
 
 type UNLocode string

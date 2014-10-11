@@ -17,7 +17,7 @@ type TrackingId string
 
 type Cargo struct {
 	TrackingId         TrackingId
-	Origin             location.Location
+	Origin             location.UNLocode
 	RouteSpecification RouteSpecification
 	Itinerary          Itinerary
 	Delivery
@@ -52,6 +52,22 @@ func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Car
 		RouteSpecification: routeSpecification,
 		Delivery:           DeriveDeliveryFrom(routeSpecification, emptyItinerary, emptyHistory),
 	}
+}
+
+type RouteSpecification struct {
+	Origin          location.UNLocode
+	Destination     location.UNLocode
+	ArrivalDeadline time.Time
+}
+
+func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
+	return itinerary.Legs != nil &&
+		s.Origin == itinerary.InitialDepartureLocation() &&
+		s.Destination == itinerary.FinalArrivalLocation()
+}
+
+func (s RouteSpecification) SameValue(v shared.ValueObject) bool {
+	return reflect.DeepEqual(s, v.(RouteSpecification))
 }
 
 type RoutingStatus int
@@ -92,26 +108,10 @@ func (s TransportStatus) String() string {
 	return ""
 }
 
-type RouteSpecification struct {
-	Origin          location.Location
-	Destination     location.Location
-	ArrivalDeadline time.Time
-}
-
-func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
-	return itinerary.Legs != nil &&
-		s.Origin.UNLocode == itinerary.InitialDepartureLocation().UNLocode &&
-		s.Destination.UNLocode == itinerary.FinalArrivalLocation().UNLocode
-}
-
-func (s RouteSpecification) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(s, v.(RouteSpecification))
-}
-
 type Leg struct {
 	VoyageNumber   voyage.VoyageNumber
-	LoadLocation   location.Location
-	UnloadLocation location.Location
+	LoadLocation   location.UNLocode
+	UnloadLocation location.UNLocode
 }
 
 func (l Leg) SameValue(v shared.ValueObject) bool {
@@ -122,16 +122,16 @@ type Itinerary struct {
 	Legs []Leg
 }
 
-func (i Itinerary) InitialDepartureLocation() location.Location {
+func (i Itinerary) InitialDepartureLocation() location.UNLocode {
 	if i.IsEmpty() {
-		return location.UnknownLocation
+		return location.UNLocode("")
 	}
 	return i.Legs[0].LoadLocation
 }
 
-func (i Itinerary) FinalArrivalLocation() location.Location {
+func (i Itinerary) FinalArrivalLocation() location.UNLocode {
 	if i.IsEmpty() {
-		return location.UnknownLocation
+		return location.UNLocode("")
 	}
 	return i.Legs[len(i.Legs)-1].UnloadLocation
 }
@@ -147,23 +147,23 @@ func (i Itinerary) IsExpected(event HandlingEvent) bool {
 
 	switch event.Type {
 	case Receive:
-		return i.InitialDepartureLocation().SameIdentity(event.Location)
+		return i.InitialDepartureLocation() == event.Location
 	case Load:
 		for _, l := range i.Legs {
-			if l.LoadLocation.SameIdentity(event.Location) && l.VoyageNumber == event.VoyageNumber {
+			if l.LoadLocation == event.Location && l.VoyageNumber == event.VoyageNumber {
 				return true
 			}
 		}
 		return false
 	case Unload:
 		for _, l := range i.Legs {
-			if l.UnloadLocation.SameIdentity(event.Location) && l.VoyageNumber == event.VoyageNumber {
+			if l.UnloadLocation == event.Location && l.VoyageNumber == event.VoyageNumber {
 				return true
 			}
 		}
 		return false
 	case Claim:
-		return i.FinalArrivalLocation().SameIdentity(event.Location)
+		return i.FinalArrivalLocation() == event.Location
 	}
 
 	return true

@@ -147,14 +147,14 @@ func RegisterHandlers() {
 
 func storeTestData(r cargo.CargoRepository) {
 	test1 := cargo.NewCargo("FTL456", cargo.RouteSpecification{
-		Origin:      location.Melbourne,
-		Destination: location.Stockholm,
+		Origin:      location.AUMEL,
+		Destination: location.SESTO,
 	})
 	r.Store(*test1)
 
 	test2 := cargo.NewCargo("ABC123", cargo.RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Hongkong,
+		Origin:      location.SESTO,
+		Destination: location.CNHKG,
 	})
 	r.Store(*test2)
 }

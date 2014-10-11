@@ -25,15 +25,10 @@ type bookingService struct {
 
 func (s *bookingService) BookNewCargo(originLocode location.UNLocode, destinationLocode location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error) {
 
-	var (
-		trackingId  = cargo.NextTrackingId()
-		origin      = s.locationRepository.Find(originLocode)
-		destination = s.locationRepository.Find(destinationLocode)
-	)
-
+	trackingId := cargo.NextTrackingId()
 	routeSpecification := cargo.RouteSpecification{
-		Origin:          origin,
-		Destination:     destination,
+		Origin:          originLocode,
+		Destination:     destinationLocode,
 		ArrivalDeadline: arrivalDeadline,
 	}
 
@@ -87,7 +82,7 @@ func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode
 
 	routeSpecification := cargo.RouteSpecification{
 		Origin:          c.Origin,
-		Destination:     l,
+		Destination:     l.UNLocode,
 		ArrivalDeadline: c.RouteSpecification.ArrivalDeadline,
 	}
 

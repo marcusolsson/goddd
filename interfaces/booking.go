@@ -83,17 +83,10 @@ func (f *bookingServiceFacade) LoadCargoForRouting(trackingId string) (cargoDTO,
 func (f *bookingServiceFacade) AssignCargoToRoute(trackingId string, candidate RouteCandidateDTO) error {
 	legs := make([]cargo.Leg, 0)
 	for _, l := range candidate.Legs {
-
-		var (
-			loadLocation   = f.locationRepository.Find(location.UNLocode(l.From))
-			unloadLocation = f.locationRepository.Find(location.UNLocode(l.To))
-			voyageNumber   = voyage.VoyageNumber(l.VoyageNumber)
-		)
-
 		legs = append(legs, cargo.Leg{
-			VoyageNumber:   voyageNumber,
-			LoadLocation:   loadLocation,
-			UnloadLocation: unloadLocation,
+			VoyageNumber:   voyage.VoyageNumber(l.VoyageNumber),
+			LoadLocation:   location.UNLocode(l.From),
+			UnloadLocation: location.UNLocode(l.To),
 		})
 	}
 
@@ -113,8 +106,8 @@ func (f *bookingServiceFacade) RequestRoutesForCargo(trackingId string) []RouteC
 		for _, leg := range itin.Legs {
 			legs = append(legs, legDTO{
 				VoyageNumber: "S0001",
-				From:         string(leg.LoadLocation.UNLocode),
-				To:           string(leg.UnloadLocation.UNLocode),
+				From:         string(leg.LoadLocation),
+				To:           string(leg.UnloadLocation),
 				LoadTime:     "N/A",
 				UnloadTime:   "N/A",
 			})
@@ -158,9 +151,9 @@ func assemble(c cargo.Cargo) cargoDTO {
 	eta := time.Date(2009, time.March, 12, 12, 0, 0, 0, time.UTC)
 	dto := cargoDTO{
 		TrackingId:           string(c.TrackingId),
-		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin.Name),
-		Origin:               string(c.Origin.UNLocode),
-		Destination:          string(c.RouteSpecification.Destination.UNLocode),
+		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin),
+		Origin:               string(c.Origin),
+		Destination:          string(c.RouteSpecification.Destination),
 		ETA:                  eta.Format(time.RFC3339),
 		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
@@ -172,8 +165,8 @@ func assemble(c cargo.Cargo) cargoDTO {
 	for _, l := range c.Itinerary.Legs {
 		legs = append(legs, legDTO{
 			VoyageNumber: string(l.VoyageNumber),
-			From:         string(l.LoadLocation.UNLocode),
-			To:           string(l.UnloadLocation.UNLocode),
+			From:         string(l.LoadLocation),
+			To:           string(l.UnloadLocation),
 		})
 	}
 	dto.Legs = legs

@@ -18,8 +18,8 @@ var _ = Suite(&S{})
 func (s *S) TestConstruction(c *C) {
 	trackingId := TrackingId("XYZ")
 	specification := RouteSpecification{
-		Origin:          location.Stockholm,
-		Destination:     location.Melbourne,
+		Origin:          location.SESTO,
+		Destination:     location.AUMEL,
 		ArrivalDeadline: time.Date(2009, time.March, 13, 0, 0, 0, 0, time.UTC),
 	}
 
@@ -27,17 +27,17 @@ func (s *S) TestConstruction(c *C) {
 
 	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
 	c.Check(cargo.Delivery.TransportStatus, Equals, NotReceived)
-	c.Check(cargo.Delivery.LastKnownLocation, Equals, location.UnknownLocation)
+	c.Check(cargo.Delivery.LastKnownLocation, Equals, location.UnknownLocation.UNLocode)
 }
 
 func (s *S) TestEquality(c *C) {
 	spec1 := RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Hongkong,
+		Origin:      location.SESTO,
+		Destination: location.CNHKG,
 	}
 	spec2 := RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Melbourne,
+		Origin:      location.SESTO,
+		Destination: location.AUMEL,
 	}
 
 	c.Check(spec1.SameValue(spec1), Equals, true)
@@ -57,18 +57,18 @@ func (s *S) TestEquality(c *C) {
 func (s *S) TestItineraryEquality(c *C) {
 
 	i1 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
-		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
+		Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}}
 
 	i2 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
-		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
+		Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}}
 
 	i3 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.Hongkong, UnloadLocation: location.Melbourne},
-		Leg{LoadLocation: location.Melbourne, UnloadLocation: location.Stockholm},
+		Leg{LoadLocation: location.CNHKG, UnloadLocation: location.AUMEL},
+		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.SESTO},
 	}}
 
 	c.Check(i1.SameValue(i1), Equals, true)
@@ -82,19 +82,19 @@ func (s *S) TestRoutingStatus(c *C) {
 
 	good := Itinerary{Legs: make([]Leg, 1)}
 	good.Legs[0] = Leg{
-		LoadLocation:   location.Stockholm,
-		UnloadLocation: location.Melbourne,
+		LoadLocation:   location.SESTO,
+		UnloadLocation: location.AUMEL,
 	}
 
 	bad := Itinerary{Legs: make([]Leg, 1)}
 	bad.Legs[0] = Leg{
-		LoadLocation:   location.Stockholm,
-		UnloadLocation: location.Hongkong,
+		LoadLocation:   location.SESTO,
+		UnloadLocation: location.CNHKG,
 	}
 
 	acceptOnlyGood := RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Melbourne,
+		Origin:      location.SESTO,
+		Destination: location.AUMEL,
 	}
 
 	cargo.SpecifyNewRoute(acceptOnlyGood)
@@ -109,21 +109,21 @@ func (s *S) TestRoutingStatus(c *C) {
 
 func (s *S) TestLastKnownLocationUnknownWhenNoEvents(c *C) {
 	cargo := NewCargo("ABC", RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Hongkong,
+		Origin:      location.SESTO,
+		Destination: location.CNHKG,
 	})
 
-	c.Check(location.UnknownLocation, Equals, cargo.Delivery.LastKnownLocation)
+	c.Check(location.UnknownLocation.UNLocode, Equals, cargo.Delivery.LastKnownLocation)
 }
 
 func (s *S) TestLastKnownLocationReceived(c *C) {
 	cargo := populateCargoReceivedInStockholm()
-	c.Check(location.Stockholm, Equals, cargo.Delivery.LastKnownLocation)
+	c.Check(location.SESTO, Equals, cargo.Delivery.LastKnownLocation)
 }
 
 func (s *S) TestLastKnownLocationClaimed(c *C) {
 	cargo := populateCargoReceivedInStockholm()
-	c.Check(location.Stockholm, Equals, cargo.Delivery.LastKnownLocation)
+	c.Check(location.SESTO, Equals, cargo.Delivery.LastKnownLocation)
 }
 
 func (s *S) TestItineraryIsExpected(c *C) {
@@ -133,28 +133,28 @@ func (s *S) TestItineraryIsExpected(c *C) {
 	c.Check(emptyItinerary.IsExpected(emptyEvent), Equals, true)
 
 	i := Itinerary{[]Leg{
-		Leg{VoyageNumber: "001A", LoadLocation: location.Stockholm, UnloadLocation: location.Melbourne},
-		Leg{VoyageNumber: "001A", LoadLocation: location.Melbourne, UnloadLocation: location.Hongkong},
+		Leg{VoyageNumber: "001A", LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		Leg{VoyageNumber: "001A", LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}}
 	c.Check(i.IsExpected(emptyEvent), Equals, true)
 
 	var (
-		receiveEvent              = HandlingEvent{Type: Receive, Location: location.Stockholm}
-		receiveEventWrongLocation = HandlingEvent{Type: Receive, Location: location.Melbourne}
+		receiveEvent              = HandlingEvent{Type: Receive, Location: location.SESTO}
+		receiveEventWrongLocation = HandlingEvent{Type: Receive, Location: location.AUMEL}
 	)
 	c.Check(i.IsExpected(receiveEvent), Equals, true)
 	c.Check(i.IsExpected(receiveEventWrongLocation), Equals, false)
 
 	var (
-		loadEvent              = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.Melbourne}
-		loadEventWrongLocation = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.Hongkong}
+		loadEvent              = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.AUMEL}
+		loadEventWrongLocation = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.CNHKG}
 	)
 	c.Check(i.IsExpected(loadEvent), Equals, true)
 	c.Check(i.IsExpected(loadEventWrongLocation), Equals, false)
 
 	var (
-		claimEvent              = HandlingEvent{Type: Claim, Location: location.Hongkong}
-		claimEventWrongLocation = HandlingEvent{Type: Claim, Location: location.Stockholm}
+		claimEvent              = HandlingEvent{Type: Claim, Location: location.CNHKG}
+		claimEventWrongLocation = HandlingEvent{Type: Claim, Location: location.SESTO}
 	)
 	c.Check(i.IsExpected(claimEvent), Equals, true)
 	c.Check(i.IsExpected(claimEventWrongLocation), Equals, false)
@@ -162,14 +162,14 @@ func (s *S) TestItineraryIsExpected(c *C) {
 
 func populateCargoReceivedInStockholm() *Cargo {
 	cargo := NewCargo("XYZ", RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Melbourne,
+		Origin:      location.SESTO,
+		Destination: location.AUMEL,
 	})
 
 	e := HandlingEvent{
 		TrackingId: cargo.TrackingId,
 		Type:       Receive,
-		Location:   location.Stockholm,
+		Location:   location.SESTO,
 	}
 
 	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}
@@ -182,14 +182,14 @@ func populateCargoReceivedInStockholm() *Cargo {
 
 func populateCargoClaimedInMelbourne() *Cargo {
 	cargo := NewCargo("XYZ", RouteSpecification{
-		Origin:      location.Stockholm,
-		Destination: location.Melbourne,
+		Origin:      location.SESTO,
+		Destination: location.AUMEL,
 	})
 
 	e := HandlingEvent{
 		TrackingId: cargo.TrackingId,
 		Type:       Claim,
-		Location:   location.Melbourne,
+		Location:   location.AUMEL,
 	}
 
 	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}

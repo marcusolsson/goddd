@@ -12,8 +12,8 @@ import (
 
 type HandlingEvent struct {
 	TrackingId
-	Type HandlingEventType
-	location.Location
+	Type     HandlingEventType
+	Location location.UNLocode
 	voyage.VoyageNumber
 }
 
