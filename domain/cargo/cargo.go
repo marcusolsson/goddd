@@ -112,6 +112,8 @@ type Leg struct {
 	VoyageNumber   voyage.VoyageNumber
 	LoadLocation   location.UNLocode
 	UnloadLocation location.UNLocode
+	LoadTime       time.Time
+	UnloadTime     time.Time
 }
 
 func (l Leg) SameValue(v shared.ValueObject) bool {

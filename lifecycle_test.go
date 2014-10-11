@@ -21,7 +21,7 @@ var _ = Suite(&S{})
 var (
 	cargoRepository    = infrastructure.NewInMemCargoRepository()
 	locationRepository = infrastructure.NewInMemLocationRepository()
-	routingService     = infrastructure.NewExternalRoutingService(locationRepository)
+	routingService     = &stubRoutingService{}
 	bookingService     = application.NewBookingService(cargoRepository, locationRepository, routingService)
 )
 
@@ -74,7 +74,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingId, "V100", location.CNHKG, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingId, "v100", location.CNHKG, cargo.Load)
 
 	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
@@ -84,13 +84,14 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 }
 
 func selectPreferredItinerary(itineraries []cargo.Itinerary) cargo.Itinerary {
-	return cargo.Itinerary{}
+	return itineraries[0]
 }
 
 func toDate(year int, month time.Month, day int) time.Time {
 	return time.Date(year, month, day, 12, 00, 00, 00, time.UTC)
 }
 
+// Stub EventHandler
 type stubEventHandler struct {
 	handledEvents []interface{}
 }
@@ -105,4 +106,27 @@ func (h *stubEventHandler) CargoWasMisdirected(c cargo.Cargo) {
 
 func (h *stubEventHandler) CargoHasArrived(c cargo.Cargo) {
 	h.handledEvents = append(h.handledEvents, c)
+}
+
+// Stub RoutingService
+type stubRoutingService struct{}
+
+func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
+	if routeSpecification.Origin == location.CNHKG {
+		return []cargo.Itinerary{
+			cargo.Itinerary{[]cargo.Leg{
+				cargo.Leg{"v100", location.CNHKG, location.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)},
+				cargo.Leg{"v200", location.USNYC, location.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)},
+				cargo.Leg{"v300", location.USCHI, location.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)},
+			}},
+		}
+	} else {
+		return []cargo.Itinerary{
+			cargo.Itinerary{[]cargo.Leg{
+				cargo.Leg{"v300", location.JNTKO, location.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)},
+				cargo.Leg{"v400", location.DEHAM, location.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)},
+			}},
+		}
+	}
+
 }
