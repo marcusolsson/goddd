@@ -153,6 +153,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 		ArrivalDeadline: arrivalDeadline,
 	}
 
+	// Specify a new route, this time from Tokyo (where it was incorrectly unloaded) to Stockholm
 	c.SpecifyNewRoute(routeSpecification)
 
 	cargoRepository.Store(c)
@@ -160,6 +161,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.RoutingStatus, Equals, cargo.Misrouted)
 	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
 
+	// Repeat procedure of selecting one out of a number of possible routes satisfying the route spec
 	newItineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
 	newItinerary := selectPreferredItinerary(newItineraries)
 
