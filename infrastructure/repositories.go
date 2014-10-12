@@ -69,6 +69,7 @@ func NewInMemLocationRepository() location.LocationRepository {
 	r.locations[location.CNHKG] = location.Hongkong
 	r.locations[location.JNTKO] = location.Tokyo
 	r.locations[location.NLRTM] = location.Rotterdam
+	r.locations[location.DEHAM] = location.Hamburg
 
 	return r
 }
@@ -92,6 +93,7 @@ func NewInMemVoyageRepository() voyage.VoyageRepository {
 
 	r.voyages[voyage.V100.VoyageNumber] = *voyage.V100
 	r.voyages[voyage.V300.VoyageNumber] = *voyage.V300
+	r.voyages[voyage.V400.VoyageNumber] = *voyage.V400
 
 	return r
 }

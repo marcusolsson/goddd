@@ -9,6 +9,7 @@ var (
 	JNTKO UNLocode = "JNTKO"
 	DEHAM UNLocode = "DEHAM"
 	NLRTM UNLocode = "NLRTM"
+	FIHEL UNLocode = "FIHEL"
 )
 
 var (
@@ -20,4 +21,5 @@ var (
 	Tokyo     = Location{JNTKO, "Tokyo"}
 	Hamburg   = Location{DEHAM, "Hamburg"}
 	Rotterdam = Location{NLRTM, "Rotterdam"}
+	Helsinki  = Location{FIHEL, "Helsinki"}
 )

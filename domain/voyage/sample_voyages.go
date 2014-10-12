@@ -18,4 +18,12 @@ var (
 			CarrierMovement{DepartureLocation: location.Melbourne, ArrivalLocation: location.Tokyo},
 		},
 	})
+
+	V400 = New("V400", Schedule{
+		[]CarrierMovement{
+			CarrierMovement{DepartureLocation: location.Hamburg, ArrivalLocation: location.Stockholm},
+			CarrierMovement{DepartureLocation: location.Stockholm, ArrivalLocation: location.Helsinki},
+			CarrierMovement{DepartureLocation: location.Helsinki, ArrivalLocation: location.Hamburg},
+		},
+	})
 )
