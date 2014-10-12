@@ -34,13 +34,12 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 			VoyageRepository:   voyageRepository,
 			LocationRepository: locationRepository,
 		}
+		handlingEventService = &handlingEventService{
+			handlingEventRepository: handlingEventRepository,
+			handlingEventFactory:    handlingEventFactory,
+			handlingEventHandler:    handlingEventHandler,
+		}
 	)
-
-	var service HandlingEventService = &handlingEventService{
-		handlingEventRepository: handlingEventRepository,
-		handlingEventFactory:    handlingEventFactory,
-		handlingEventHandler:    handlingEventHandler,
-	}
 
 	var (
 		completionTime = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
