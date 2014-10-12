@@ -20,26 +20,23 @@ type S struct{}
 var _ = Suite(&S{})
 
 var (
-	cargoRepository    = infrastructure.NewInMemCargoRepository()
-	locationRepository = infrastructure.NewInMemLocationRepository()
-	routingService     = &stubRoutingService{}
-	bookingService     = application.NewBookingService(cargoRepository, locationRepository, routingService)
-)
-
-var (
-	cargoEventHandler      = &stubCargoEventHandler{}
-	cargoInspectionService = application.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
-)
-
-var (
-	voyageRepository = infrastructure.NewInMemVoyageRepository()
-)
-
-var (
+	cargoRepository         = infrastructure.NewInMemCargoRepository()
+	locationRepository      = infrastructure.NewInMemLocationRepository()
+	voyageRepository        = infrastructure.NewInMemVoyageRepository()
 	handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
-	handlingEventFactory    = cargo.HandlingEventFactory{cargoRepository, voyageRepository, locationRepository}
-	handlingEventHandler    = &stubHandlingEventHandler{cargoInspectionService}
-	handlingEventService    = application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
+)
+
+var (
+	handlingEventFactory = cargo.HandlingEventFactory{cargoRepository, voyageRepository, locationRepository}
+	handlingEventHandler = &stubHandlingEventHandler{cargoInspectionService}
+	cargoEventHandler    = &stubCargoEventHandler{}
+)
+
+var (
+	routingService         = &stubRoutingService{}
+	bookingService         = application.NewBookingService(cargoRepository, locationRepository, routingService)
+	cargoInspectionService = application.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
+	handlingEventService   = application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 )
 
 func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
