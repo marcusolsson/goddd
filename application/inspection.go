@@ -9,7 +9,7 @@ type CargoInspectionService interface {
 type cargoInspectionService struct {
 	cargoRepository         cargo.CargoRepository
 	handlingEventRepository cargo.HandlingEventRepository
-	eventHandler            EventHandler
+	cargoEventHandler       CargoEventHandler
 }
 
 // TODO: Should be transactional
@@ -25,12 +25,16 @@ func (s *cargoInspectionService) InspectCargo(trackingId cargo.TrackingId) {
 	c.DeriveDeliveryProgress(h)
 
 	if c.Delivery.IsMisdirected {
-		s.eventHandler.CargoWasMisdirected(c)
+		s.cargoEventHandler.CargoWasMisdirected(c)
 	}
 
 	if c.Delivery.IsUnloadedAtDestination {
-		s.eventHandler.CargoHasArrived(c)
+		s.cargoEventHandler.CargoHasArrived(c)
 	}
 
 	s.cargoRepository.Store(c)
+}
+
+func NewCargoInspectionService(cargoRepository cargo.CargoRepository, handlingEventRepository cargo.HandlingEventRepository, eventHandler CargoEventHandler) CargoInspectionService {
+	return &cargoInspectionService{cargoRepository, handlingEventRepository, eventHandler}
 }

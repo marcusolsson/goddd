@@ -16,13 +16,14 @@ type HandlingEventService interface {
 type handlingEventService struct {
 	handlingEventRepository cargo.HandlingEventRepository
 	handlingEventFactory    cargo.HandlingEventFactory
-	eventHandler            EventHandler
+	handlingEventHandler    HandlingEventHandler
 }
 
 func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, voyageNumber voyage.VoyageNumber,
 	unLocode location.UNLocode, eventType cargo.HandlingEventType) error {
 
 	registrationTime := time.Now()
+
 	event, err := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingId, voyageNumber, unLocode, eventType)
 
 	if err != nil {
@@ -31,15 +32,15 @@ func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, t
 
 	s.handlingEventRepository.Store(event)
 
-	s.eventHandler.CargoWasHandled(event)
+	s.handlingEventHandler.CargoWasHandled(event)
 
 	return nil
 }
 
-func NewHandlingEventService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h EventHandler) HandlingEventService {
+func NewHandlingEventService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h HandlingEventHandler) HandlingEventService {
 	return &handlingEventService{
 		handlingEventRepository: r,
 		handlingEventFactory:    f,
-		eventHandler:            h,
+		handlingEventHandler:    h,
 	}
 }

@@ -8,17 +8,29 @@ import (
 	. "gopkg.in/check.v1"
 )
 
+type stubCargoEventHandler struct {
+	handledEvents []interface{}
+}
+
+func (h *stubCargoEventHandler) CargoWasMisdirected(c cargo.Cargo) {
+	h.handledEvents = append(h.handledEvents, c)
+}
+
+func (h *stubCargoEventHandler) CargoHasArrived(c cargo.Cargo) {
+	h.handledEvents = append(h.handledEvents, c)
+}
+
 func (s *S) TestInspectMisdirectedCargo(c *C) {
 
 	var (
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
 		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
-		eventHandler            = &stubEventHandler{make([]interface{}, 0)}
+		cargoEventHandler       = &stubCargoEventHandler{make([]interface{}, 0)}
 
 		inspectionService CargoInspectionService = &cargoInspectionService{
 			cargoRepository:         cargoRepository,
 			handlingEventRepository: handlingEventRepository,
-			eventHandler:            eventHandler,
+			cargoEventHandler:       cargoEventHandler,
 		}
 	)
 
@@ -41,11 +53,11 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Load, Location: location.SESTO})
 	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Unload, Location: location.USNYC})
 
-	c.Check(len(eventHandler.handledEvents), Equals, 0)
+	c.Check(len(cargoEventHandler.handledEvents), Equals, 0)
 
 	inspectionService.InspectCargo(trackingId)
 
-	c.Check(len(eventHandler.handledEvents), Equals, 1)
+	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
 }
 
 func (s *S) TestInspectUnloadedCargo(c *C) {
@@ -53,12 +65,12 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 	var (
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
 		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
-		eventHandler            = &stubEventHandler{make([]interface{}, 0)}
+		cargoEventHandler       = &stubCargoEventHandler{make([]interface{}, 0)}
 
 		inspectionService CargoInspectionService = &cargoInspectionService{
 			cargoRepository:         cargoRepository,
 			handlingEventRepository: handlingEventRepository,
-			eventHandler:            eventHandler,
+			cargoEventHandler:       cargoEventHandler,
 		}
 	)
 
@@ -83,9 +95,9 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Load, Location: location.AUMEL})
 	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Unload, Location: location.CNHKG})
 
-	c.Check(len(eventHandler.handledEvents), Equals, 0)
+	c.Check(len(cargoEventHandler.handledEvents), Equals, 0)
 
 	inspectionService.InspectCargo(trackingId)
 
-	c.Check(len(eventHandler.handledEvents), Equals, 1)
+	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
 }

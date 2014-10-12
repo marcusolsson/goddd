@@ -26,10 +26,15 @@ var (
 )
 
 var (
+	cargoEventHandler      = &stubCargoEventHandler{}
+	cargoInspectionService = application.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
+)
+
+var (
 	handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
 	handlingEventFactory    = cargo.HandlingEventFactory{cargoRepository}
-	applicationEvents       = &stubEventHandler{}
-	handlingEventService    = application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, applicationEvents)
+	handlingEventHandler    = &stubHandlingEventHandler{cargoInspectionService}
+	handlingEventService    = application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 )
 
 func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
@@ -70,15 +75,18 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 
 	// Use case 3: handling
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 1), trackingId, "", location.CNHKG, cargo.Receive)
+	// Ensure we're not working with stale cargo.
+	c, err = cargoRepository.Find(trackingId)
 
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingId, "v100", location.CNHKG, cargo.Load)
+	c, err = cargoRepository.Find(trackingId)
 
 	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
-	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
+	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
 }
@@ -89,23 +97,6 @@ func selectPreferredItinerary(itineraries []cargo.Itinerary) cargo.Itinerary {
 
 func toDate(year int, month time.Month, day int) time.Time {
 	return time.Date(year, month, day, 12, 00, 00, 00, time.UTC)
-}
-
-// Stub EventHandler
-type stubEventHandler struct {
-	handledEvents []interface{}
-}
-
-func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
-	h.handledEvents = append(h.handledEvents, event)
-}
-
-func (h *stubEventHandler) CargoWasMisdirected(c cargo.Cargo) {
-	h.handledEvents = append(h.handledEvents, c)
-}
-
-func (h *stubEventHandler) CargoHasArrived(c cargo.Cargo) {
-	h.handledEvents = append(h.handledEvents, c)
 }
 
 // Stub RoutingService
@@ -129,4 +120,23 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 		}
 	}
 
+}
+
+// Stub HandlingEventHandler
+type stubHandlingEventHandler struct {
+	application.CargoInspectionService
+}
+
+func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
+	h.CargoInspectionService.InspectCargo(event.TrackingId)
+}
+
+// Stub CargoEventHandler
+type stubCargoEventHandler struct {
+}
+
+func (h *stubCargoEventHandler) CargoWasMisdirected(c cargo.Cargo) {
+}
+
+func (h *stubCargoEventHandler) CargoHasArrived(c cargo.Cargo) {
 }

@@ -66,7 +66,9 @@ func calculateTransportStatus(event HandlingEvent) TransportStatus {
 	case Load:
 		return OnboardCarrier
 	case Unload:
+		return InPort
 	case Receive:
+		return InPort
 	case Customs:
 		return InPort
 	case Claim:
@@ -83,7 +85,7 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 
 	var (
 		routingStatus           = calculateRoutingStatus(itinerary, routeSpecification)
-		TransportStatus         = calculateTransportStatus(lastEvent)
+		transportStatus         = calculateTransportStatus(lastEvent)
 		lastKnownLocation       = calculateLastKnownLocation(lastEvent)
 		isMisdirected           = calculateMisdirectedStatus(lastEvent, itinerary)
 		isUnloadedAtDestination = calculateUnloadedAtDestination(lastEvent, routeSpecification)
@@ -94,7 +96,7 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 		Itinerary:               itinerary,
 		RouteSpecification:      routeSpecification,
 		RoutingStatus:           routingStatus,
-		TransportStatus:         TransportStatus,
+		TransportStatus:         transportStatus,
 		LastKnownLocation:       lastKnownLocation,
 		IsMisdirected:           isMisdirected,
 		IsUnloadedAtDestination: isUnloadedAtDestination,

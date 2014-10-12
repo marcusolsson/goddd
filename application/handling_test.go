@@ -10,26 +10,18 @@ import (
 	. "gopkg.in/check.v1"
 )
 
-type stubEventHandler struct {
+type stubHandlingEventHandler struct {
 	handledEvents []interface{}
 }
 
-func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
+func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 	h.handledEvents = append(h.handledEvents, event)
-}
-
-func (h *stubEventHandler) CargoWasMisdirected(c cargo.Cargo) {
-	h.handledEvents = append(h.handledEvents, c)
-}
-
-func (h *stubEventHandler) CargoHasArrived(c cargo.Cargo) {
-	h.handledEvents = append(h.handledEvents, c)
 }
 
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
-		eventHandler            = &stubEventHandler{make([]interface{}, 0)}
+		handlingEventHandler    = &stubHandlingEventHandler{make([]interface{}, 0)}
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
 		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
 		handlingEventFactory    = cargo.HandlingEventFactory{
@@ -40,7 +32,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	var service HandlingEventService = &handlingEventService{
 		handlingEventRepository: handlingEventRepository,
 		handlingEventFactory:    handlingEventFactory,
-		eventHandler:            eventHandler,
+		handlingEventHandler:    handlingEventHandler,
 	}
 
 	var (
@@ -56,5 +48,5 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	err := service.RegisterHandlingEvent(completionTime, trackingId, voyageNumber, unLocode, eventType)
 
 	c.Check(err, IsNil)
-	c.Check(len(eventHandler.handledEvents), Equals, 1)
+	c.Check(len(handlingEventHandler.handledEvents), Equals, 1)
 }

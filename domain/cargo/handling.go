@@ -32,6 +32,25 @@ const (
 	Customs
 )
 
+func (t HandlingEventType) String() string {
+	switch t {
+	case NotHandled:
+		return "Not Handled"
+	case Load:
+		return "Load"
+	case Unload:
+		return "Unload"
+	case Receive:
+		return "Receive"
+	case Claim:
+		return "Claim"
+	case Customs:
+		return "Customs"
+	}
+
+	return ""
+}
+
 type HandlingHistory struct {
 	HandlingEvents []HandlingEvent
 }
@@ -67,5 +86,10 @@ func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, c
 		return HandlingEvent{}, ErrCannotCreateHandlingEvent
 	}
 
-	return HandlingEvent{}, nil
+	return HandlingEvent{
+		TrackingId:   trackingId,
+		Type:         eventType,
+		Location:     unLocode,
+		VoyageNumber: voyageNumber,
+	}, nil
 }
