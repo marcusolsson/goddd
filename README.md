@@ -49,7 +49,7 @@ __Read more__
 
 Go does not support means of creating a immutable struct. All fields can be altered after creation. It is however possible to use interfaces to limit altering structs after creation.
 
-    type Leg struct {
+    type Leg interface {
 			LoadLocation() location.Location
     }
 
