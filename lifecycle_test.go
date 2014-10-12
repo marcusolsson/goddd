@@ -52,7 +52,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 		arrivalDeadline = time.Date(2009, time.March, 18, 12, 00, 00, 00, time.UTC)
 	)
 
+	//
 	// Use case 1: booking
+	//
+
 	trackingId, err := bookingService.BookNewCargo(origin, destination, arrivalDeadline)
 
 	chk.Assert(err, IsNil)
@@ -67,7 +70,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	//chk.Check(c.Delivery.ETA, Equals, ...)
 	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
 
+	//
 	// Use case 2: routing
+	//
+
 	itineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
 	itinerary := selectPreferredItinerary(itineraries)
 
@@ -82,7 +88,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	//chk.Check(c.Delivery.ETA, Equals, ...)
 	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
 
+	//
 	// Use case 3: handling
+	//
+
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 1), trackingId, "", location.CNHKG, cargo.Receive)
 	chk.Check(err, IsNil)
 
@@ -98,33 +107,67 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 
 	c, err = cargoRepository.Find(trackingId)
 
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
+	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
 	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
 
+	//
 	// Here's an attempt to register a handling event that's not valid
 	// because there is no voyage with the specified voyage number,
 	// and there's no location with the specified UN Locode either.
+	//
+
 	noSuchVoyageNumber := voyage.VoyageNumber("XX000")
 	noSuchUNLocode := location.UNLocode("ZZZZZ")
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingId, noSuchVoyageNumber, noSuchUNLocode, cargo.Load)
 	chk.Check(err, NotNil)
 
-	// Cargo is now (incorrectly) unloaded in Tokyo
+	//
+	// Cargo is incorrectly unloaded in Tokyo
+	//
+
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingId, voyage.V100.VoyageNumber, location.JNTKO, cargo.Unload)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingId)
 
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
-	chk.Check(c.Delivery.IsMisdirected, Equals, true)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
+	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
 	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
+
+	// Cargo is now misdirected
+	chk.Check(c.Delivery.IsMisdirected, Equals, true)
+
+	//
+	// Cargo needs to be rerouted
+	//
+
+	routeSpecification := cargo.RouteSpecification{
+		Origin:          location.JNTKO,
+		Destination:     location.SESTO,
+		ArrivalDeadline: arrivalDeadline,
+	}
+
+	c.SpecifyNewRoute(routeSpecification)
+
+	cargoRepository.Store(c)
+
+	chk.Check(c.RoutingStatus, Equals, cargo.Misrouted)
+	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
+
+	newItineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
+	newItinerary := selectPreferredItinerary(newItineraries)
+
+	c.AssignToRoute(newItinerary)
+
+	cargoRepository.Store(c)
+
+	chk.Check(c.Delivery.RoutingStatus, Equals, cargo.Routed)
 }
 
 func selectPreferredItinerary(itineraries []cargo.Itinerary) cargo.Itinerary {
