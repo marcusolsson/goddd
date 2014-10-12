@@ -181,7 +181,7 @@ type CargoRepository interface {
 	FindAll() []Cargo
 }
 
-var ErrUnknownCargo = errors.New("Unknown cargo")
+var ErrUnknownCargo = errors.New("unknown cargo")
 
 func NextTrackingId() TrackingId {
 	return TrackingId(strings.Split(strings.ToUpper(uuid.New()), "-")[0])

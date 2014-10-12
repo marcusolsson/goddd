@@ -21,11 +21,18 @@ func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
-		handlingEventHandler    = &stubHandlingEventHandler{make([]interface{}, 0)}
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
+		voyageRepository        = infrastructure.NewInMemVoyageRepository()
+		locationRepository      = infrastructure.NewInMemLocationRepository()
 		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
-		handlingEventFactory    = cargo.HandlingEventFactory{
-			CargoRepository: cargoRepository,
+	)
+
+	var (
+		handlingEventHandler = &stubHandlingEventHandler{make([]interface{}, 0)}
+		handlingEventFactory = cargo.HandlingEventFactory{
+			CargoRepository:    cargoRepository,
+			VoyageRepository:   voyageRepository,
+			LocationRepository: locationRepository,
 		}
 	)
 
@@ -38,7 +45,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	var (
 		completionTime = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 		trackingId     = cargo.TrackingId("ABC123")
-		voyageNumber   = voyage.VoyageNumber("CM001")
+		voyageNumber   = voyage.VoyageNumber("V100")
 		unLocode       = location.Stockholm.UNLocode
 		eventType      = cargo.Load
 	)

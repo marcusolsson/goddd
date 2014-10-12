@@ -1,6 +1,7 @@
 package voyage
 
 import (
+	"errors"
 	"reflect"
 	"time"
 
@@ -26,8 +27,10 @@ type CarrierMovement struct {
 	ArrivalTime       time.Time
 }
 
+var ErrUnknownVoyage = errors.New("unknown voyage")
+
 type VoyageRepository interface {
-	Find(VoyageNumber) Voyage
+	Find(VoyageNumber) (Voyage, error)
 }
 
 func New(n VoyageNumber, s Schedule) *Voyage {
@@ -45,14 +48,3 @@ func (s Schedule) SameValue(v shared.ValueObject) bool {
 func (m CarrierMovement) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(m, v.(CarrierMovement))
 }
-
-// Sample voyages for test purposes.
-var (
-	// Voyage number 0100S (by ship)
-	MelbourneToStockholm = New("0100S", Schedule{
-		[]CarrierMovement{
-			CarrierMovement{DepartureLocation: location.Melbourne, ArrivalLocation: location.Hongkong},
-			CarrierMovement{DepartureLocation: location.Hongkong, ArrivalLocation: location.Stockholm},
-		},
-	})
-)

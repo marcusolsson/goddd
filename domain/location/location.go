@@ -1,6 +1,10 @@
 package location
 
-import "github.com/marcusolsson/goddd/domain/shared"
+import (
+	"errors"
+
+	"github.com/marcusolsson/goddd/domain/shared"
+)
 
 var (
 	SESTO UNLocode = "SESTO"
@@ -35,7 +39,9 @@ func (l Location) SameIdentity(e shared.Entity) bool {
 
 var UnknownLocation = Location{}
 
+var ErrUnknownLocation = errors.New("unknown location")
+
 type LocationRepository interface {
-	Find(locode UNLocode) Location
+	Find(locode UNLocode) (Location, error)
 	FindAll() []Location
 }

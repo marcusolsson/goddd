@@ -43,12 +43,12 @@ type locationRepositoryInMem struct {
 	locations map[location.UNLocode]location.Location
 }
 
-func (r *locationRepositoryInMem) Find(locode location.UNLocode) location.Location {
+func (r *locationRepositoryInMem) Find(locode location.UNLocode) (location.Location, error) {
 	if l, ok := r.locations[locode]; ok {
-		return l
+		return l, nil
 	}
 
-	return location.UnknownLocation
+	return location.Location{}, location.ErrUnknownLocation
 }
 
 func (r *locationRepositoryInMem) FindAll() []location.Location {
@@ -75,12 +75,12 @@ type voyageRepositoryInMem struct {
 	voyages map[voyage.VoyageNumber]voyage.Voyage
 }
 
-func (r *voyageRepositoryInMem) Find(voyageNumber voyage.VoyageNumber) voyage.Voyage {
+func (r *voyageRepositoryInMem) Find(voyageNumber voyage.VoyageNumber) (voyage.Voyage, error) {
 	if v, ok := r.voyages[voyageNumber]; ok {
-		return v
+		return v, nil
 	}
 
-	return voyage.Voyage{}
+	return voyage.Voyage{}, voyage.ErrUnknownVoyage
 }
 
 func NewInMemVoyageRepository() voyage.VoyageRepository {
@@ -88,7 +88,7 @@ func NewInMemVoyageRepository() voyage.VoyageRepository {
 		voyages: make(map[voyage.VoyageNumber]voyage.Voyage),
 	}
 
-	r.voyages[voyage.MelbourneToStockholm.VoyageNumber] = *voyage.MelbourneToStockholm
+	r.voyages[voyage.V100.VoyageNumber] = *voyage.V100
 
 	return r
 }

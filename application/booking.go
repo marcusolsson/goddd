@@ -2,7 +2,6 @@ package application
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/cargo"
@@ -74,10 +73,10 @@ func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode
 		return errors.New("Could not find cargo.")
 	}
 
-	l := s.locationRepository.Find(unLocode)
+	l, err := s.locationRepository.Find(unLocode)
 
-	if l == location.UnknownLocation {
-		return errors.New(fmt.Sprintf("Could not find location %s", unLocode))
+	if err != nil {
+		return err
 	}
 
 	routeSpecification := cargo.RouteSpecification{

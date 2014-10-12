@@ -7,6 +7,7 @@ import (
 	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/voyage"
 	"github.com/marcusolsson/goddd/infrastructure"
 
 	. "gopkg.in/check.v1"
@@ -31,8 +32,12 @@ var (
 )
 
 var (
+	voyageRepository = infrastructure.NewInMemVoyageRepository()
+)
+
+var (
 	handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
-	handlingEventFactory    = cargo.HandlingEventFactory{cargoRepository}
+	handlingEventFactory    = cargo.HandlingEventFactory{cargoRepository, voyageRepository, locationRepository}
 	handlingEventHandler    = &stubHandlingEventHandler{cargoInspectionService}
 	handlingEventService    = application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 )
@@ -75,13 +80,17 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 
 	// Use case 3: handling
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 1), trackingId, "", location.CNHKG, cargo.Receive)
+	chk.Check(err, IsNil)
+
 	// Ensure we're not working with stale cargo.
 	c, err = cargoRepository.Find(trackingId)
 
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingId, "v100", location.CNHKG, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingId, "V100", location.CNHKG, cargo.Load)
+	chk.Check(err, IsNil)
+
 	c, err = cargoRepository.Find(trackingId)
 
 	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
@@ -89,6 +98,15 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	//chk.Check(c.Delivery.NextExpectedActivity, Equals, ...)
+
+	// Here's an attempt to register a handling event that's not valid
+	// because there is no voyage with the specified voyage number,
+	// and there's no location with the specified UN Locode either.
+	noSuchVoyageNumber := voyage.VoyageNumber("XX000")
+	noSuchUNLocode := location.UNLocode("ZZZZZ")
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingId, noSuchVoyageNumber, noSuchUNLocode, cargo.Load)
+
+	chk.Check(err, NotNil)
 }
 
 func selectPreferredItinerary(itineraries []cargo.Itinerary) cargo.Itinerary {
@@ -106,16 +124,16 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 	if routeSpecification.Origin == location.CNHKG {
 		return []cargo.Itinerary{
 			cargo.Itinerary{[]cargo.Leg{
-				cargo.Leg{"v100", location.CNHKG, location.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)},
-				cargo.Leg{"v200", location.USNYC, location.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)},
-				cargo.Leg{"v300", location.USCHI, location.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)},
+				cargo.Leg{"V100", location.CNHKG, location.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)},
+				cargo.Leg{"V200", location.USNYC, location.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)},
+				cargo.Leg{"V300", location.USCHI, location.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)},
 			}},
 		}
 	} else {
 		return []cargo.Itinerary{
 			cargo.Itinerary{[]cargo.Leg{
-				cargo.Leg{"v300", location.JNTKO, location.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)},
-				cargo.Leg{"v400", location.DEHAM, location.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)},
+				cargo.Leg{"V300", location.JNTKO, location.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)},
+				cargo.Leg{"V400", location.DEHAM, location.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)},
 			}},
 		}
 	}

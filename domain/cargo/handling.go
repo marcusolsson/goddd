@@ -74,16 +74,26 @@ type HandlingEventRepository interface {
 
 type HandlingEventFactory struct {
 	CargoRepository
+	voyage.VoyageRepository
+	location.LocationRepository
 }
-
-var ErrCannotCreateHandlingEvent = errors.New("Cannot create handling event")
 
 func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingId TrackingId,
 	voyageNumber voyage.VoyageNumber, unLocode location.UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
-	_, err := f.CargoRepository.Find(trackingId)
 
-	if err != nil {
-		return HandlingEvent{}, ErrCannotCreateHandlingEvent
+	if _, err := f.CargoRepository.Find(trackingId); err != nil {
+		return HandlingEvent{}, err
+	}
+
+	if _, err := f.VoyageRepository.Find(voyageNumber); err != nil {
+		// TODO: This is pretty ugly, but when creating a Receive event, the voyage number is not known.
+		if len(voyageNumber) > 0 {
+			return HandlingEvent{}, err
+		}
+	}
+
+	if _, err := f.LocationRepository.Find(unLocode); err != nil {
+		return HandlingEvent{}, err
 	}
 
 	return HandlingEvent{
