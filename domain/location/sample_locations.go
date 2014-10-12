@@ -8,6 +8,7 @@ var (
 	USCHI UNLocode = "USCHI"
 	JNTKO UNLocode = "JNTKO"
 	DEHAM UNLocode = "DEHAM"
+	NLRTM UNLocode = "NLRTM"
 )
 
 var (
@@ -18,4 +19,5 @@ var (
 	Chicago   = Location{USCHI, "Chicago"}
 	Tokyo     = Location{JNTKO, "Tokyo"}
 	Hamburg   = Location{DEHAM, "Hamburg"}
+	Rotterdam = Location{NLRTM, "Rotterdam"}
 )

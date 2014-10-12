@@ -170,6 +170,18 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	cargoRepository.Store(c)
 
 	chk.Check(c.Delivery.RoutingStatus, Equals, cargo.Routed)
+
+	//
+	// Cargo has been rerouted, shipping continues
+	//
+
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 8), trackingId, voyage.V300.VoyageNumber, location.JNTKO, cargo.Load)
+	chk.Check(err, IsNil)
+
+	c, err = cargoRepository.Find(trackingId)
+
+	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
+	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
 }
 
 func selectPreferredItinerary(itineraries []cargo.Itinerary) cargo.Itinerary {
