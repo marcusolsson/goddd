@@ -64,9 +64,10 @@ func NewInMemLocationRepository() location.LocationRepository {
 		locations: make(map[location.UNLocode]location.Location),
 	}
 
-	r.locations[location.Stockholm.UNLocode] = location.Stockholm
-	r.locations[location.Melbourne.UNLocode] = location.Melbourne
-	r.locations[location.Hongkong.UNLocode] = location.Hongkong
+	r.locations[location.SESTO] = location.Stockholm
+	r.locations[location.AUMEL] = location.Melbourne
+	r.locations[location.CNHKG] = location.Hongkong
+	r.locations[location.JNTKO] = location.Tokyo
 
 	return r
 }
