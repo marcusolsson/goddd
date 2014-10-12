@@ -27,7 +27,7 @@ func (s *S) TestConstruction(c *C) {
 
 	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
 	c.Check(cargo.Delivery.TransportStatus, Equals, NotReceived)
-	c.Check(cargo.Delivery.LastKnownLocation, Equals, location.UnknownLocation.UNLocode)
+	c.Check(cargo.Delivery.LastKnownLocation, Equals, location.UNLocode(""))
 }
 
 func (s *S) TestEquality(c *C) {
@@ -113,7 +113,7 @@ func (s *S) TestLastKnownLocationUnknownWhenNoEvents(c *C) {
 		Destination: location.CNHKG,
 	})
 
-	c.Check(location.UnknownLocation.UNLocode, Equals, cargo.Delivery.LastKnownLocation)
+	c.Check(location.UNLocode(""), Equals, cargo.Delivery.LastKnownLocation)
 }
 
 func (s *S) TestLastKnownLocationReceived(c *C) {

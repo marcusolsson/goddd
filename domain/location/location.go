@@ -17,8 +17,6 @@ func (l Location) SameIdentity(e shared.Entity) bool {
 	return l.UNLocode == e.(Location).UNLocode
 }
 
-var UnknownLocation = Location{}
-
 var ErrUnknownLocation = errors.New("unknown location")
 
 type LocationRepository interface {
