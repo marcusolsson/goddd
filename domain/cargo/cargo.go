@@ -112,6 +112,8 @@ const (
 
 func (s TransportStatus) String() string {
 	switch s {
+	case NotReceived:
+		return "Not received"
 	case InPort:
 		return "In port"
 	}

@@ -31,11 +31,12 @@ func NewApi() *Api {
 }
 
 var (
-	cargoRepository      = infrastructure.NewInMemCargoRepository()
-	locationRepository   = infrastructure.NewInMemLocationRepository()
-	routingService       = infrastructure.NewExternalRoutingService(locationRepository)
-	bookingService       = application.NewBookingService(cargoRepository, locationRepository, routingService)
-	bookingServiceFacade = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, bookingService)
+	cargoRepository         = infrastructure.NewInMemCargoRepository()
+	locationRepository      = infrastructure.NewInMemLocationRepository()
+	handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
+	routingService          = infrastructure.NewExternalRoutingService(locationRepository)
+	bookingService          = application.NewBookingService(cargoRepository, locationRepository, routingService)
+	bookingServiceFacade    = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
 )
 
 func RegisterHandlers() {

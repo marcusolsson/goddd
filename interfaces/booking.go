@@ -58,9 +58,10 @@ type BookingServiceFacade interface {
 }
 
 type bookingServiceFacade struct {
-	cargoRepository    cargo.CargoRepository
-	locationRepository location.LocationRepository
-	bookingService     application.BookingService
+	cargoRepository         cargo.CargoRepository
+	locationRepository      location.LocationRepository
+	handlingEventRepository cargo.HandlingEventRepository
+	bookingService          application.BookingService
 }
 
 func (f *bookingServiceFacade) BookNewCargo(origin, destination string, arrivalDeadline string) (string, error) {
@@ -77,7 +78,7 @@ func (f *bookingServiceFacade) LoadCargoForRouting(trackingId string) (cargoDTO,
 		return cargoDTO{}, err
 	}
 
-	return assemble(c), nil
+	return assemble(c, f.handlingEventRepository), nil
 }
 
 func (f *bookingServiceFacade) AssignCargoToRoute(trackingId string, candidate RouteCandidateDTO) error {
@@ -137,30 +138,48 @@ func (f *bookingServiceFacade) ListAllCargos() []cargoDTO {
 	dtos := make([]cargoDTO, len(cargos))
 
 	for i, c := range cargos {
-		dtos[i] = assemble(c)
+		dtos[i] = assemble(c, f.handlingEventRepository)
 	}
 
 	return dtos
 }
 
-func NewBookingServiceFacade(cargoRepository cargo.CargoRepository, locationRepository location.LocationRepository, bookingService application.BookingService) BookingServiceFacade {
-	return &bookingServiceFacade{cargoRepository, locationRepository, bookingService}
+func NewBookingServiceFacade(cargoRepository cargo.CargoRepository, locationRepository location.LocationRepository, handlingEventRepository cargo.HandlingEventRepository, bookingService application.BookingService) BookingServiceFacade {
+	return &bookingServiceFacade{cargoRepository, locationRepository, handlingEventRepository, bookingService}
 }
 
-func assemble(c cargo.Cargo) cargoDTO {
-	eta := time.Date(2009, time.March, 12, 12, 0, 0, 0, time.UTC)
-	dto := cargoDTO{
+func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoDTO {
+	return cargoDTO{
 		TrackingId:           string(c.TrackingId),
-		StatusText:           fmt.Sprintf("%s %s", cargo.InPort, c.Origin),
 		Origin:               string(c.Origin),
 		Destination:          string(c.RouteSpecification.Destination),
-		ETA:                  eta.Format(time.RFC3339),
-		NextExpectedActivity: "Next expected activity is to load cargo onto voyage 0200T in New York",
+		ETA:                  c.Delivery.ETA.Format(time.RFC3339),
+		NextExpectedActivity: "",
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
 		Routed:               !c.Itinerary.IsEmpty(),
 		ArrivalDeadline:      c.ArrivalDeadline.Format(time.RFC3339),
+		StatusText:           assembleStatusText(c),
+		Legs:                 assembleLegs(c),
+		Events:               assembleEvents(c, her),
 	}
+}
 
+func assembleStatusText(c cargo.Cargo) string {
+	switch c.Delivery.TransportStatus {
+	case cargo.NotReceived:
+		return "Not received"
+	case cargo.InPort:
+		return fmt.Sprintf("In port %s", c.Delivery.LastKnownLocation)
+	case cargo.OnboardCarrier:
+		return fmt.Sprintf("Onboard voyage %s", c.Delivery.CurrentVoyage)
+	case cargo.Claimed:
+		return "Claimed"
+	default:
+		return "Unknown"
+	}
+}
+
+func assembleLegs(c cargo.Cargo) []legDTO {
 	legs := make([]legDTO, 0)
 	for _, l := range c.Itinerary.Legs {
 		legs = append(legs, legDTO{
@@ -169,13 +188,34 @@ func assemble(c cargo.Cargo) cargoDTO {
 			To:           string(l.UnloadLocation),
 		})
 	}
-	dto.Legs = legs
+	return legs
+}
 
-	// TODO: Query real handling history from handlingEventRepository
-	dto.Events = make([]eventDTO, 3)
-	dto.Events[0] = eventDTO{Description: "Received in Hongkong, at 3/1/09 12:00 AM.", Expected: true}
-	dto.Events[1] = eventDTO{Description: "Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM."}
-	dto.Events[2] = eventDTO{Description: "Unloaded off voyage 0100S in New York, at 3/5/09 12:00 AM."}
+func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []eventDTO {
+	h := r.QueryHandlingHistory(c.TrackingId)
+	events := make([]eventDTO, len(h.HandlingEvents))
+	for i, e := range h.HandlingEvents {
+		var description string
 
-	return dto
+		switch e.Activity.Type {
+		case cargo.NotHandled:
+			description = "Cargo has not yet been received."
+		case cargo.Receive:
+			description = fmt.Sprintf("Received in %s, at %s", e.Activity.Location, time.Now().Format(time.RFC3339))
+		case cargo.Load:
+			description = fmt.Sprintf("Loaded onto voyage %s in %s, at %s.", e.Activity.VoyageNumber, e.Activity.Location, time.Now().Format(time.RFC3339))
+		case cargo.Unload:
+			description = fmt.Sprintf("Unloaded off voyage %s in %s, at %s.", e.Activity.VoyageNumber, e.Activity.Location, time.Now().Format(time.RFC3339))
+		case cargo.Claim:
+			description = fmt.Sprintf("Claimed in %s, at %s.", e.Activity.Location, time.Now().Format(time.RFC3339))
+		case cargo.Customs:
+			description = fmt.Sprintf("Cleared customs in %s, at %s.", e.Activity.Location, time.Now().Format(time.RFC3339))
+		default:
+			description = "[Unknown status]"
+		}
+
+		events[i] = eventDTO{Description: description, Expected: c.Itinerary.IsExpected(e)}
+	}
+
+	return events
 }
