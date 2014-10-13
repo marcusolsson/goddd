@@ -108,7 +108,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V100.VoyageNumber)
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.USNYC, VoyageNumber: voyage.V100.VoyageNumber})
 
 	//
@@ -134,7 +134,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{})
 
 	// Cargo is now misdirected
@@ -181,7 +181,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V300.VoyageNumber)
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.DEHAM, VoyageNumber: voyage.V300.VoyageNumber})
 
 	// Unload in Hamburg
@@ -193,7 +193,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.DEHAM)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Load, Location: location.DEHAM, VoyageNumber: voyage.V400.VoyageNumber})
 
 	// Load in Hamburg
@@ -205,7 +205,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.DEHAM)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V400.VoyageNumber)
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.SESTO, VoyageNumber: voyage.V400.VoyageNumber})
 
 	// Unload in Stockholm
@@ -217,7 +217,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.SESTO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Claim, Location: location.SESTO})
 
 	// Finally, cargo is claimed in Stockholm. This ends the cargo lifecycle from our perspective.
@@ -229,7 +229,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.SESTO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.Claimed)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	//chk.Check(c.Delivery.CurrentVoyage, Equals, ...)
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{})
 }
 

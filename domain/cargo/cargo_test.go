@@ -139,22 +139,22 @@ func (s *S) TestItineraryIsExpected(c *C) {
 	c.Check(i.IsExpected(emptyEvent), Equals, true)
 
 	var (
-		receiveEvent              = HandlingEvent{Type: Receive, Location: location.SESTO}
-		receiveEventWrongLocation = HandlingEvent{Type: Receive, Location: location.AUMEL}
+		receiveEvent              = HandlingEvent{Activity: HandlingActivity{Type: Receive, Location: location.SESTO}}
+		receiveEventWrongLocation = HandlingEvent{Activity: HandlingActivity{Type: Receive, Location: location.AUMEL}}
 	)
 	c.Check(i.IsExpected(receiveEvent), Equals, true)
 	c.Check(i.IsExpected(receiveEventWrongLocation), Equals, false)
 
 	var (
-		loadEvent              = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.AUMEL}
-		loadEventWrongLocation = HandlingEvent{VoyageNumber: "001A", Type: Load, Location: location.CNHKG}
+		loadEvent              = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Load, Location: location.AUMEL}}
+		loadEventWrongLocation = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Load, Location: location.CNHKG}}
 	)
 	c.Check(i.IsExpected(loadEvent), Equals, true)
 	c.Check(i.IsExpected(loadEventWrongLocation), Equals, false)
 
 	var (
-		claimEvent              = HandlingEvent{Type: Claim, Location: location.CNHKG}
-		claimEventWrongLocation = HandlingEvent{Type: Claim, Location: location.SESTO}
+		claimEvent              = HandlingEvent{Activity: HandlingActivity{Type: Claim, Location: location.CNHKG}}
+		claimEventWrongLocation = HandlingEvent{Activity: HandlingActivity{Type: Claim, Location: location.SESTO}}
 	)
 	c.Check(i.IsExpected(claimEvent), Equals, true)
 	c.Check(i.IsExpected(claimEventWrongLocation), Equals, false)
@@ -168,8 +168,10 @@ func populateCargoReceivedInStockholm() *Cargo {
 
 	e := HandlingEvent{
 		TrackingId: cargo.TrackingId,
-		Type:       Receive,
-		Location:   location.SESTO,
+		Activity: HandlingActivity{
+			Type:     Receive,
+			Location: location.SESTO,
+		},
 	}
 
 	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}
@@ -188,8 +190,10 @@ func populateCargoClaimedInMelbourne() *Cargo {
 
 	e := HandlingEvent{
 		TrackingId: cargo.TrackingId,
-		Type:       Claim,
-		Location:   location.AUMEL,
+		Activity: HandlingActivity{
+			Type:     Claim,
+			Location: location.AUMEL,
+		},
 	}
 
 	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}

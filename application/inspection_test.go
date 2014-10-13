@@ -49,9 +49,9 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 
 	cargoRepository.Store(*misdirectedCargo)
 
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Receive, Location: location.SESTO})
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Load, Location: location.SESTO})
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Unload, Location: location.USNYC})
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Receive, location.SESTO)
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Load, location.SESTO)
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Unload, location.USNYC)
 
 	c.Check(len(cargoEventHandler.handledEvents), Equals, 0)
 
@@ -89,15 +89,22 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 
 	cargoRepository.Store(*unloadedCargo)
 
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Receive, Location: location.SESTO})
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Load, Location: location.SESTO})
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Unload, Location: location.AUMEL})
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Load, Location: location.AUMEL})
-	handlingEventRepository.Store(cargo.HandlingEvent{TrackingId: trackingId, VoyageNumber: voyageNumber, Type: cargo.Unload, Location: location.CNHKG})
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Receive, location.SESTO)
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Load, location.SESTO)
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Unload, location.AUMEL)
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Load, location.AUMEL)
+	storeEvent(handlingEventRepository, trackingId, voyageNumber, cargo.Unload, location.CNHKG)
 
 	c.Check(len(cargoEventHandler.handledEvents), Equals, 0)
 
 	inspectionService.InspectCargo(trackingId)
 
 	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
+}
+
+func storeEvent(repository cargo.HandlingEventRepository, trackingId cargo.TrackingId, voyage voyage.VoyageNumber, activityType cargo.HandlingEventType, location location.UNLocode) {
+	repository.Store(cargo.HandlingEvent{
+		TrackingId: trackingId,
+		Activity:   cargo.HandlingActivity{VoyageNumber: voyage, Type: activityType, Location: location},
+	})
 }

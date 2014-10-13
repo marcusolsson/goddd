@@ -5,6 +5,7 @@ import (
 
 	"github.com/marcusolsson/goddd/domain/location"
 	"github.com/marcusolsson/goddd/domain/shared"
+	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
 type Delivery struct {
@@ -17,6 +18,7 @@ type Delivery struct {
 	NextExpectedActivity    HandlingActivity
 	LastEvent               HandlingEvent
 	LastKnownLocation       location.UNLocode
+	CurrentVoyage           voyage.VoyageNumber
 }
 
 func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
@@ -115,6 +117,14 @@ func calculateNextExpectedActivity(d Delivery) HandlingActivity {
 	return HandlingActivity{}
 }
 
+func calculateCurrentVoyage(transportStatus TransportStatus, event HandlingEvent) voyage.VoyageNumber {
+	if transportStatus == OnboardCarrier && event.Activity.Type != NotHandled {
+		return event.Activity.VoyageNumber
+	}
+
+	return voyage.VoyageNumber("")
+}
+
 func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecification RouteSpecification) Delivery {
 
 	var (
@@ -123,6 +133,7 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 		lastKnownLocation       = calculateLastKnownLocation(lastEvent)
 		isMisdirected           = calculateMisdirectedStatus(lastEvent, itinerary)
 		isUnloadedAtDestination = calculateUnloadedAtDestination(lastEvent, routeSpecification)
+		currentVoyage           = calculateCurrentVoyage(transportStatus, lastEvent)
 	)
 
 	d := Delivery{
@@ -134,6 +145,7 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 		LastKnownLocation:       lastKnownLocation,
 		IsMisdirected:           isMisdirected,
 		IsUnloadedAtDestination: isUnloadedAtDestination,
+		CurrentVoyage:           currentVoyage,
 	}
 
 	d.NextExpectedActivity = calculateNextExpectedActivity(d)
