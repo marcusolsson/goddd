@@ -48,25 +48,25 @@ func (i Itinerary) IsExpected(event HandlingEvent) bool {
 		return true
 	}
 
-	switch event.Type {
+	switch event.Activity.Type {
 	case Receive:
-		return i.InitialDepartureLocation() == event.Location
+		return i.InitialDepartureLocation() == event.Activity.Location
 	case Load:
 		for _, l := range i.Legs {
-			if l.LoadLocation == event.Location && l.VoyageNumber == event.VoyageNumber {
+			if l.LoadLocation == event.Activity.Location && l.VoyageNumber == event.Activity.VoyageNumber {
 				return true
 			}
 		}
 		return false
 	case Unload:
 		for _, l := range i.Legs {
-			if l.UnloadLocation == event.Location && l.VoyageNumber == event.VoyageNumber {
+			if l.UnloadLocation == event.Activity.Location && l.VoyageNumber == event.Activity.VoyageNumber {
 				return true
 			}
 		}
 		return false
 	case Claim:
-		return i.FinalArrivalLocation() == event.Location
+		return i.FinalArrivalLocation() == event.Activity.Location
 	}
 
 	return true

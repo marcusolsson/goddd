@@ -8,14 +8,15 @@ import (
 )
 
 type Delivery struct {
-	LastEvent         HandlingEvent
-	LastKnownLocation location.UNLocode
 	Itinerary
 	RouteSpecification
 	RoutingStatus
 	TransportStatus
 	IsMisdirected           bool
 	IsUnloadedAtDestination bool
+	NextExpectedActivity    HandlingActivity
+	LastEvent               HandlingEvent
+	LastKnownLocation       location.UNLocode
 }
 
 func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
@@ -24,6 +25,10 @@ func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinera
 
 func (d Delivery) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(d, v.(Delivery))
+}
+
+func (d Delivery) IsOnTrack() bool {
+	return d.RoutingStatus == Routed && !d.IsMisdirected
 }
 
 func DeriveDeliveryFrom(routeSpecification RouteSpecification, itinerary Itinerary, history HandlingHistory) Delivery {
@@ -44,7 +49,7 @@ func calculateRoutingStatus(itinerary Itinerary, routeSpecification RouteSpecifi
 }
 
 func calculateMisdirectedStatus(event HandlingEvent, itinerary Itinerary) bool {
-	if event.Type == NotHandled {
+	if event.Activity.Type == NotHandled {
 		return false
 	}
 
@@ -52,15 +57,15 @@ func calculateMisdirectedStatus(event HandlingEvent, itinerary Itinerary) bool {
 }
 
 func calculateUnloadedAtDestination(event HandlingEvent, routeSpecification RouteSpecification) bool {
-	if event.Type == NotHandled {
+	if event.Activity.Type == NotHandled {
 		return false
 	}
 
-	return event.Type == Unload && routeSpecification.Destination == event.Location
+	return event.Activity.Type == Unload && routeSpecification.Destination == event.Activity.Location
 }
 
 func calculateTransportStatus(event HandlingEvent) TransportStatus {
-	switch event.Type {
+	switch event.Activity.Type {
 	case NotHandled:
 		return NotReceived
 	case Load:
@@ -78,7 +83,36 @@ func calculateTransportStatus(event HandlingEvent) TransportStatus {
 }
 
 func calculateLastKnownLocation(event HandlingEvent) location.UNLocode {
-	return event.Location
+	return event.Activity.Location
+}
+
+func calculateNextExpectedActivity(d Delivery) HandlingActivity {
+	if !d.IsOnTrack() {
+		return HandlingActivity{}
+	}
+
+	switch d.LastEvent.Activity.Type {
+	case NotHandled:
+		return HandlingActivity{Type: Receive, Location: d.RouteSpecification.Origin}
+	case Load:
+		for _, l := range d.Itinerary.Legs {
+			if l.LoadLocation == d.LastEvent.Activity.Location {
+				return HandlingActivity{Type: Unload, Location: l.UnloadLocation, VoyageNumber: l.VoyageNumber}
+			}
+		}
+	case Unload:
+		for i, l := range d.Itinerary.Legs {
+			if l.UnloadLocation == d.LastEvent.Activity.Location {
+				if i < len(d.Itinerary.Legs)-1 {
+					return HandlingActivity{Type: Load, Location: d.Itinerary.Legs[i+1].LoadLocation, VoyageNumber: d.Itinerary.Legs[i+1].VoyageNumber}
+				} else {
+					return HandlingActivity{Type: Claim, Location: l.UnloadLocation}
+				}
+			}
+		}
+	}
+
+	return HandlingActivity{}
 }
 
 func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecification RouteSpecification) Delivery {
@@ -91,7 +125,7 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 		isUnloadedAtDestination = calculateUnloadedAtDestination(lastEvent, routeSpecification)
 	)
 
-	return Delivery{
+	d := Delivery{
 		LastEvent:               lastEvent,
 		Itinerary:               itinerary,
 		RouteSpecification:      routeSpecification,
@@ -101,4 +135,8 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 		IsMisdirected:           isMisdirected,
 		IsUnloadedAtDestination: isUnloadedAtDestination,
 	}
+
+	d.NextExpectedActivity = calculateNextExpectedActivity(d)
+
+	return d
 }

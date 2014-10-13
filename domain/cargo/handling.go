@@ -10,15 +10,15 @@ import (
 	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
-type HandlingEvent struct {
-	TrackingId
+type HandlingActivity struct {
 	Type     HandlingEventType
 	Location location.UNLocode
 	voyage.VoyageNumber
 }
 
-func (e HandlingEvent) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(e, v.(HandlingEvent))
+type HandlingEvent struct {
+	TrackingId
+	Activity HandlingActivity
 }
 
 type HandlingEventType int
@@ -97,9 +97,11 @@ func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, c
 	}
 
 	return HandlingEvent{
-		TrackingId:   trackingId,
-		Type:         eventType,
-		Location:     unLocode,
-		VoyageNumber: voyageNumber,
+		TrackingId: trackingId,
+		Activity: HandlingActivity{
+			Type:         eventType,
+			Location:     unLocode,
+			VoyageNumber: voyageNumber,
+		},
 	}, nil
 }

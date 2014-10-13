@@ -42,7 +42,6 @@ func (c *Cargo) SameIdentity(e shared.Entity) bool {
 
 func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Cargo {
 	emptyItinerary := Itinerary{}
-
 	emptyHistory := HandlingHistory{make([]HandlingEvent, 0)}
 
 	return &Cargo{
