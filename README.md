@@ -14,29 +14,35 @@ The purpose of this sample is because I wanted to learn Go and to see how well i
 
 In Go, two struct values are equal if their corresponding non-blank fields are equal. You cannot overload equality for structs and there is no standard interface for equality. For value objects, this seems nice at first but when comparing `Itinerary` structs you will get an error.
 
-    type Itinerary struct {
-	        Legs []Leg
-    }
+```go
+type Itinerary struct {
+    Legs []Leg
+}
+```
 
 The reason is because `==` does a shallow comparison and that is probably not what you want in this case. The solution is to use [DeepEqual](http://golang.org/pkg/reflect/#DeepEqual) function, which will scan all the arrays and maps (if any) as well. One alternative is to implement a `ValueObject` interface:
 
-	type ValueObject interface {
-			SameValue(other ValueObject) bool
-	}
+```go
+type ValueObject interface {
+    SameValue(other ValueObject) bool
+}
 
-    func (i Itinerary) SameValue(other ValueObject) bool {
-		    return reflect.DeepEqual(i, other.(Itinerary))
-    }
+func (i Itinerary) SameValue(other ValueObject) bool {
+    return reflect.DeepEqual(i, other.(Itinerary))
+}
+```
 
 For entities we can then similarly implement a `Entity` interface*:
 
-	type Entity interface {
-			SameValue(other Entity) bool
-	}
+```go
+type Entity interface {
+    SameValue(other Entity) bool
+}
 
-    func (c *Cargo) SameIdentity(other Entity) bool {
-		    return c.TrackingId == other.(*Cargo).TrackingId
-    }
+func (c *Cargo) SameIdentity(other Entity) bool {
+    return c.TrackingId == other.(*Cargo).TrackingId
+}
+```
 
 *In both of cases though, it will still be very tempting to use the `==`.
 
@@ -49,21 +55,23 @@ __Read more__
 
 Go does not support means of creating a immutable struct. All fields can be altered after creation. It is however possible to use interfaces to limit altering structs after creation.
 
-    type Leg interface {
-			LoadLocation() location.Location
-    }
+```go
+type Leg interface {
+    LoadLocation() location.Location
+}
 
-    type leg struct {
-         loadLocation location.Location
-    }
+type leg struct {
+    loadLocation location.Location
+}
 
-    func (l leg) LoadLocation() location.Location {
-         return l.loadLocation
-    }
+func (l leg) LoadLocation() location.Location {
+    return l.loadLocation
+}
 
-    func NewLeg(load location.Location) Leg {
-         return leg{loadLocation: load}
-    }
+func NewLeg(load location.Location) Leg {
+    return leg{loadLocation: load}
+}
+```
 
 Since the `leg` struct starts with a lowercase, it will not be exported outside the package. The jury is still out on this one though. On one hand, it makes it natural to use the `func New...` idiom to initialize the value object. On the other hand, it kind of feels non-idiomatic. A more idiomatic alternative would probably be to use _zero-initialization_ to construct a valid value object, and make sure the developers understand the concept of value objects.
 
@@ -115,28 +123,30 @@ Returns a cargo with a given tracking ID.
 
 __Example:__
 
+```json
+{
+  "trackingId": "ABC123",
+  "statusText": "In port Stockholm",
+  "origin": "Stockholm",
+  "destination": "Hongkong",
+  "eta": "2009-03-12 12:00",
+  "nextExpectedActivity": "Next expected activity is to load cargo onto voyage 0200T in New York",
+  "events": [
     {
-        "trackingId": "ABC123",
-        "statusText": "In port Stockholm",
-        "origin": "Stockholm",
-        "destination": "Hongkong",
-        "eta": "2009-03-12 12:00",
-        "nextExpectedActivity": "Next expected activity is to load cargo onto voyage 0200T in New York",
-        "events": [
-          {
-            "description": "Received in Hongkong, at 3/1/09 12:00 AM.",
-            "expected": true
-          },
-          {
-            "description": "Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM.",
-            "expected": false
-          },
-          {
-            "description": "Unloaded off voyage 0100S in New York, at 3/5/09 12:00 AM.",
-            "expected": false
-          }
-        ]
-      }
+      "description": "Received in Hongkong, at 3/1/09 12:00 AM.",
+      "expected": true
+    },
+    {
+      "description": "Loaded onto voyage 0100S in Hongkong, at 3/2/09 12:00 AM.",
+      "expected": false
+    },
+    {
+      "description": "Unloaded off voyage 0100S in New York, at 3/5/09 12:00 AM.",
+      "expected": false
+    }
+  ]
+}
+```
 
 #### POST /cargos
 Books a cargo.
@@ -159,50 +169,54 @@ Requests the possible routes for a booked cargo.
 
 __Example:__
 
-    [
+```json
+[
+  {
+    "legs": [
       {
-        "legs": [
-          {
-            "voyage": "S0001",
-            "from": "SESTO",
-            "to": "CNHKG",
-            "loadTime": "2009-03-12 12:00",
-            "unloadTime": "2009-03-23 14:50"
-          },
-		  {
-            "voyage": "S0002",
-            "from": "CNHKG",
-            "to": "AUMEL",
-            "loadTime": "2009-03-24 12:00",
-            "unloadTime": "2009-03-30 11:20"
-          }
-        ]
+        "voyage": "S0001",
+        "from": "SESTO",
+        "to": "CNHKG",
+        "loadTime": "2009-03-12 12:00",
+        "unloadTime": "2009-03-23 14:50"
+      },
+      {
+        "voyage": "S0002",
+        "from": "CNHKG",
+        "to": "AUMEL",
+        "loadTime": "2009-03-24 12:00",
+        "unloadTime": "2009-03-30 11:20"
       }
     ]
+  }
+]
+```
 
 #### POST /cargos/:id/assign_to_route
 Assigns the cargo to a route. Typically one of the routes returned by `/cargos/:id/request_routes`.
 
 __Example:__
 
+```json
+{
+  "legs": [
     {
-      "legs": [
-        {
-          "voyage": "S0001",
-          "from": "SESTO",
-          "to": "CNHKG",
-          "loadTime": "2009-03-12 12:00",
-          "unloadTime": "2009-03-23 14:50"
-        },
-	    {
-          "voyage": "S0002",
-          "from": "CNHKG",
-          "to": "AUMEL",
-          "loadTime": "2009-03-24 12:00",
-          "unloadTime": "2009-03-30 11:20"
-        }
-      ]
+      "voyage": "S0001",
+      "from": "SESTO",
+      "to": "CNHKG",
+      "loadTime": "2009-03-12 12:00",
+      "unloadTime": "2009-03-23 14:50"
+    },
+    {
+      "voyage": "S0002",
+      "from": "CNHKG",
+      "to": "AUMEL",
+      "loadTime": "2009-03-24 12:00",
+      "unloadTime": "2009-03-30 11:20"
     }
+  ]
+}
+```
 
 ### Locations
 
@@ -211,20 +225,22 @@ Returns a list of the registered locations.
 
 __Example:__
 
-    [
-      {
-        "locode": "SESTO",
-        "name": "Stockholm"
-      },
-      {
-        "locode": "AUMEL",
-        "name": "Melbourne"
-      },
-      {
-        "locode": "CNHKG",
-        "name": "Hongkong"
-      }
-    ]
+```json
+[
+  {
+    "locode": "SESTO",
+    "name": "Stockholm"
+  },
+  {
+    "locode": "AUMEL",
+    "name": "Melbourne"
+  },
+  {
+    "locode": "CNHKG",
+    "name": "Hongkong"
+  }
+]
+```
 
 ## Copyright
 
