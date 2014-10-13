@@ -160,6 +160,40 @@ func (s *S) TestItineraryIsExpected(c *C) {
 	c.Check(i.IsExpected(claimEventWrongLocation), Equals, false)
 }
 
+var routingStatusTests = []struct {
+	routingStatus RoutingStatus
+	expected      string
+}{
+	{NotRouted, "Not routed"},
+	{Misrouted, "Misrouted"},
+	{Routed, "Routed"},
+	{1000, ""},
+}
+
+func (s *S) TestRoutingStatusStringer(c *C) {
+	for _, tt := range routingStatusTests {
+		c.Check(tt.routingStatus.String(), Equals, tt.expected)
+	}
+}
+
+var transportStatusTests = []struct {
+	transportStatus TransportStatus
+	expected        string
+}{
+	{NotReceived, "Not received"},
+	{InPort, "In port"},
+	{OnboardCarrier, "Onboard carrier"},
+	{Claimed, "Claimed"},
+	{Unknown, "Unknown"},
+	{1000, ""},
+}
+
+func (s *S) TestTransportStatusStringer(c *C) {
+	for _, tt := range transportStatusTests {
+		c.Check(tt.transportStatus.String(), Equals, tt.expected)
+	}
+}
+
 func populateCargoReceivedInStockholm() *Cargo {
 	cargo := NewCargo("XYZ", RouteSpecification{
 		Origin:      location.SESTO,

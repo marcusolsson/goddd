@@ -116,6 +116,12 @@ func (s TransportStatus) String() string {
 		return "Not received"
 	case InPort:
 		return "In port"
+	case OnboardCarrier:
+		return "Onboard carrier"
+	case Claimed:
+		return "Claimed"
+	case Unknown:
+		return "Unknown"
 	}
 	return ""
 }
