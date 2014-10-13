@@ -39,6 +39,10 @@ func (i Itinerary) FinalArrivalLocation() location.UNLocode {
 	return i.Legs[len(i.Legs)-1].UnloadLocation
 }
 
+func (i Itinerary) FinalArrivalTime() time.Time {
+	return i.Legs[len(i.Legs)-1].UnloadTime
+}
+
 func (i Itinerary) IsEmpty() bool {
 	return i.Legs == nil || len(i.Legs) == 0
 }

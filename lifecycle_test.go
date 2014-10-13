@@ -64,7 +64,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.RoutingStatus, Equals, cargo.NotRouted)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, true)
-	//chk.Check(c.Delivery.ETA, Equals, ...)
+	chk.Check(c.Delivery.ETA, Equals, time.Time{})
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{})
 
 	//
@@ -82,7 +82,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.RoutingStatus, Equals, cargo.Routed)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
-	//chk.Check(c.Delivery.ETA, Equals, ...)
+	chk.Check(c.Delivery.ETA, Not(Equals), time.Time{})
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Receive, Location: location.CNHKG})
 
 	//

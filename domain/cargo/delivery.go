@@ -2,6 +2,7 @@ package cargo
 
 import (
 	"reflect"
+	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
 	"github.com/marcusolsson/goddd/domain/shared"
@@ -19,6 +20,7 @@ type Delivery struct {
 	LastEvent               HandlingEvent
 	LastKnownLocation       location.UNLocode
 	CurrentVoyage           voyage.VoyageNumber
+	ETA                     time.Time
 }
 
 func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
@@ -125,6 +127,14 @@ func calculateCurrentVoyage(transportStatus TransportStatus, event HandlingEvent
 	return voyage.VoyageNumber("")
 }
 
+func calculateETA(d Delivery) time.Time {
+	if !d.IsOnTrack() {
+		return time.Time{}
+	}
+
+	return d.FinalArrivalTime()
+}
+
 func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecification RouteSpecification) Delivery {
 
 	var (
@@ -149,6 +159,7 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 	}
 
 	d.NextExpectedActivity = calculateNextExpectedActivity(d)
+	d.ETA = calculateETA(d)
 
 	return d
 }
