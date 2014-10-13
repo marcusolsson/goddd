@@ -87,7 +87,7 @@ __Read more__
 
 ## REST API
 
-The application exposes a REST API using [Martini](https://github.com/go-martini/martini).
+The application exposes a REST API.
 
 ### Setup
 

@@ -1,148 +1,165 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"net/url"
+
+	"github.com/codegangsta/negroni"
+	"github.com/gorilla/mux"
+	"github.com/hariharan-uno/cors"
+	"gopkg.in/unrolled/render.v1"
 
 	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
 	"github.com/marcusolsson/goddd/infrastructure"
 	"github.com/marcusolsson/goddd/interfaces"
-
-	"github.com/go-martini/martini"
-	"github.com/martini-contrib/binding"
-	"github.com/martini-contrib/cors"
-	"github.com/martini-contrib/render"
 )
 
-type jsonObject map[string]interface{}
+type Api struct {
+	Renderer *render.Render
+}
 
-func RegisterHandlers() {
-	var (
-		cargoRepository      = infrastructure.NewInMemCargoRepository()
-		locationRepository   = infrastructure.NewInMemLocationRepository()
-		routingService       = infrastructure.NewExternalRoutingService(locationRepository)
-		bookingService       = application.NewBookingService(cargoRepository, locationRepository, routingService)
-		bookingServiceFacade = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, bookingService)
-	)
-
-	// Store some sample cargos.
+func NewApi() *Api {
 	storeTestData(cargoRepository)
 
-	var (
-		ResourceNotFound              = jsonObject{"error": "The specified resource does not exist."}
-		MissingRequiredQueryParameter = jsonObject{"error": "A required query parameter was not specified for this request."}
-		InvalidInput                  = jsonObject{"error": "One of the request inputs is not valid."}
-	)
+	return &Api{
+		Renderer: render.New(render.Options{IndentJSON: true}),
+	}
+}
 
-	m := martini.Classic()
+var (
+	cargoRepository      = infrastructure.NewInMemCargoRepository()
+	locationRepository   = infrastructure.NewInMemLocationRepository()
+	routingService       = infrastructure.NewExternalRoutingService(locationRepository)
+	bookingService       = application.NewBookingService(cargoRepository, locationRepository, routingService)
+	bookingServiceFacade = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, bookingService)
+)
 
-	m.Use(martini.Static("app"))
+func RegisterHandlers() {
 
-	m.Use(cors.Allow(&cors.Options{
+	a := NewApi()
+
+	router := mux.NewRouter()
+
+	router.HandleFunc("/cargos", a.CargosHandler).Methods("GET")
+	router.HandleFunc("/cargos", a.BookCargoHandler).Methods("POST")
+	router.HandleFunc("/cargos/{id}", a.CargoHandler).Methods("GET")
+	router.HandleFunc("/cargos/{id}/request_routes", a.RequestRoutesHandler).Methods("GET")
+	router.HandleFunc("/cargos/{id}/assign_to_route", a.AssignToRouteHandler).Methods("POST")
+	router.HandleFunc("/cargos/{id}/change_destination", a.ChangeDestinationHandler).Methods("POST")
+	router.HandleFunc("/locations", a.LocationsHandler).Methods("GET")
+
+	n := negroni.Classic()
+
+	options := cors.Options{
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{"GET", "POST", "OPTIONS"},
 		AllowHeaders: []string{"Origin", "Content-Type"},
-	}))
+	}
 
-	m.Use(render.Renderer(render.Options{
-		IndentJSON: true,
-	}))
+	n.Use(negroni.HandlerFunc(options.Allow))
+	n.UseHandler(router)
 
-	// GET /cargos
-	m.Get("/cargos", func(r render.Render) {
-		r.JSON(200, bookingServiceFacade.ListAllCargos())
-	})
+	http.Handle("/", n)
+}
 
-	m.Get("/cargos/:id", func(params martini.Params, r render.Render) {
-		c, err := bookingServiceFacade.LoadCargoForRouting(params["id"])
+var (
+	ResourceNotFound = map[string]interface{}{"error": "resource not found"}
+	InvalidInput     = map[string]interface{}{"error": "invalid input"}
+)
 
-		if err != nil {
-			r.JSON(404, ResourceNotFound)
-			return
-		}
+func (a *Api) CargosHandler(w http.ResponseWriter, req *http.Request) {
+	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.ListAllCargos())
+}
 
-		r.JSON(200, c)
-	})
+func (a *Api) CargoHandler(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	c, err := bookingServiceFacade.LoadCargoForRouting(vars["id"])
 
-	// POST /cargos/:id/change_destination
-	m.Post("/cargos/:id/change_destination", func(req *http.Request, params martini.Params, r render.Render) {
-		v := queryParams(req.URL.Query())
-		found, missing := v.validateQueryParams("destination")
+	if err != nil {
+		a.Renderer.JSON(w, http.StatusNotFound, ResourceNotFound)
+		return
+	}
 
-		if len(missing) > 0 {
-			e := MissingRequiredQueryParameter
-			e["missing"] = missing
-			r.JSON(400, e)
-			return
-		}
+	a.Renderer.JSON(w, http.StatusOK, c)
+}
 
-		if err := bookingServiceFacade.ChangeDestination(params["id"], fmt.Sprintf("%s", found["destination"])); err != nil {
-			r.JSON(400, InvalidInput)
-			return
-		}
+func (a *Api) RequestRoutesHandler(w http.ResponseWriter, req *http.Request) {
+	vars := mux.Vars(req)
+	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.RequestRoutesForCargo(vars["id"]))
+}
 
-		r.JSON(200, jsonObject{})
-	})
+func (a *Api) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
+	decoder := json.NewDecoder(req.Body)
+	candidate := interfaces.RouteCandidateDTO{}
+	if err := decoder.Decode(&candidate); err != nil {
+		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
+	}
 
-	// POST /cargos/:id/assign_to_route
-	m.Post("/cargos/:id/assign_to_route", binding.Bind(interfaces.RouteCandidateDTO{}), func(c interfaces.RouteCandidateDTO, params martini.Params, r render.Render) {
-		if err := bookingServiceFacade.AssignCargoToRoute(params["id"], c); err != nil {
-			r.JSON(400, InvalidInput)
-			return
-		}
+	vars := mux.Vars(req)
+	if err := bookingServiceFacade.AssignCargoToRoute(vars["id"], candidate); err != nil {
+		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
+		return
+	}
 
-		r.JSON(200, jsonObject{})
-	})
+	a.Renderer.JSON(w, http.StatusOK, map[string]interface{}{})
+}
 
-	// GET /cargos/:id/request_routes
-	m.Get("/cargos/:id/request_routes", func(params martini.Params, r render.Render) {
-		r.JSON(200, bookingServiceFacade.RequestRoutesForCargo(params["id"]))
-	})
+func (a *Api) ChangeDestinationHandler(w http.ResponseWriter, req *http.Request) {
+	v := queryParams(req.URL.Query())
+	found, missing := v.validateQueryParams("destination")
 
-	// POST /cargos
-	m.Post("/cargos", func(req *http.Request, r render.Render) {
-		v := queryParams(req.URL.Query())
-		found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
+	if len(missing) > 0 {
+		a.Renderer.JSON(w, http.StatusBadRequest, map[string]interface{}{"error": "missing parameter", "missing": missing})
+		return
+	}
 
-		if len(missing) > 0 {
-			e := MissingRequiredQueryParameter
-			e["missing"] = missing
-			r.JSON(400, e)
-			return
-		}
+	vars := mux.Vars(req)
+	if err := bookingServiceFacade.ChangeDestination(vars["id"], fmt.Sprintf("%s", found["destination"])); err != nil {
+		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
+		return
+	}
 
-		var (
-			origin          = found["origin"].(string)
-			destination     = found["destination"].(string)
-			arrivalDeadline = found["arrivalDeadline"].(string)
-		)
+	a.Renderer.JSON(w, http.StatusOK, map[string]interface{}{})
+}
 
-		trackingId, err := bookingServiceFacade.BookNewCargo(origin, destination, arrivalDeadline)
+func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
+	v := queryParams(req.URL.Query())
+	found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
 
-		if err != nil {
-			r.JSON(400, InvalidInput)
-			return
-		}
+	if len(missing) > 0 {
+		a.Renderer.JSON(w, http.StatusBadRequest, map[string]interface{}{"error": "missing parameter", "missing": missing})
+		return
+	}
 
-		c, err := bookingServiceFacade.LoadCargoForRouting(trackingId)
+	var (
+		origin          = found["origin"].(string)
+		destination     = found["destination"].(string)
+		arrivalDeadline = found["arrivalDeadline"].(string)
+	)
 
-		if err != nil {
-			r.JSON(404, ResourceNotFound)
-			return
-		}
+	trackingId, err := bookingServiceFacade.BookNewCargo(origin, destination, arrivalDeadline)
 
-		r.JSON(200, c)
-	})
+	if err != nil {
+		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
+		return
+	}
 
-	// GET /locations
-	m.Get("/locations", func(r render.Render) {
-		r.JSON(200, bookingServiceFacade.ListShippingLocations())
-	})
+	c, err := bookingServiceFacade.LoadCargoForRouting(trackingId)
 
-	http.Handle("/", m)
+	if err != nil {
+		a.Renderer.JSON(w, http.StatusNotFound, ResourceNotFound)
+		return
+	}
+
+	a.Renderer.JSON(w, http.StatusOK, c)
+}
+
+func (a *Api) LocationsHandler(w http.ResponseWriter, req *http.Request) {
+	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.ListShippingLocations())
 }
 
 func storeTestData(r cargo.CargoRepository) {
@@ -160,6 +177,8 @@ func storeTestData(r cargo.CargoRepository) {
 }
 
 type queryParams url.Values
+
+type jsonObject map[string]interface{}
 
 func (p queryParams) validateQueryParams(params ...string) (found jsonObject, missing []string) {
 	found = make(jsonObject)
