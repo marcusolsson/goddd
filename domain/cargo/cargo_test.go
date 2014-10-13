@@ -54,29 +54,6 @@ func (s *S) TestEquality(c *C) {
 	c.Check(c1.SameIdentity(c2), Equals, false)
 }
 
-func (s *S) TestItineraryEquality(c *C) {
-
-	i1 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
-	}}
-
-	i2 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
-	}}
-
-	i3 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.CNHKG, UnloadLocation: location.AUMEL},
-		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.SESTO},
-	}}
-
-	c.Check(i1.SameValue(i1), Equals, true)
-	c.Check(i1.SameValue(i2), Equals, true)
-	c.Check(i1.SameValue(i3), Equals, false)
-	c.Check(i2.SameValue(i3), Equals, false)
-}
-
 func (s *S) TestRoutingStatus(c *C) {
 	cargo := NewCargo("ABC", RouteSpecification{})
 
@@ -124,40 +101,6 @@ func (s *S) TestLastKnownLocationReceived(c *C) {
 func (s *S) TestLastKnownLocationClaimed(c *C) {
 	cargo := populateCargoReceivedInStockholm()
 	c.Check(location.SESTO, Equals, cargo.Delivery.LastKnownLocation)
-}
-
-func (s *S) TestItineraryIsExpected(c *C) {
-
-	emptyItinerary := Itinerary{}
-	emptyEvent := HandlingEvent{}
-	c.Check(emptyItinerary.IsExpected(emptyEvent), Equals, true)
-
-	i := Itinerary{[]Leg{
-		Leg{VoyageNumber: "001A", LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		Leg{VoyageNumber: "001A", LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
-	}}
-	c.Check(i.IsExpected(emptyEvent), Equals, true)
-
-	var (
-		receiveEvent              = HandlingEvent{Activity: HandlingActivity{Type: Receive, Location: location.SESTO}}
-		receiveEventWrongLocation = HandlingEvent{Activity: HandlingActivity{Type: Receive, Location: location.AUMEL}}
-	)
-	c.Check(i.IsExpected(receiveEvent), Equals, true)
-	c.Check(i.IsExpected(receiveEventWrongLocation), Equals, false)
-
-	var (
-		loadEvent              = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Load, Location: location.AUMEL}}
-		loadEventWrongLocation = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Load, Location: location.CNHKG}}
-	)
-	c.Check(i.IsExpected(loadEvent), Equals, true)
-	c.Check(i.IsExpected(loadEventWrongLocation), Equals, false)
-
-	var (
-		claimEvent              = HandlingEvent{Activity: HandlingActivity{Type: Claim, Location: location.CNHKG}}
-		claimEventWrongLocation = HandlingEvent{Activity: HandlingActivity{Type: Claim, Location: location.SESTO}}
-	)
-	c.Check(i.IsExpected(claimEvent), Equals, true)
-	c.Check(i.IsExpected(claimEventWrongLocation), Equals, false)
 }
 
 var routingStatusTests = []struct {
