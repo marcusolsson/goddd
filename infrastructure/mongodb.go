@@ -21,7 +21,7 @@ func (r *locationRepositoryMongoDB) Store(l location.Location) {
 	defer session.Close()
 
 	c := session.DB("app30695645").C("locations")
-	_, err = c.UpsertId(l.UNLocode, &l)
+	_, err = c.Upsert(bson.M{"unlocode": l.UNLocode}, l)
 
 	if err != nil {
 		log.Fatal(err)
