@@ -21,7 +21,7 @@ func (r *locationRepositoryMongoDB) Store(l location.Location) {
 	defer session.Close()
 
 	c := session.DB("app30695645").C("locations")
-	err = c.Insert(&l)
+	err = c.UpsertId(l.UNLocode, &l)
 
 	if err != nil {
 		log.Fatal(err)
@@ -62,9 +62,8 @@ func ensureUNLocodeIndex() {
 	defer session.Close()
 
 	index := mgo.Index{
-		Key:      []string{"unlocode"},
-		Unique:   true,
-		DropDups: true,
+		Key:    []string{"unlocode"},
+		Unique: true,
 	}
 
 	c := session.DB("app30695645").C("locations")
