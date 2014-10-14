@@ -28,7 +28,3 @@ deploy:
         name: get dependencies
         code: |-
             go get ./... && go get gopkg.in/check.v1
-
-    - pjvds/appengine-deploy:
-        email: ninjasinventedphysics@gmail.com
-        password: $APP_ENGINE_PASS
