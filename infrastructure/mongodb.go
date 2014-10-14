@@ -61,7 +61,12 @@ func NewLocationRepositoryMongoDB() location.LocationRepository {
 	defer session.Close()
 
 	c := session.DB("app30695645").C("locations")
-	err = c.EnsureIndexKey("unlocode")
+
+	index := mgo.Index{
+		Key:    []string{"unlocode"},
+		Unique: true,
+	}
+	err = c.EnsureIndex(index)
 
 	if err != nil {
 		panic(err)
