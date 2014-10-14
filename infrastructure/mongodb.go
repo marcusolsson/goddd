@@ -12,7 +12,7 @@ import (
 type locationRepositoryMongoDB struct {
 }
 
-func (r *locationRepositoryMongoDB) Store(l location.Location) {
+func withCollection(f func(c *mgo.Collection)) {
 	session, err := mgo.Dial(os.Getenv("MONGOHQ_URL"))
 
 	if err != nil {
@@ -21,11 +21,16 @@ func (r *locationRepositoryMongoDB) Store(l location.Location) {
 	defer session.Close()
 
 	c := session.DB("app30695645").C("locations")
-	_, err = c.Upsert(bson.M{"unlocode": l.UNLocode}, l)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	f(c)
+}
+
+func (r *locationRepositoryMongoDB) Store(l location.Location) {
+	withCollection(func(c *mgo.Collection) {
+		if _, err := c.Upsert(bson.M{"unlocode": l.UNLocode}, l); err != nil {
+			log.Fatal(err)
+		}
+	})
 }
 
 func (r *locationRepositoryMongoDB) Find(locode location.UNLocode) (location.Location, error) {
@@ -33,45 +38,30 @@ func (r *locationRepositoryMongoDB) Find(locode location.UNLocode) (location.Loc
 }
 
 func (r *locationRepositoryMongoDB) FindAll() []location.Location {
-	session, err := mgo.Dial(os.Getenv("MONGOHQ_URL"))
-
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-
-	c := session.DB("app30695645").C("locations")
-
 	var result []location.Location
-	err = c.Find(bson.M{}).All(&result)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	withCollection(func(c *mgo.Collection) {
+		if err := c.Find(bson.M{}).All(&result); err != nil {
+			log.Fatal(err)
+		}
+	})
 
 	return result
 }
 
 func ensureUNLocodeIndex() {
-	session, err := mgo.Dial(os.Getenv("MONGOHQ_URL"))
+	withCollection(func(c *mgo.Collection) {
+		index := mgo.Index{
+			Key:    []string{"unlocode"},
+			Unique: true,
+		}
 
-	if err != nil {
-		panic(err)
-	}
+		err := c.EnsureIndex(index)
 
-	defer session.Close()
-
-	index := mgo.Index{
-		Key:    []string{"unlocode"},
-		Unique: true,
-	}
-
-	c := session.DB("app30695645").C("locations")
-	err = c.EnsureIndex(index)
-
-	if err != nil {
-		panic(err)
-	}
+		if err != nil {
+			panic(err)
+		}
+	})
 }
 
 func NewLocationRepositoryMongoDB() location.LocationRepository {
