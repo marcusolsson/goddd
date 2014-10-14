@@ -14,30 +14,44 @@ import (
 	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/domain/routing"
 	"github.com/marcusolsson/goddd/infrastructure"
 	"github.com/marcusolsson/goddd/interfaces"
 )
 
 type Api struct {
 	Renderer *render.Render
+	cargo.CargoRepository
+	location.LocationRepository
+	cargo.HandlingEventRepository
+	routing.RoutingService
+	application.BookingService
+	interfaces.BookingServiceFacade
 }
 
 func NewApi() *Api {
+
+	var (
+		cargoRepository         = infrastructure.NewInMemCargoRepository()
+		locationRepository      = infrastructure.NewLocationRepositoryMongoDB()
+		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
+		routingService          = infrastructure.NewExternalRoutingService(locationRepository)
+		bookingService          = application.NewBookingService(cargoRepository, locationRepository, routingService)
+		bookingServiceFacade    = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
+	)
+
 	storeTestData(cargoRepository)
 
 	return &Api{
-		Renderer: render.New(render.Options{IndentJSON: true}),
+		Renderer:                render.New(render.Options{IndentJSON: true}),
+		CargoRepository:         cargoRepository,
+		LocationRepository:      locationRepository,
+		HandlingEventRepository: handlingEventRepository,
+		RoutingService:          routingService,
+		BookingService:          bookingService,
+		BookingServiceFacade:    bookingServiceFacade,
 	}
 }
-
-var (
-	cargoRepository         = infrastructure.NewInMemCargoRepository()
-	locationRepository      = infrastructure.NewInMemLocationRepository()
-	handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
-	routingService          = infrastructure.NewExternalRoutingService(locationRepository)
-	bookingService          = application.NewBookingService(cargoRepository, locationRepository, routingService)
-	bookingServiceFacade    = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
-)
 
 func RegisterHandlers() {
 
@@ -73,12 +87,12 @@ var (
 )
 
 func (a *Api) CargosHandler(w http.ResponseWriter, req *http.Request) {
-	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.ListAllCargos())
+	a.Renderer.JSON(w, http.StatusOK, a.BookingServiceFacade.ListAllCargos())
 }
 
 func (a *Api) CargoHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	c, err := bookingServiceFacade.LoadCargoForRouting(vars["id"])
+	c, err := a.BookingServiceFacade.LoadCargoForRouting(vars["id"])
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusNotFound, ResourceNotFound)
@@ -90,7 +104,7 @@ func (a *Api) CargoHandler(w http.ResponseWriter, req *http.Request) {
 
 func (a *Api) RequestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.RequestRoutesForCargo(vars["id"]))
+	a.Renderer.JSON(w, http.StatusOK, a.BookingServiceFacade.RequestRoutesForCargo(vars["id"]))
 }
 
 func (a *Api) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
@@ -101,7 +115,7 @@ func (a *Api) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	vars := mux.Vars(req)
-	if err := bookingServiceFacade.AssignCargoToRoute(vars["id"], candidate); err != nil {
+	if err := a.BookingServiceFacade.AssignCargoToRoute(vars["id"], candidate); err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 		return
 	}
@@ -119,7 +133,7 @@ func (a *Api) ChangeDestinationHandler(w http.ResponseWriter, req *http.Request)
 	}
 
 	vars := mux.Vars(req)
-	if err := bookingServiceFacade.ChangeDestination(vars["id"], fmt.Sprintf("%s", found["destination"])); err != nil {
+	if err := a.BookingServiceFacade.ChangeDestination(vars["id"], fmt.Sprintf("%s", found["destination"])); err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 		return
 	}
@@ -142,14 +156,14 @@ func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 		arrivalDeadline = found["arrivalDeadline"].(string)
 	)
 
-	trackingId, err := bookingServiceFacade.BookNewCargo(origin, destination, arrivalDeadline)
+	trackingId, err := a.BookingServiceFacade.BookNewCargo(origin, destination, arrivalDeadline)
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 		return
 	}
 
-	c, err := bookingServiceFacade.LoadCargoForRouting(trackingId)
+	c, err := a.BookingServiceFacade.LoadCargoForRouting(trackingId)
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusNotFound, ResourceNotFound)
@@ -160,7 +174,7 @@ func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (a *Api) LocationsHandler(w http.ResponseWriter, req *http.Request) {
-	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.ListShippingLocations())
+	a.Renderer.JSON(w, http.StatusOK, a.BookingServiceFacade.ListShippingLocations())
 }
 
 func storeTestData(r cargo.CargoRepository) {

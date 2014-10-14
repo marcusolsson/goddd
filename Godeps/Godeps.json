@@ -1,9 +1,6 @@
 {
 	"ImportPath": "github.com/marcusolsson/goddd",
 	"GoVersion": "go1.3.1",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go-uuid/uuid",
@@ -30,6 +27,10 @@
 		{
 			"ImportPath": "gopkg.in/check.v1",
 			"Rev": "91ae5f88a67b14891cfd43895b01164f6c120420"
+		},
+		{
+			"ImportPath": "gopkg.in/mgo.v2",
+			"Rev": "231ce7e0549b5ce60d35ed805bff505cab7098e4"
 		},
 		{
 			"ImportPath": "gopkg.in/unrolled/render.v1",
