@@ -1,4 +1,4 @@
-# GoDDD [![wercker status](https://app.wercker.com/status/12b6c3ee4ea86efc7fd5184b589916b7/s "wercker status")](https://app.wercker.com/project/bykey/12b6c3ee4ea86efc7fd5184b589916b7)
+# GoDDD [![wercker status](https://app.wercker.com/status/4622d397d47d1fa763372d7772722603/s/master "wercker status")](https://app.wercker.com/project/bykey/4622d397d47d1fa763372d7772722603)
 
 This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net/) to Go. The purpose is to explore how to write idiomatic Go applications using Domain-Driven Design.
 
