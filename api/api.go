@@ -9,9 +9,8 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/hariharan-uno/cors"
+	"google.golang.org/appengine"
 	"gopkg.in/unrolled/render.v1"
-
-	"appengine"
 
 	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
