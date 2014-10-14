@@ -52,27 +52,33 @@ func (r *locationRepositoryMongoDB) FindAll() []location.Location {
 	return result
 }
 
-func NewLocationRepositoryMongoDB() location.LocationRepository {
+func ensureUNLocodeIndex() {
 	session, err := mgo.Dial(os.Getenv("MONGOHQ_URL"))
 
 	if err != nil {
 		panic(err)
 	}
-	defer session.Close()
 
-	c := session.DB("app30695645").C("locations")
+	defer session.Close()
 
 	index := mgo.Index{
 		Key:    []string{"unlocode"},
 		Unique: true,
 	}
+
+	c := session.DB("app30695645").C("locations")
 	err = c.EnsureIndex(index)
 
 	if err != nil {
 		panic(err)
 	}
+}
+
+func NewLocationRepositoryMongoDB() location.LocationRepository {
 
 	r := &locationRepositoryMongoDB{}
+
+	ensureUNLocodeIndex()
 
 	r.Store(location.Stockholm)
 	r.Store(location.Hamburg)
