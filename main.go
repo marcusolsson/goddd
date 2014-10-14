@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/marcusolsson/goddd/api"
 )
@@ -9,5 +10,5 @@ import (
 func main() {
 	api.RegisterHandlers()
 
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":"+os.Getenv("PORT"), nil)
 }

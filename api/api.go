@@ -9,7 +9,6 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/gorilla/mux"
 	"github.com/hariharan-uno/cors"
-	"google.golang.org/appengine"
 	"gopkg.in/unrolled/render.v1"
 
 	"github.com/marcusolsson/goddd/application"
@@ -161,9 +160,7 @@ func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (a *Api) LocationsHandler(w http.ResponseWriter, req *http.Request) {
-	lr := infrastructure.NewDatastoreLocationRepository(appengine.NewContext(req))
-	f := interfaces.NewBookingServiceFacade(cargoRepository, lr, handlingEventRepository, bookingService)
-	a.Renderer.JSON(w, http.StatusOK, f.ListShippingLocations())
+	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.ListShippingLocations())
 }
 
 func storeTestData(r cargo.CargoRepository) {
