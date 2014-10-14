@@ -62,8 +62,9 @@ func ensureUNLocodeIndex() {
 	defer session.Close()
 
 	index := mgo.Index{
-		Key:    []string{"unlocode"},
-		Unique: true,
+		Key:      []string{"unlocode"},
+		Unique:   true,
+		DropDups: true,
 	}
 
 	c := session.DB("app30695645").C("locations")
