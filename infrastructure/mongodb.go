@@ -53,6 +53,20 @@ func (r *locationRepositoryMongoDB) FindAll() []location.Location {
 }
 
 func NewLocationRepositoryMongoDB() location.LocationRepository {
+	session, err := mgo.Dial(os.Getenv("MONGOHQ_URL"))
+
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	c := session.DB("app30695645").C("locations")
+	err = c.EnsureIndexKey("unlocode")
+
+	if err != nil {
+		panic(err)
+	}
+
 	r := &locationRepositoryMongoDB{}
 
 	r.Store(location.Stockholm)
