@@ -11,6 +11,8 @@ import (
 	"github.com/hariharan-uno/cors"
 	"gopkg.in/unrolled/render.v1"
 
+	"appengine"
+
 	"github.com/marcusolsson/goddd/application"
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
@@ -160,7 +162,9 @@ func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (a *Api) LocationsHandler(w http.ResponseWriter, req *http.Request) {
-	a.Renderer.JSON(w, http.StatusOK, bookingServiceFacade.ListShippingLocations())
+	lr := infrastructure.NewDatastoreLocationRepository(appengine.NewContext(req))
+	f := interfaces.NewBookingServiceFacade(cargoRepository, lr, handlingEventRepository, bookingService)
+	a.Renderer.JSON(w, http.StatusOK, f.ListShippingLocations())
 }
 
 func storeTestData(r cargo.CargoRepository) {
