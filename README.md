@@ -111,7 +111,15 @@ The application exposes a REST API.
 
     `go run local.go`
 
-_Note:_ The `appengine.go` is used to deploy it on Google App Engine. If you want to deploy it to your own project, edit the `app.yaml` to point to your own project. Read more about [deploying Go applications to App Engine](https://cloud.google.com/appengine/docs/go/).
+_Note:_ ~~The `appengine.go` is used to deploy it on Google App Engine. If you want to deploy it to your own project, edit the `app.yaml` to point to your own project.~~ 
+
+_Update:_ I have switched over to Heroku since it feels less intrusive (plus better wercker integration).
+
+__Read more:__
+
+- [Deploy Go applications to App Engine](https://cloud.google.com/appengine/docs/go/)
+- [Deploy Go applications to Heroku](http://blog.wercker.com/2013/07/10/deploying-golang-to-heroku.html)
+
 
 ### Cargos
 
