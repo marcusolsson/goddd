@@ -109,7 +109,7 @@ The application exposes a REST API.
 
 3. Run it!:
 
-    `go run local.go`
+    `go run main.go`
 
 _Note:_ ~~The `appengine.go` is used to deploy it on Google App Engine. If you want to deploy it to your own project, edit the `app.yaml` to point to your own project.~~ 
 
