@@ -10,9 +10,19 @@ import (
 )
 
 type BookingService interface {
+	// BookNewCargo registers a new cargo in the tracking system, not yet
+	// routed.
 	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error)
+
+	// RequestPossibleRoutesForCargo requests a list of itineraries describing
+	// possible routes for this cargo.
 	RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary
+
+	// AssignCargoToRoute assigns a cargo to the route specified by the
+	// itinerary.
 	AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) error
+
+	// ChangeDestination changes the destination of a cargo.
 	ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) error
 }
 
@@ -94,6 +104,7 @@ func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode
 	return nil
 }
 
+// NewBookingService creates a booking service with necessary dependencies.
 func NewBookingService(cr cargo.CargoRepository, lr location.LocationRepository, rs routing.RoutingService) BookingService {
 	return &bookingService{
 		cargoRepository:    cr,

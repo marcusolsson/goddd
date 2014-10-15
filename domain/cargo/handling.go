@@ -10,17 +10,24 @@ import (
 	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
+// HandlingActivity represents how and where a cargo can be handled, and can
+// be used to express predictions about what is expected to happen to a cargo
+// in the future.
 type HandlingActivity struct {
 	Type     HandlingEventType
 	Location location.UNLocode
 	voyage.VoyageNumber
 }
 
+// HandlingEvent is used to register the event when, for instance, a cargo is
+// unloaded from a carrier at a some loacation at a given time.
 type HandlingEvent struct {
 	TrackingId
 	Activity HandlingActivity
 }
 
+// HandlingEventType. Either requires or prohibits a carrier movement
+// association, it's never optional.
 type HandlingEventType int
 
 const (
@@ -51,6 +58,7 @@ func (t HandlingEventType) String() string {
 	return ""
 }
 
+// HandlingHistory is the handling history of a cargo.
 type HandlingHistory struct {
 	HandlingEvents []HandlingEvent
 }
@@ -67,11 +75,13 @@ func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(h, v.(HandlingHistory))
 }
 
+// HandlingEventRepository provides access a handling event store.
 type HandlingEventRepository interface {
 	Store(e HandlingEvent)
 	QueryHandlingHistory(TrackingId) HandlingHistory
 }
 
+// HandlingEventFactory creates handling events.
 type HandlingEventFactory struct {
 	CargoRepository
 	voyage.VoyageRepository

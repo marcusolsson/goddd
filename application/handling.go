@@ -9,6 +9,8 @@ import (
 )
 
 type HandlingEventService interface {
+	// RegisterHandlingEvent registers a handling event in the system, and
+	// notifies interested parties that a cargo has been handled.
 	RegisterHandlingEvent(completionTime time.Time, trackingId cargo.TrackingId, voyageNumber voyage.VoyageNumber,
 		unLocode location.UNLocode, eventType cargo.HandlingEventType) error
 }
@@ -37,6 +39,8 @@ func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, t
 	return nil
 }
 
+// NewHandlingEventService creates a handling event service with necessary
+// dependencies.
 func NewHandlingEventService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h HandlingEventHandler) HandlingEventService {
 	return &handlingEventService{
 		handlingEventRepository: r,

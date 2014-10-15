@@ -9,6 +9,7 @@ import (
 	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
+// Leg describes the transportation between two locations on a voyage.
 type Leg struct {
 	VoyageNumber   voyage.VoyageNumber
 	LoadLocation   location.UNLocode
@@ -21,6 +22,8 @@ func (l Leg) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(l, v.(Leg))
 }
 
+// Itinerary specifies steps required to transport a cargo from its origin to
+// destination.
 type Itinerary struct {
 	Legs []Leg
 }
@@ -43,10 +46,13 @@ func (i Itinerary) FinalArrivalTime() time.Time {
 	return i.Legs[len(i.Legs)-1].UnloadTime
 }
 
+// IsEmpty checks if the itinerary contains at least one leg.
 func (i Itinerary) IsEmpty() bool {
 	return i.Legs == nil || len(i.Legs) == 0
 }
 
+// IsExpected checks if the given handling event is expected when executing
+// this itinerary.
 func (i Itinerary) IsExpected(event HandlingEvent) bool {
 	if i.IsEmpty() {
 		return true

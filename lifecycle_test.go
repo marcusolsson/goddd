@@ -28,12 +28,18 @@ var (
 
 var (
 	handlingEventFactory = cargo.HandlingEventFactory{cargoRepository, voyageRepository, locationRepository}
-	handlingEventHandler = &stubHandlingEventHandler{cargoInspectionService}
-	cargoEventHandler    = &stubCargoEventHandler{}
 )
 
 var (
-	routingService         = &stubRoutingService{}
+	routingService = &stubRoutingService{}
+)
+
+var (
+	cargoEventHandler    = &stubCargoEventHandler{}
+	handlingEventHandler = &stubHandlingEventHandler{cargoInspectionService}
+)
+
+var (
 	bookingService         = application.NewBookingService(cargoRepository, locationRepository, routingService)
 	cargoInspectionService = application.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
 	handlingEventService   = application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)

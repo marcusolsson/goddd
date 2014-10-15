@@ -9,17 +9,34 @@ import (
 	"github.com/marcusolsson/goddd/domain/shared"
 )
 
+// VoyageNumber uniquely identifies a particular Voyage.
 type VoyageNumber string
 
+// Voyage
 type Voyage struct {
 	VoyageNumber
 	Schedule
 }
 
+func (v *Voyage) SameIdentity(vo shared.ValueObject) bool {
+	return v.VoyageNumber == vo.(*Voyage).VoyageNumber
+}
+
+// New creates a voyage with a voyage number and a provided schedule.
+func New(n VoyageNumber, s Schedule) *Voyage {
+	return &Voyage{VoyageNumber: n, Schedule: s}
+}
+
+// Schedule describes a voyage schedule.
 type Schedule struct {
 	CarrierMovements []CarrierMovement
 }
 
+func (s Schedule) SameValue(v shared.ValueObject) bool {
+	return reflect.DeepEqual(s, v.(Schedule))
+}
+
+// CarrierMovement is a vessel voyage from one location to another.
 type CarrierMovement struct {
 	DepartureLocation location.Location
 	ArrivalLocation   location.Location
@@ -27,24 +44,14 @@ type CarrierMovement struct {
 	ArrivalTime       time.Time
 }
 
-var ErrUnknownVoyage = errors.New("unknown voyage")
-
-type VoyageRepository interface {
-	Find(VoyageNumber) (Voyage, error)
-}
-
-func New(n VoyageNumber, s Schedule) *Voyage {
-	return &Voyage{VoyageNumber: n, Schedule: s}
-}
-
-func (v *Voyage) SameIdentity(vo shared.ValueObject) bool {
-	return v.VoyageNumber == vo.(*Voyage).VoyageNumber
-}
-
-func (s Schedule) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(s, v.(Schedule))
-}
-
 func (m CarrierMovement) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(m, v.(CarrierMovement))
+}
+
+// ErrUnknownVoyage is used when a voyage could not be found.
+var ErrUnknownVoyage = errors.New("unknown voyage")
+
+// VoyageRepository provides access a voyage store.
+type VoyageRepository interface {
+	Find(VoyageNumber) (Voyage, error)
 }

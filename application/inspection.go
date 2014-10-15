@@ -3,6 +3,9 @@ package application
 import "github.com/marcusolsson/goddd/domain/cargo"
 
 type CargoInspectionService interface {
+	// InspectCargo inspects cargo and send relevant notifications to
+	// interested parties, for example if a cargo has been misdirected, or
+	// unloaded at the final destination.
 	InspectCargo(trackingId cargo.TrackingId)
 }
 
@@ -35,6 +38,8 @@ func (s *cargoInspectionService) InspectCargo(trackingId cargo.TrackingId) {
 	s.cargoRepository.Store(c)
 }
 
+// NewCargoInspectionService creates a inspection service with necessary
+// dependencies.
 func NewCargoInspectionService(cargoRepository cargo.CargoRepository, handlingEventRepository cargo.HandlingEventRepository, eventHandler CargoEventHandler) CargoInspectionService {
 	return &cargoInspectionService{cargoRepository, handlingEventRepository, eventHandler}
 }
