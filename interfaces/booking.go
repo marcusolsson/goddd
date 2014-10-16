@@ -157,7 +157,7 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoDTO {
 		NextExpectedActivity: "",
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
 		Routed:               !c.Itinerary.IsEmpty(),
-		ArrivalDeadline:      c.ArrivalDeadline.Format(time.RFC3339),
+		ArrivalDeadline:      c.RouteSpecification.ArrivalDeadline.Format(time.RFC3339),
 		StatusText:           assembleStatusText(c),
 		Legs:                 assembleLegs(c),
 		Events:               assembleEvents(c, her),

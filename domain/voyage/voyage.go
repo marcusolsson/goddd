@@ -14,12 +14,12 @@ type VoyageNumber string
 
 // Voyage
 type Voyage struct {
-	VoyageNumber
-	Schedule
+	VoyageNumber VoyageNumber
+	Schedule     Schedule
 }
 
-func (v *Voyage) SameIdentity(vo shared.ValueObject) bool {
-	return v.VoyageNumber == vo.(*Voyage).VoyageNumber
+func (v *Voyage) SameIdentity(e shared.Entity) bool {
+	return v.VoyageNumber == e.(*Voyage).VoyageNumber
 }
 
 // New creates a voyage with a voyage number and a provided schedule.

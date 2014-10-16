@@ -84,8 +84,8 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 
 	cargoRepository.Store(c)
 
-	chk.Check(c.TransportStatus, Equals, cargo.NotReceived)
-	chk.Check(c.RoutingStatus, Equals, cargo.Routed)
+	chk.Check(c.Delivery.TransportStatus, Equals, cargo.NotReceived)
+	chk.Check(c.Delivery.RoutingStatus, Equals, cargo.Routed)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
 	chk.Check(c.Delivery.ETA, Not(Equals), time.Time{})
@@ -161,7 +161,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 
 	cargoRepository.Store(c)
 
-	chk.Check(c.RoutingStatus, Equals, cargo.Misrouted)
+	chk.Check(c.Delivery.RoutingStatus, Equals, cargo.Misrouted)
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{})
 
 	// Repeat procedure of selecting one out of a number of possible routes satisfying the route spec
@@ -272,11 +272,11 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 // Stub HandlingEventHandler
 type stubHandlingEventHandler struct {
-	application.CargoInspectionService
+	InspectionService application.CargoInspectionService
 }
 
 func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
-	h.CargoInspectionService.InspectCargo(event.TrackingId)
+	h.InspectionService.InspectCargo(event.TrackingId)
 }
 
 // Stub CargoEventHandler

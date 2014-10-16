@@ -14,16 +14,16 @@ import (
 // be used to express predictions about what is expected to happen to a cargo
 // in the future.
 type HandlingActivity struct {
-	Type     HandlingEventType
-	Location location.UNLocode
-	voyage.VoyageNumber
+	Type         HandlingEventType
+	Location     location.UNLocode
+	VoyageNumber voyage.VoyageNumber
 }
 
 // HandlingEvent is used to register the event when, for instance, a cargo is
 // unloaded from a carrier at a some loacation at a given time.
 type HandlingEvent struct {
-	TrackingId
-	Activity HandlingActivity
+	TrackingId TrackingId
+	Activity   HandlingActivity
 }
 
 // HandlingEventType. Either requires or prohibits a carrier movement
@@ -83,9 +83,9 @@ type HandlingEventRepository interface {
 
 // HandlingEventFactory creates handling events.
 type HandlingEventFactory struct {
-	CargoRepository
-	voyage.VoyageRepository
-	location.LocationRepository
+	CargoRepository    CargoRepository
+	VoyageRepository   voyage.VoyageRepository
+	LocationRepository location.LocationRepository
 }
 
 func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingId TrackingId,

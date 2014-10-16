@@ -12,17 +12,17 @@ import (
 // Delivery is the actual transportation of the cargo, as opposed to the
 // customer requirement (RouteSpecification) and the plan (Itinerary).
 type Delivery struct {
-	Itinerary
-	RouteSpecification
-	RoutingStatus
-	TransportStatus
-	IsMisdirected           bool
-	IsUnloadedAtDestination bool
+	Itinerary               Itinerary
+	RouteSpecification      RouteSpecification
+	RoutingStatus           RoutingStatus
+	TransportStatus         TransportStatus
 	NextExpectedActivity    HandlingActivity
 	LastEvent               HandlingEvent
 	LastKnownLocation       location.UNLocode
 	CurrentVoyage           voyage.VoyageNumber
 	ETA                     time.Time
+	IsMisdirected           bool
+	IsUnloadedAtDestination bool
 }
 
 // UpdateOnRouting creates a new delivery snapshot to reflect changes in
@@ -174,5 +174,5 @@ func calculateETA(d Delivery) time.Time {
 		return time.Time{}
 	}
 
-	return d.FinalArrivalTime()
+	return d.Itinerary.FinalArrivalTime()
 }

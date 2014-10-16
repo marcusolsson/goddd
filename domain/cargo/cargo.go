@@ -21,7 +21,7 @@ type Cargo struct {
 	Origin             location.UNLocode
 	RouteSpecification RouteSpecification
 	Itinerary          Itinerary
-	Delivery
+	Delivery           Delivery
 }
 
 // SpecifyNewRoute specifies a new route for this cargo.
