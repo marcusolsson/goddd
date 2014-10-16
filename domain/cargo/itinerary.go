@@ -18,10 +18,12 @@ type Leg struct {
 	UnloadTime     time.Time
 }
 
+// SameValue returns whether two legs have the same value.
 func (l Leg) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(l, v.(Leg))
 }
 
+// NewLeg creates a new itinerary leg.
 func NewLeg(voyageNumber voyage.VoyageNumber, loadLocation, unloadLocation location.UNLocode, loadTime, unloadTime time.Time) Leg {
 	return Leg{
 		VoyageNumber:   voyageNumber,
@@ -38,6 +40,7 @@ type Itinerary struct {
 	Legs []Leg
 }
 
+// InitialDepartureLocation returns the start of the itinerary.
 func (i Itinerary) InitialDepartureLocation() location.UNLocode {
 	if i.IsEmpty() {
 		return location.UNLocode("")
@@ -45,6 +48,7 @@ func (i Itinerary) InitialDepartureLocation() location.UNLocode {
 	return i.Legs[0].LoadLocation
 }
 
+// FinalArrivalLocation returns the end of the itinerary.
 func (i Itinerary) FinalArrivalLocation() location.UNLocode {
 	if i.IsEmpty() {
 		return location.UNLocode("")
@@ -52,6 +56,7 @@ func (i Itinerary) FinalArrivalLocation() location.UNLocode {
 	return i.Legs[len(i.Legs)-1].UnloadLocation
 }
 
+// FinalArrivalTime returns the expected arrival time at final destination.
 func (i Itinerary) FinalArrivalTime() time.Time {
 	return i.Legs[len(i.Legs)-1].UnloadTime
 }
@@ -92,6 +97,7 @@ func (i Itinerary) IsExpected(event HandlingEvent) bool {
 	return true
 }
 
+// SameValue returns whether two itineraries have the same value.
 func (i Itinerary) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(i, v.(Itinerary))
 }

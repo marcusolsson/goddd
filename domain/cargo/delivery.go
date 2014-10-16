@@ -32,6 +32,7 @@ func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinera
 	return newDelivery(d.LastEvent, itinerary, routeSpecification)
 }
 
+// SameValue returns whether two deliveries have the same value.
 func (d Delivery) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(d, v.(Delivery))
 }
@@ -85,13 +86,13 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 func calculateRoutingStatus(itinerary Itinerary, routeSpecification RouteSpecification) RoutingStatus {
 	if itinerary.Legs == nil {
 		return NotRouted
-	} else {
-		if routeSpecification.IsSatisfiedBy(itinerary) {
-			return Routed
-		} else {
-			return Misrouted
-		}
 	}
+
+	if routeSpecification.IsSatisfiedBy(itinerary) {
+		return Routed
+	}
+
+	return Misrouted
 }
 
 func calculateMisdirectedStatus(event HandlingEvent, itinerary Itinerary) bool {
@@ -151,9 +152,9 @@ func calculateNextExpectedActivity(d Delivery) HandlingActivity {
 			if l.UnloadLocation == d.LastEvent.Activity.Location {
 				if i < len(d.Itinerary.Legs)-1 {
 					return HandlingActivity{Type: Load, Location: d.Itinerary.Legs[i+1].LoadLocation, VoyageNumber: d.Itinerary.Legs[i+1].VoyageNumber}
-				} else {
-					return HandlingActivity{Type: Claim, Location: l.UnloadLocation}
 				}
+
+				return HandlingActivity{Type: Claim, Location: l.UnloadLocation}
 			}
 		}
 	}

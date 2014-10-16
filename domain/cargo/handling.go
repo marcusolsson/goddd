@@ -26,8 +26,7 @@ type HandlingEvent struct {
 	Activity   HandlingActivity
 }
 
-// HandlingEventType. Either requires or prohibits a carrier movement
-// association, it's never optional.
+// HandlingEventType describes type of a handling event.
 type HandlingEventType int
 
 const (
@@ -63,6 +62,7 @@ type HandlingHistory struct {
 	HandlingEvents []HandlingEvent
 }
 
+// MostRecentlyCompletedEvent returns most recently completed handling event.
 func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
 	if len(h.HandlingEvents) == 0 {
 		return HandlingEvent{}, errors.New("Delivery history is empty")
@@ -71,6 +71,7 @@ func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
 	return h.HandlingEvents[len(h.HandlingEvents)-1], nil
 }
 
+// SameValue returns whether two handling histories have the same value.
 func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(h, v.(HandlingHistory))
 }
@@ -88,6 +89,7 @@ type HandlingEventFactory struct {
 	LocationRepository location.Repository
 }
 
+// CreateHandlingEvent creates a validated handling event.
 func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingID TrackingID,
 	voyageNumber voyage.VoyageNumber, unLocode location.UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
 

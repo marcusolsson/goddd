@@ -70,6 +70,7 @@ type Repository interface {
 // ErrUnknownCargo is used when a cargo could not be found.
 var ErrUnknownCargo = errors.New("unknown cargo")
 
+// NextTrackingID generates a new tracking ID.
 // TODO: Move to infrastructure
 func NextTrackingID() TrackingID {
 	return TrackingID(strings.Split(strings.ToUpper(uuid.New()), "-")[0])
@@ -91,6 +92,7 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 		s.Destination == itinerary.FinalArrivalLocation()
 }
 
+// SameValue returns whether two route specifications have the same value.
 func (s RouteSpecification) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(s, v.(RouteSpecification))
 }
