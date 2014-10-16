@@ -85,7 +85,7 @@ type HandlingEventRepository interface {
 type HandlingEventFactory struct {
 	CargoRepository    Repository
 	VoyageRepository   voyage.VoyageRepository
-	LocationRepository location.LocationRepository
+	LocationRepository location.Repository
 }
 
 func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingID TrackingID,

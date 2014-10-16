@@ -64,7 +64,7 @@ func ensureUNLocodeIndex() {
 	})
 }
 
-func NewLocationRepositoryMongoDB() location.LocationRepository {
+func NewLocationRepositoryMongoDB() location.Repository {
 
 	r := &locationRepositoryMongoDB{}
 

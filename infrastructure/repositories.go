@@ -59,7 +59,7 @@ func (r *locationRepositoryInMem) FindAll() []location.Location {
 	return l
 }
 
-func NewInMemLocationRepository() location.LocationRepository {
+func NewInMemLocationRepository() location.Repository {
 	r := &locationRepositoryInMem{
 		locations: make(map[location.UNLocode]location.Location),
 	}

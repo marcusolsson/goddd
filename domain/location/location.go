@@ -28,7 +28,7 @@ func (l Location) SameIdentity(e shared.Entity) bool {
 var ErrUnknownLocation = errors.New("unknown location")
 
 // LocationRepository provides access a location store.
-type LocationRepository interface {
+type Repository interface {
 	Find(locode UNLocode) (Location, error)
 	FindAll() []Location
 }

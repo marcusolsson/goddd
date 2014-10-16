@@ -7,7 +7,7 @@ import (
 )
 
 type externalRoutingService struct {
-	locationRepository location.LocationRepository
+	locationRepository location.Repository
 }
 
 func (s *externalRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
@@ -20,6 +20,6 @@ func (s *externalRoutingService) FetchRoutesForSpecification(routeSpecification 
 	return []cargo.Itinerary{it}
 }
 
-func NewExternalRoutingService(locationRepository location.LocationRepository) routing.RoutingService {
+func NewExternalRoutingService(locationRepository location.Repository) routing.RoutingService {
 	return &externalRoutingService{locationRepository: locationRepository}
 }

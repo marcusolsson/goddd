@@ -59,7 +59,7 @@ type BookingServiceFacade interface {
 
 type bookingServiceFacade struct {
 	cargoRepository         cargo.Repository
-	locationRepository      location.LocationRepository
+	locationRepository      location.Repository
 	handlingEventRepository cargo.HandlingEventRepository
 	bookingService          application.BookingService
 }
@@ -144,7 +144,7 @@ func (f *bookingServiceFacade) ListAllCargos() []cargoDTO {
 	return dtos
 }
 
-func NewBookingServiceFacade(cargoRepository cargo.Repository, locationRepository location.LocationRepository, handlingEventRepository cargo.HandlingEventRepository, bookingService application.BookingService) BookingServiceFacade {
+func NewBookingServiceFacade(cargoRepository cargo.Repository, locationRepository location.Repository, handlingEventRepository cargo.HandlingEventRepository, bookingService application.BookingService) BookingServiceFacade {
 	return &bookingServiceFacade{cargoRepository, locationRepository, handlingEventRepository, bookingService}
 }
 
