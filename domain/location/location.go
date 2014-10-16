@@ -20,6 +20,7 @@ type Location struct {
 	Name     string
 }
 
+// SameIdentity returns whether two locations have the same UN Locode.
 func (l Location) SameIdentity(e shared.Entity) bool {
 	return l.UNLocode == e.(Location).UNLocode
 }
@@ -27,7 +28,7 @@ func (l Location) SameIdentity(e shared.Entity) bool {
 // ErrUnknownLocation is used when a location could not be found.
 var ErrUnknownLocation = errors.New("unknown location")
 
-// LocationRepository provides access a location store.
+// Repository provides access a location store.
 type Repository interface {
 	Find(locode UNLocode) (Location, error)
 	FindAll() []Location
