@@ -84,7 +84,7 @@ type HandlingEventRepository interface {
 // HandlingEventFactory creates handling events.
 type HandlingEventFactory struct {
 	CargoRepository    Repository
-	VoyageRepository   voyage.VoyageRepository
+	VoyageRepository   voyage.Repository
 	LocationRepository location.Repository
 }
 

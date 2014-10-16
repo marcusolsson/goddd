@@ -86,7 +86,7 @@ func (r *voyageRepositoryInMem) Find(voyageNumber voyage.VoyageNumber) (voyage.V
 	return voyage.Voyage{}, voyage.ErrUnknownVoyage
 }
 
-func NewInMemVoyageRepository() voyage.VoyageRepository {
+func NewInMemVoyageRepository() voyage.Repository {
 	r := &voyageRepositoryInMem{
 		voyages: make(map[voyage.VoyageNumber]voyage.Voyage),
 	}

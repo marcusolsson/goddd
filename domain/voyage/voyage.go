@@ -52,6 +52,6 @@ func (m CarrierMovement) SameValue(v shared.ValueObject) bool {
 var ErrUnknownVoyage = errors.New("unknown voyage")
 
 // VoyageRepository provides access a voyage store.
-type VoyageRepository interface {
+type Repository interface {
 	Find(VoyageNumber) (Voyage, error)
 }
