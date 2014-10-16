@@ -22,6 +22,16 @@ func (l Leg) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(l, v.(Leg))
 }
 
+func NewLeg(voyageNumber voyage.VoyageNumber, loadLocation, unloadLocation location.UNLocode, loadTime, unloadTime time.Time) Leg {
+	return Leg{
+		VoyageNumber:   voyageNumber,
+		LoadLocation:   loadLocation,
+		UnloadLocation: unloadLocation,
+		LoadTime:       loadTime,
+		UnloadTime:     unloadTime,
+	}
+}
+
 // Itinerary specifies steps required to transport a cargo from its origin to
 // destination.
 type Itinerary struct {

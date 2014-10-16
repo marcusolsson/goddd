@@ -27,7 +27,11 @@ var (
 )
 
 var (
-	handlingEventFactory = cargo.HandlingEventFactory{cargoRepository, voyageRepository, locationRepository}
+	handlingEventFactory = cargo.HandlingEventFactory{
+		CargoRepository:    cargoRepository,
+		VoyageRepository:   voyageRepository,
+		LocationRepository: locationRepository,
+	}
 )
 
 var (
@@ -59,11 +63,11 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	// Use case 1: booking
 	//
 
-	trackingId, err := bookingService.BookNewCargo(origin, destination, arrivalDeadline)
+	trackingID, err := bookingService.BookNewCargo(origin, destination, arrivalDeadline)
 
 	chk.Assert(err, IsNil)
 
-	c, err := cargoRepository.Find(trackingId)
+	c, err := cargoRepository.Find(trackingID)
 
 	chk.Assert(err, IsNil)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.NotReceived)
@@ -77,7 +81,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	// Use case 2: routing
 	//
 
-	itineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
+	itineraries := bookingService.RequestPossibleRoutesForCargo(trackingID)
 	itinerary := selectPreferredItinerary(itineraries)
 
 	c.AssignToRoute(itinerary)
@@ -95,20 +99,20 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	// Use case 3: handling
 	//
 
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 1), trackingId, "", location.CNHKG, cargo.Receive)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 1), trackingID, "", location.CNHKG, cargo.Receive)
 	chk.Check(err, IsNil)
 
 	// Ensure we're not working with stale cargo.
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
 
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingId, voyage.V100.VoyageNumber, location.CNHKG, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingID, voyage.V100.VoyageNumber, location.CNHKG, cargo.Load)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
@@ -125,17 +129,17 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 
 	noSuchVoyageNumber := voyage.VoyageNumber("XX000")
 	noSuchUNLocode := location.UNLocode("ZZZZZ")
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingId, noSuchVoyageNumber, noSuchUNLocode, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingID, noSuchVoyageNumber, noSuchUNLocode, cargo.Load)
 	chk.Check(err, NotNil)
 
 	//
 	// Cargo is incorrectly unloaded in Tokyo
 	//
 
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingId, voyage.V100.VoyageNumber, location.JNTKO, cargo.Unload)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingID, voyage.V100.VoyageNumber, location.JNTKO, cargo.Unload)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
@@ -165,7 +169,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{})
 
 	// Repeat procedure of selecting one out of a number of possible routes satisfying the route spec
-	newItineraries := bookingService.RequestPossibleRoutesForCargo(trackingId)
+	newItineraries := bookingService.RequestPossibleRoutesForCargo(trackingID)
 	newItinerary := selectPreferredItinerary(newItineraries)
 
 	c.AssignToRoute(newItinerary)
@@ -179,10 +183,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	//
 
 	// Load in Tokyo
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 8), trackingId, voyage.V300.VoyageNumber, location.JNTKO, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 8), trackingID, voyage.V300.VoyageNumber, location.JNTKO, cargo.Load)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
@@ -191,10 +195,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.DEHAM, VoyageNumber: voyage.V300.VoyageNumber})
 
 	// Unload in Hamburg
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 12), trackingId, voyage.V300.VoyageNumber, location.DEHAM, cargo.Unload)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 12), trackingID, voyage.V300.VoyageNumber, location.DEHAM, cargo.Unload)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.DEHAM)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
@@ -203,10 +207,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Load, Location: location.DEHAM, VoyageNumber: voyage.V400.VoyageNumber})
 
 	// Load in Hamburg
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 14), trackingId, voyage.V400.VoyageNumber, location.DEHAM, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 14), trackingID, voyage.V400.VoyageNumber, location.DEHAM, cargo.Load)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.DEHAM)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
@@ -215,10 +219,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.SESTO, VoyageNumber: voyage.V400.VoyageNumber})
 
 	// Unload in Stockholm
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 15), trackingId, voyage.V400.VoyageNumber, location.SESTO, cargo.Unload)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 15), trackingID, voyage.V400.VoyageNumber, location.SESTO, cargo.Unload)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.SESTO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
@@ -227,10 +231,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Claim, Location: location.SESTO})
 
 	// Finally, cargo is claimed in Stockholm. This ends the cargo lifecycle from our perspective.
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 16), trackingId, voyage.V400.VoyageNumber, location.SESTO, cargo.Claim)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 16), trackingID, voyage.V400.VoyageNumber, location.SESTO, cargo.Claim)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingId)
+	c, err = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.SESTO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.Claimed)
@@ -253,21 +257,20 @@ type stubRoutingService struct{}
 func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 	if routeSpecification.Origin == location.CNHKG {
 		return []cargo.Itinerary{
-			cargo.Itinerary{[]cargo.Leg{
-				cargo.Leg{"V100", location.CNHKG, location.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)},
-				cargo.Leg{"V200", location.USNYC, location.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)},
-				cargo.Leg{"V300", location.USCHI, location.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)},
-			}},
-		}
-	} else {
-		return []cargo.Itinerary{
-			cargo.Itinerary{[]cargo.Leg{
-				cargo.Leg{"V300", location.JNTKO, location.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)},
-				cargo.Leg{"V400", location.DEHAM, location.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)},
+			cargo.Itinerary{Legs: []cargo.Leg{
+				cargo.NewLeg("V100", location.CNHKG, location.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)),
+				cargo.NewLeg("V200", location.USNYC, location.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)),
+				cargo.NewLeg("V300", location.USCHI, location.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)),
 			}},
 		}
 	}
 
+	return []cargo.Itinerary{
+		cargo.Itinerary{Legs: []cargo.Leg{
+			cargo.NewLeg("V300", location.JNTKO, location.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)),
+			cargo.NewLeg("V400", location.DEHAM, location.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)),
+		}},
+	}
 }
 
 // Stub HandlingEventHandler
