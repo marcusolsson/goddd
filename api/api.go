@@ -18,12 +18,12 @@ import (
 	"github.com/marcusolsson/goddd/interfaces"
 )
 
-type Api struct {
+type API struct {
 	Renderer *render.Render
 	Facade   interfaces.BookingServiceFacade
 }
 
-func NewApi() *Api {
+func NewAPI() *API {
 
 	var (
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
@@ -36,7 +36,7 @@ func NewApi() *Api {
 
 	storeTestData(cargoRepository)
 
-	return &Api{
+	return &API{
 		Renderer: render.New(render.Options{IndentJSON: true}),
 		Facade:   bookingServiceFacade,
 	}
@@ -44,7 +44,7 @@ func NewApi() *Api {
 
 func RegisterHandlers() {
 
-	a := NewApi()
+	a := NewAPI()
 
 	router := mux.NewRouter()
 
@@ -75,11 +75,11 @@ var (
 	InvalidInput     = map[string]interface{}{"error": "invalid input"}
 )
 
-func (a *Api) CargosHandler(w http.ResponseWriter, req *http.Request) {
+func (a *API) CargosHandler(w http.ResponseWriter, req *http.Request) {
 	a.Renderer.JSON(w, http.StatusOK, a.Facade.ListAllCargos())
 }
 
-func (a *Api) CargoHandler(w http.ResponseWriter, req *http.Request) {
+func (a *API) CargoHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	c, err := a.Facade.LoadCargoForRouting(vars["id"])
 
@@ -91,12 +91,12 @@ func (a *Api) CargoHandler(w http.ResponseWriter, req *http.Request) {
 	a.Renderer.JSON(w, http.StatusOK, c)
 }
 
-func (a *Api) RequestRoutesHandler(w http.ResponseWriter, req *http.Request) {
+func (a *API) RequestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
 	a.Renderer.JSON(w, http.StatusOK, a.Facade.RequestRoutesForCargo(vars["id"]))
 }
 
-func (a *Api) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
+func (a *API) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	candidate := interfaces.RouteCandidateDTO{}
 	if err := decoder.Decode(&candidate); err != nil {
@@ -112,7 +112,7 @@ func (a *Api) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
 	a.Renderer.JSON(w, http.StatusOK, map[string]interface{}{})
 }
 
-func (a *Api) ChangeDestinationHandler(w http.ResponseWriter, req *http.Request) {
+func (a *API) ChangeDestinationHandler(w http.ResponseWriter, req *http.Request) {
 	v := queryParams(req.URL.Query())
 	found, missing := v.validateQueryParams("destination")
 
@@ -130,7 +130,7 @@ func (a *Api) ChangeDestinationHandler(w http.ResponseWriter, req *http.Request)
 	a.Renderer.JSON(w, http.StatusOK, map[string]interface{}{})
 }
 
-func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
+func (a *API) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 	v := queryParams(req.URL.Query())
 	found, missing := v.validateQueryParams("origin", "destination", "arrivalDeadline")
 
@@ -145,14 +145,14 @@ func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 		arrivalDeadline = found["arrivalDeadline"].(string)
 	)
 
-	trackingId, err := a.Facade.BookNewCargo(origin, destination, arrivalDeadline)
+	trackingID, err := a.Facade.BookNewCargo(origin, destination, arrivalDeadline)
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 		return
 	}
 
-	c, err := a.Facade.LoadCargoForRouting(trackingId)
+	c, err := a.Facade.LoadCargoForRouting(trackingID)
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusNotFound, ResourceNotFound)
@@ -162,7 +162,7 @@ func (a *Api) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 	a.Renderer.JSON(w, http.StatusOK, c)
 }
 
-func (a *Api) LocationsHandler(w http.ResponseWriter, req *http.Request) {
+func (a *API) LocationsHandler(w http.ResponseWriter, req *http.Request) {
 	a.Renderer.JSON(w, http.StatusOK, a.Facade.ListShippingLocations())
 }
 
