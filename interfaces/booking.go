@@ -12,7 +12,7 @@ import (
 )
 
 type cargoDTO struct {
-	TrackingID           string     `json:"trackingId"`
+	TrackingID           string     `json:"trackingID"`
 	StatusText           string     `json:"statusText"`
 	Origin               string     `json:"origin"`
 	Destination          string     `json:"destination"`
@@ -49,10 +49,10 @@ type eventDTO struct {
 
 type BookingServiceFacade interface {
 	BookNewCargo(origin, destination string, arrivalDeadline string) (string, error)
-	LoadCargoForRouting(trackingId string) (cargoDTO, error)
-	AssignCargoToRoute(trackingId string, candidate RouteCandidateDTO) error
-	ChangeDestination(trackingId string, destinationUNLocode string) error
-	RequestRoutesForCargo(trackingId string) []RouteCandidateDTO
+	LoadCargoForRouting(trackingID string) (cargoDTO, error)
+	AssignCargoToRoute(trackingID string, candidate RouteCandidateDTO) error
+	ChangeDestination(trackingID string, destinationUNLocode string) error
+	RequestRoutesForCargo(trackingID string) []RouteCandidateDTO
 	ListShippingLocations() []locationDTO
 	ListAllCargos() []cargoDTO
 }
@@ -66,13 +66,13 @@ type bookingServiceFacade struct {
 
 func (f *bookingServiceFacade) BookNewCargo(origin, destination string, arrivalDeadline string) (string, error) {
 	millis, _ := strconv.ParseInt(fmt.Sprintf("%s", arrivalDeadline), 10, 64)
-	trackingId, err := f.bookingService.BookNewCargo(location.UNLocode(origin), location.UNLocode(destination), time.Unix(millis/1000, 0))
+	trackingID, err := f.bookingService.BookNewCargo(location.UNLocode(origin), location.UNLocode(destination), time.Unix(millis/1000, 0))
 
-	return string(trackingId), err
+	return string(trackingID), err
 }
 
-func (f *bookingServiceFacade) LoadCargoForRouting(trackingId string) (cargoDTO, error) {
-	c, err := f.cargoRepository.Find(cargo.TrackingID(trackingId))
+func (f *bookingServiceFacade) LoadCargoForRouting(trackingID string) (cargoDTO, error) {
+	c, err := f.cargoRepository.Find(cargo.TrackingID(trackingID))
 
 	if err != nil {
 		return cargoDTO{}, err
@@ -81,8 +81,8 @@ func (f *bookingServiceFacade) LoadCargoForRouting(trackingId string) (cargoDTO,
 	return assemble(c, f.handlingEventRepository), nil
 }
 
-func (f *bookingServiceFacade) AssignCargoToRoute(trackingId string, candidate RouteCandidateDTO) error {
-	legs := make([]cargo.Leg, 0)
+func (f *bookingServiceFacade) AssignCargoToRoute(trackingID string, candidate RouteCandidateDTO) error {
+	var legs []cargo.Leg
 	for _, l := range candidate.Legs {
 		legs = append(legs, cargo.Leg{
 			VoyageNumber:   voyage.Number(l.VoyageNumber),
@@ -91,19 +91,19 @@ func (f *bookingServiceFacade) AssignCargoToRoute(trackingId string, candidate R
 		})
 	}
 
-	return f.bookingService.AssignCargoToRoute(cargo.Itinerary{legs}, cargo.TrackingID(trackingId))
+	return f.bookingService.AssignCargoToRoute(cargo.Itinerary{Legs: legs}, cargo.TrackingID(trackingID))
 }
 
-func (f *bookingServiceFacade) ChangeDestination(trackingId string, destinationUNLocode string) error {
-	return f.bookingService.ChangeDestination(cargo.TrackingID(trackingId), location.UNLocode(destinationUNLocode))
+func (f *bookingServiceFacade) ChangeDestination(trackingID string, destinationUNLocode string) error {
+	return f.bookingService.ChangeDestination(cargo.TrackingID(trackingID), location.UNLocode(destinationUNLocode))
 }
 
-func (f *bookingServiceFacade) RequestRoutesForCargo(trackingId string) []RouteCandidateDTO {
-	itineraries := f.bookingService.RequestPossibleRoutesForCargo(cargo.TrackingID(trackingId))
+func (f *bookingServiceFacade) RequestRoutesForCargo(trackingID string) []RouteCandidateDTO {
+	itineraries := f.bookingService.RequestPossibleRoutesForCargo(cargo.TrackingID(trackingID))
 
-	candidates := make([]RouteCandidateDTO, 0)
+	var candidates []RouteCandidateDTO
 	for _, itin := range itineraries {
-		legs := make([]legDTO, 0)
+		var legs []legDTO
 		for _, leg := range itin.Legs {
 			legs = append(legs, legDTO{
 				VoyageNumber: "S0001",
@@ -180,7 +180,7 @@ func assembleStatusText(c cargo.Cargo) string {
 }
 
 func assembleLegs(c cargo.Cargo) []legDTO {
-	legs := make([]legDTO, 0)
+	var legs []legDTO
 	for _, l := range c.Itinerary.Legs {
 		legs = append(legs, legDTO{
 			VoyageNumber: string(l.VoyageNumber),
