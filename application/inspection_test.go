@@ -40,7 +40,7 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 		Destination: location.CNHKG,
 	})
 
-	var voyageNumber voyage.VoyageNumber = "001A"
+	var voyageNumber voyage.Number = "001A"
 
 	misdirectedCargo.AssignToRoute(cargo.Itinerary{Legs: []cargo.Leg{
 		cargo.Leg{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
@@ -80,7 +80,7 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 		Destination: location.CNHKG,
 	})
 
-	var voyageNumber voyage.VoyageNumber = "001A"
+	var voyageNumber voyage.Number = "001A"
 
 	unloadedCargo.AssignToRoute(cargo.Itinerary{Legs: []cargo.Leg{
 		cargo.Leg{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
@@ -102,7 +102,7 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
 }
 
-func storeEvent(repository cargo.HandlingEventRepository, trackingId cargo.TrackingID, voyage voyage.VoyageNumber, activityType cargo.HandlingEventType, location location.UNLocode) {
+func storeEvent(repository cargo.HandlingEventRepository, trackingId cargo.TrackingID, voyage voyage.Number, activityType cargo.HandlingEventType, location location.UNLocode) {
 	repository.Store(cargo.HandlingEvent{
 		TrackingID: trackingId,
 		Activity:   cargo.HandlingActivity{VoyageNumber: voyage, Type: activityType, Location: location},

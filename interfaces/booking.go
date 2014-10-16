@@ -85,7 +85,7 @@ func (f *bookingServiceFacade) AssignCargoToRoute(trackingId string, candidate R
 	legs := make([]cargo.Leg, 0)
 	for _, l := range candidate.Legs {
 		legs = append(legs, cargo.Leg{
-			VoyageNumber:   voyage.VoyageNumber(l.VoyageNumber),
+			VoyageNumber:   voyage.Number(l.VoyageNumber),
 			LoadLocation:   location.UNLocode(l.From),
 			UnloadLocation: location.UNLocode(l.To),
 		})

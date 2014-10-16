@@ -44,7 +44,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 	var (
 		completionTime = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 		trackingID     = cargo.TrackingID("ABC123")
-		voyageNumber   = voyage.VoyageNumber("V100")
+		voyageNumber   = voyage.Number("V100")
 		unLocode       = location.Stockholm.UNLocode
 		eventType      = cargo.Load
 	)

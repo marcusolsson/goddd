@@ -109,7 +109,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
 
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingID, voyage.V100.VoyageNumber, location.CNHKG, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 3), trackingID, voyage.V100.Number, location.CNHKG, cargo.Load)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingID)
@@ -118,8 +118,8 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.CNHKG)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
-	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V100.VoyageNumber)
-	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.USNYC, VoyageNumber: voyage.V100.VoyageNumber})
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V100.Number)
+	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.USNYC, VoyageNumber: voyage.V100.Number})
 
 	//
 	// Here's an attempt to register a handling event that's not valid
@@ -127,7 +127,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	// and there's no location with the specified UN Locode either.
 	//
 
-	noSuchVoyageNumber := voyage.VoyageNumber("XX000")
+	noSuchVoyageNumber := voyage.Number("XX000")
 	noSuchUNLocode := location.UNLocode("ZZZZZ")
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingID, noSuchVoyageNumber, noSuchUNLocode, cargo.Load)
 	chk.Check(err, NotNil)
@@ -136,7 +136,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	// Cargo is incorrectly unloaded in Tokyo
 	//
 
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingID, voyage.V100.VoyageNumber, location.JNTKO, cargo.Unload)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 5), trackingID, voyage.V100.Number, location.JNTKO, cargo.Unload)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingID)
@@ -144,7 +144,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.Itinerary.IsEmpty(), Equals, false)
-	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.Number(""))
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{})
 
 	// Cargo is now misdirected
@@ -183,7 +183,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	//
 
 	// Load in Tokyo
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 8), trackingID, voyage.V300.VoyageNumber, location.JNTKO, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 8), trackingID, voyage.V300.Number, location.JNTKO, cargo.Load)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingID)
@@ -191,11 +191,11 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.JNTKO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V300.VoyageNumber)
-	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.DEHAM, VoyageNumber: voyage.V300.VoyageNumber})
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V300.Number)
+	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.DEHAM, VoyageNumber: voyage.V300.Number})
 
 	// Unload in Hamburg
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 12), trackingID, voyage.V300.VoyageNumber, location.DEHAM, cargo.Unload)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 12), trackingID, voyage.V300.Number, location.DEHAM, cargo.Unload)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingID)
@@ -203,11 +203,11 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.DEHAM)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
-	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Load, Location: location.DEHAM, VoyageNumber: voyage.V400.VoyageNumber})
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.Number(""))
+	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Load, Location: location.DEHAM, VoyageNumber: voyage.V400.Number})
 
 	// Load in Hamburg
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 14), trackingID, voyage.V400.VoyageNumber, location.DEHAM, cargo.Load)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 14), trackingID, voyage.V400.Number, location.DEHAM, cargo.Load)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingID)
@@ -215,11 +215,11 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.DEHAM)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.OnboardCarrier)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V400.VoyageNumber)
-	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.SESTO, VoyageNumber: voyage.V400.VoyageNumber})
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.V400.Number)
+	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Unload, Location: location.SESTO, VoyageNumber: voyage.V400.Number})
 
 	// Unload in Stockholm
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 15), trackingID, voyage.V400.VoyageNumber, location.SESTO, cargo.Unload)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 15), trackingID, voyage.V400.Number, location.SESTO, cargo.Unload)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingID)
@@ -227,11 +227,11 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.SESTO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.InPort)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.Number(""))
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{Type: cargo.Claim, Location: location.SESTO})
 
 	// Finally, cargo is claimed in Stockholm. This ends the cargo lifecycle from our perspective.
-	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 16), trackingID, voyage.V400.VoyageNumber, location.SESTO, cargo.Claim)
+	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 16), trackingID, voyage.V400.Number, location.SESTO, cargo.Claim)
 	chk.Check(err, IsNil)
 
 	c, err = cargoRepository.Find(trackingID)
@@ -239,7 +239,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.SESTO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.Claimed)
 	chk.Check(c.Delivery.IsMisdirected, Equals, false)
-	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.VoyageNumber(""))
+	chk.Check(c.Delivery.CurrentVoyage, Equals, voyage.Number(""))
 	chk.Check(c.Delivery.NextExpectedActivity, Equals, cargo.HandlingActivity{})
 }
 

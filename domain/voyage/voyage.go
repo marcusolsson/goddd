@@ -9,22 +9,23 @@ import (
 	"github.com/marcusolsson/goddd/domain/shared"
 )
 
-// VoyageNumber uniquely identifies a particular Voyage.
-type VoyageNumber string
+// Number uniquely identifies a particular Voyage.
+type Number string
 
-// Voyage
+// Voyage is a uniquely identifiable series of carrier movements.
 type Voyage struct {
-	VoyageNumber VoyageNumber
-	Schedule     Schedule
+	Number   Number
+	Schedule Schedule
 }
 
+// SameIdentity returns whether two voyages have the same voyage number.
 func (v *Voyage) SameIdentity(e shared.Entity) bool {
-	return v.VoyageNumber == e.(*Voyage).VoyageNumber
+	return v.Number == e.(*Voyage).Number
 }
 
 // New creates a voyage with a voyage number and a provided schedule.
-func New(n VoyageNumber, s Schedule) *Voyage {
-	return &Voyage{VoyageNumber: n, Schedule: s}
+func New(n Number, s Schedule) *Voyage {
+	return &Voyage{Number: n, Schedule: s}
 }
 
 // Schedule describes a voyage schedule.
@@ -32,6 +33,7 @@ type Schedule struct {
 	CarrierMovements []CarrierMovement
 }
 
+// SameValue returns whether two schedules have the same value.
 func (s Schedule) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(s, v.(Schedule))
 }
@@ -44,6 +46,7 @@ type CarrierMovement struct {
 	ArrivalTime       time.Time
 }
 
+// SameValue returns whether two carrier movements have the same value.
 func (m CarrierMovement) SameValue(v shared.ValueObject) bool {
 	return reflect.DeepEqual(m, v.(CarrierMovement))
 }
@@ -51,7 +54,7 @@ func (m CarrierMovement) SameValue(v shared.ValueObject) bool {
 // ErrUnknownVoyage is used when a voyage could not be found.
 var ErrUnknownVoyage = errors.New("unknown voyage")
 
-// VoyageRepository provides access a voyage store.
+// Repository provides access a voyage store.
 type Repository interface {
-	Find(VoyageNumber) (Voyage, error)
+	Find(Number) (Voyage, error)
 }

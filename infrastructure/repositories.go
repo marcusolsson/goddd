@@ -75,10 +75,10 @@ func NewInMemLocationRepository() location.Repository {
 }
 
 type voyageRepositoryInMem struct {
-	voyages map[voyage.VoyageNumber]voyage.Voyage
+	voyages map[voyage.Number]voyage.Voyage
 }
 
-func (r *voyageRepositoryInMem) Find(voyageNumber voyage.VoyageNumber) (voyage.Voyage, error) {
+func (r *voyageRepositoryInMem) Find(voyageNumber voyage.Number) (voyage.Voyage, error) {
 	if v, ok := r.voyages[voyageNumber]; ok {
 		return v, nil
 	}
@@ -88,12 +88,12 @@ func (r *voyageRepositoryInMem) Find(voyageNumber voyage.VoyageNumber) (voyage.V
 
 func NewInMemVoyageRepository() voyage.Repository {
 	r := &voyageRepositoryInMem{
-		voyages: make(map[voyage.VoyageNumber]voyage.Voyage),
+		voyages: make(map[voyage.Number]voyage.Voyage),
 	}
 
-	r.voyages[voyage.V100.VoyageNumber] = *voyage.V100
-	r.voyages[voyage.V300.VoyageNumber] = *voyage.V300
-	r.voyages[voyage.V400.VoyageNumber] = *voyage.V400
+	r.voyages[voyage.V100.Number] = *voyage.V100
+	r.voyages[voyage.V300.Number] = *voyage.V300
+	r.voyages[voyage.V400.Number] = *voyage.V400
 
 	return r
 }

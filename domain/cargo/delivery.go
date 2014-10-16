@@ -19,7 +19,7 @@ type Delivery struct {
 	NextExpectedActivity    HandlingActivity
 	LastEvent               HandlingEvent
 	LastKnownLocation       location.UNLocode
-	CurrentVoyage           voyage.VoyageNumber
+	CurrentVoyage           voyage.Number
 	ETA                     time.Time
 	IsMisdirected           bool
 	IsUnloadedAtDestination bool
@@ -162,12 +162,12 @@ func calculateNextExpectedActivity(d Delivery) HandlingActivity {
 	return HandlingActivity{}
 }
 
-func calculateCurrentVoyage(transportStatus TransportStatus, event HandlingEvent) voyage.VoyageNumber {
+func calculateCurrentVoyage(transportStatus TransportStatus, event HandlingEvent) voyage.Number {
 	if transportStatus == OnboardCarrier && event.Activity.Type != NotHandled {
 		return event.Activity.VoyageNumber
 	}
 
-	return voyage.VoyageNumber("")
+	return voyage.Number("")
 }
 
 func calculateETA(d Delivery) time.Time {

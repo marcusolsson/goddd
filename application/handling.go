@@ -11,7 +11,7 @@ import (
 type HandlingEventService interface {
 	// RegisterHandlingEvent registers a handling event in the system, and
 	// notifies interested parties that a cargo has been handled.
-	RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.VoyageNumber,
+	RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.Number,
 		unLocode location.UNLocode, eventType cargo.HandlingEventType) error
 }
 
@@ -21,7 +21,7 @@ type handlingEventService struct {
 	handlingEventHandler    HandlingEventHandler
 }
 
-func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.VoyageNumber,
+func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.Number,
 	unLocode location.UNLocode, eventType cargo.HandlingEventType) error {
 
 	registrationTime := time.Now()

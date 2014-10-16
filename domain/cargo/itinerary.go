@@ -11,7 +11,7 @@ import (
 
 // Leg describes the transportation between two locations on a voyage.
 type Leg struct {
-	VoyageNumber   voyage.VoyageNumber
+	VoyageNumber   voyage.Number
 	LoadLocation   location.UNLocode
 	UnloadLocation location.UNLocode
 	LoadTime       time.Time
@@ -24,7 +24,7 @@ func (l Leg) SameValue(v shared.ValueObject) bool {
 }
 
 // NewLeg creates a new itinerary leg.
-func NewLeg(voyageNumber voyage.VoyageNumber, loadLocation, unloadLocation location.UNLocode, loadTime, unloadTime time.Time) Leg {
+func NewLeg(voyageNumber voyage.Number, loadLocation, unloadLocation location.UNLocode, loadTime, unloadTime time.Time) Leg {
 	return Leg{
 		VoyageNumber:   voyageNumber,
 		LoadLocation:   loadLocation,
