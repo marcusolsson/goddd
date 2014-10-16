@@ -6,7 +6,7 @@ type CargoInspectionService interface {
 	// InspectCargo inspects cargo and send relevant notifications to
 	// interested parties, for example if a cargo has been misdirected, or
 	// unloaded at the final destination.
-	InspectCargo(trackingId cargo.TrackingId)
+	InspectCargo(trackingID cargo.TrackingID)
 }
 
 type cargoInspectionService struct {
@@ -16,14 +16,14 @@ type cargoInspectionService struct {
 }
 
 // TODO: Should be transactional
-func (s *cargoInspectionService) InspectCargo(trackingId cargo.TrackingId) {
-	c, err := s.cargoRepository.Find(trackingId)
+func (s *cargoInspectionService) InspectCargo(trackingID cargo.TrackingID) {
+	c, err := s.cargoRepository.Find(trackingID)
 
 	if err != nil {
 		return
 	}
 
-	h := s.handlingEventRepository.QueryHandlingHistory(trackingId)
+	h := s.handlingEventRepository.QueryHandlingHistory(trackingID)
 
 	c.DeriveDeliveryProgress(h)
 

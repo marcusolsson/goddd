@@ -34,7 +34,7 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 		}
 	)
 
-	trackingId := cargo.TrackingId("ABC123")
+	trackingId := cargo.TrackingID("ABC123")
 	misdirectedCargo := cargo.NewCargo(trackingId, cargo.RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
@@ -74,7 +74,7 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 		}
 	)
 
-	trackingId := cargo.TrackingId("ABC123")
+	trackingId := cargo.TrackingID("ABC123")
 	unloadedCargo := cargo.NewCargo(trackingId, cargo.RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
@@ -102,9 +102,9 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
 }
 
-func storeEvent(repository cargo.HandlingEventRepository, trackingId cargo.TrackingId, voyage voyage.VoyageNumber, activityType cargo.HandlingEventType, location location.UNLocode) {
+func storeEvent(repository cargo.HandlingEventRepository, trackingId cargo.TrackingID, voyage voyage.VoyageNumber, activityType cargo.HandlingEventType, location location.UNLocode) {
 	repository.Store(cargo.HandlingEvent{
-		TrackingId: trackingId,
+		TrackingID: trackingId,
 		Activity:   cargo.HandlingActivity{VoyageNumber: voyage, Type: activityType, Location: location},
 	})
 }

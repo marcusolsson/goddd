@@ -43,15 +43,15 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
 		completionTime = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
-		trackingId     = cargo.TrackingId("ABC123")
+		trackingID     = cargo.TrackingID("ABC123")
 		voyageNumber   = voyage.VoyageNumber("V100")
 		unLocode       = location.Stockholm.UNLocode
 		eventType      = cargo.Load
 	)
 
-	cargoRepository.Store(*cargo.NewCargo(trackingId, cargo.RouteSpecification{}))
+	cargoRepository.Store(*cargo.NewCargo(trackingID, cargo.RouteSpecification{}))
 
-	err := handlingEventService.RegisterHandlingEvent(completionTime, trackingId, voyageNumber, unLocode, eventType)
+	err := handlingEventService.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType)
 
 	c.Check(err, IsNil)
 	c.Check(len(handlingEventHandler.handledEvents), Equals, 1)

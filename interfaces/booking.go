@@ -12,7 +12,7 @@ import (
 )
 
 type cargoDTO struct {
-	TrackingId           string     `json:"trackingId"`
+	TrackingID           string     `json:"trackingId"`
 	StatusText           string     `json:"statusText"`
 	Origin               string     `json:"origin"`
 	Destination          string     `json:"destination"`
@@ -72,7 +72,7 @@ func (f *bookingServiceFacade) BookNewCargo(origin, destination string, arrivalD
 }
 
 func (f *bookingServiceFacade) LoadCargoForRouting(trackingId string) (cargoDTO, error) {
-	c, err := f.cargoRepository.Find(cargo.TrackingId(trackingId))
+	c, err := f.cargoRepository.Find(cargo.TrackingID(trackingId))
 
 	if err != nil {
 		return cargoDTO{}, err
@@ -91,15 +91,15 @@ func (f *bookingServiceFacade) AssignCargoToRoute(trackingId string, candidate R
 		})
 	}
 
-	return f.bookingService.AssignCargoToRoute(cargo.Itinerary{legs}, cargo.TrackingId(trackingId))
+	return f.bookingService.AssignCargoToRoute(cargo.Itinerary{legs}, cargo.TrackingID(trackingId))
 }
 
 func (f *bookingServiceFacade) ChangeDestination(trackingId string, destinationUNLocode string) error {
-	return f.bookingService.ChangeDestination(cargo.TrackingId(trackingId), location.UNLocode(destinationUNLocode))
+	return f.bookingService.ChangeDestination(cargo.TrackingID(trackingId), location.UNLocode(destinationUNLocode))
 }
 
 func (f *bookingServiceFacade) RequestRoutesForCargo(trackingId string) []RouteCandidateDTO {
-	itineraries := f.bookingService.RequestPossibleRoutesForCargo(cargo.TrackingId(trackingId))
+	itineraries := f.bookingService.RequestPossibleRoutesForCargo(cargo.TrackingID(trackingId))
 
 	candidates := make([]RouteCandidateDTO, 0)
 	for _, itin := range itineraries {
@@ -150,7 +150,7 @@ func NewBookingServiceFacade(cargoRepository cargo.CargoRepository, locationRepo
 
 func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoDTO {
 	return cargoDTO{
-		TrackingId:           string(c.TrackingId),
+		TrackingID:           string(c.TrackingID),
 		Origin:               string(c.Origin),
 		Destination:          string(c.RouteSpecification.Destination),
 		ETA:                  c.Delivery.ETA.Format(time.RFC3339),
@@ -192,7 +192,7 @@ func assembleLegs(c cargo.Cargo) []legDTO {
 }
 
 func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []eventDTO {
-	h := r.QueryHandlingHistory(c.TrackingId)
+	h := r.QueryHandlingHistory(c.TrackingID)
 	events := make([]eventDTO, len(h.HandlingEvents))
 	for i, e := range h.HandlingEvents {
 		var description string

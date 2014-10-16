@@ -16,14 +16,14 @@ type S struct{}
 var _ = Suite(&S{})
 
 func (s *S) TestConstruction(c *C) {
-	trackingId := TrackingId("XYZ")
+	trackingID := TrackingID("XYZ")
 	specification := RouteSpecification{
 		Origin:          location.SESTO,
 		Destination:     location.AUMEL,
 		ArrivalDeadline: time.Date(2009, time.March, 13, 0, 0, 0, 0, time.UTC),
 	}
 
-	cargo := NewCargo(trackingId, specification)
+	cargo := NewCargo(trackingID, specification)
 
 	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
 	c.Check(cargo.Delivery.TransportStatus, Equals, NotReceived)
@@ -144,7 +144,7 @@ func populateCargoReceivedInStockholm() *Cargo {
 	})
 
 	e := HandlingEvent{
-		TrackingId: cargo.TrackingId,
+		TrackingID: cargo.TrackingID,
 		Activity: HandlingActivity{
 			Type:     Receive,
 			Location: location.SESTO,
@@ -166,7 +166,7 @@ func populateCargoClaimedInMelbourne() *Cargo {
 	})
 
 	e := HandlingEvent{
-		TrackingId: cargo.TrackingId,
+		TrackingID: cargo.TrackingID,
 		Activity: HandlingActivity{
 			Type:     Claim,
 			Location: location.AUMEL,

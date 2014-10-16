@@ -279,7 +279,7 @@ type stubHandlingEventHandler struct {
 }
 
 func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
-	h.InspectionService.InspectCargo(event.TrackingId)
+	h.InspectionService.InspectCargo(event.TrackingID)
 }
 
 // Stub CargoEventHandler

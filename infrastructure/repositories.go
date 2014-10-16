@@ -7,18 +7,18 @@ import (
 )
 
 type cargoRepositoryInMem struct {
-	cargos map[cargo.TrackingId]cargo.Cargo
+	cargos map[cargo.TrackingID]cargo.Cargo
 }
 
 func (r *cargoRepositoryInMem) Store(c cargo.Cargo) error {
-	r.cargos[c.TrackingId] = c
+	r.cargos[c.TrackingID] = c
 
 	return nil
 }
 
-func (r *cargoRepositoryInMem) Find(trackingId cargo.TrackingId) (cargo.Cargo, error) {
+func (r *cargoRepositoryInMem) Find(trackingID cargo.TrackingID) (cargo.Cargo, error) {
 
-	if val, ok := r.cargos[trackingId]; ok {
+	if val, ok := r.cargos[trackingID]; ok {
 		return val, nil
 	}
 
@@ -35,7 +35,7 @@ func (r *cargoRepositoryInMem) FindAll() []cargo.Cargo {
 
 func NewInMemCargoRepository() cargo.CargoRepository {
 	return &cargoRepositoryInMem{
-		cargos: make(map[cargo.TrackingId]cargo.Cargo),
+		cargos: make(map[cargo.TrackingID]cargo.Cargo),
 	}
 }
 
@@ -99,23 +99,23 @@ func NewInMemVoyageRepository() voyage.VoyageRepository {
 }
 
 type handlingEventRepositoryInMem struct {
-	events map[cargo.TrackingId][]cargo.HandlingEvent
+	events map[cargo.TrackingID][]cargo.HandlingEvent
 }
 
 func (r *handlingEventRepositoryInMem) Store(e cargo.HandlingEvent) {
 	// Make array if it's the first event with this tracking ID.
-	if _, ok := r.events[e.TrackingId]; !ok {
-		r.events[e.TrackingId] = make([]cargo.HandlingEvent, 0)
+	if _, ok := r.events[e.TrackingID]; !ok {
+		r.events[e.TrackingID] = make([]cargo.HandlingEvent, 0)
 	}
-	r.events[e.TrackingId] = append(r.events[e.TrackingId], e)
+	r.events[e.TrackingID] = append(r.events[e.TrackingID], e)
 }
 
-func (r *handlingEventRepositoryInMem) QueryHandlingHistory(trackingId cargo.TrackingId) cargo.HandlingHistory {
-	return cargo.HandlingHistory{r.events[trackingId]}
+func (r *handlingEventRepositoryInMem) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
+	return cargo.HandlingHistory{r.events[trackingID]}
 }
 
 func NewInMemHandlingEventRepository() cargo.HandlingEventRepository {
 	return &handlingEventRepositoryInMem{
-		events: make(map[cargo.TrackingId][]cargo.HandlingEvent),
+		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
 	}
 }

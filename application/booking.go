@@ -12,18 +12,18 @@ import (
 type BookingService interface {
 	// BookNewCargo registers a new cargo in the tracking system, not yet
 	// routed.
-	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error)
+	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error)
 
 	// RequestPossibleRoutesForCargo requests a list of itineraries describing
 	// possible routes for this cargo.
-	RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary
+	RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []cargo.Itinerary
 
 	// AssignCargoToRoute assigns a cargo to the route specified by the
 	// itinerary.
-	AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) error
+	AssignCargoToRoute(itinerary cargo.Itinerary, trackingID cargo.TrackingID) error
 
 	// ChangeDestination changes the destination of a cargo.
-	ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) error
+	ChangeDestination(trackingID cargo.TrackingID, unLocode location.UNLocode) error
 }
 
 type bookingService struct {
@@ -32,24 +32,24 @@ type bookingService struct {
 	routingService     routing.RoutingService
 }
 
-func (s *bookingService) BookNewCargo(originLocode location.UNLocode, destinationLocode location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingId, error) {
+func (s *bookingService) BookNewCargo(originLocode location.UNLocode, destinationLocode location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
 
-	trackingId := cargo.NextTrackingId()
+	trackingID := cargo.NextTrackingID()
 	routeSpecification := cargo.RouteSpecification{
 		Origin:          originLocode,
 		Destination:     destinationLocode,
 		ArrivalDeadline: arrivalDeadline,
 	}
 
-	c := cargo.NewCargo(trackingId, routeSpecification)
+	c := cargo.NewCargo(trackingID, routeSpecification)
 
 	s.cargoRepository.Store(*c)
 
-	return c.TrackingId, nil
+	return c.TrackingID, nil
 }
 
-func (s *bookingService) RequestPossibleRoutesForCargo(trackingId cargo.TrackingId) []cargo.Itinerary {
-	c, err := s.cargoRepository.Find(trackingId)
+func (s *bookingService) RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []cargo.Itinerary {
+	c, err := s.cargoRepository.Find(trackingID)
 
 	if err != nil {
 		return []cargo.Itinerary{}
@@ -58,10 +58,10 @@ func (s *bookingService) RequestPossibleRoutesForCargo(trackingId cargo.Tracking
 	return s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
 }
 
-func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingId cargo.TrackingId) error {
+func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingID cargo.TrackingID) error {
 	var err error
 
-	c, err := s.cargoRepository.Find(trackingId)
+	c, err := s.cargoRepository.Find(trackingID)
 
 	if err != nil {
 		return err
@@ -76,8 +76,8 @@ func (s *bookingService) AssignCargoToRoute(itinerary cargo.Itinerary, trackingI
 	return nil
 }
 
-func (s *bookingService) ChangeDestination(trackingId cargo.TrackingId, unLocode location.UNLocode) error {
-	c, err := s.cargoRepository.Find(trackingId)
+func (s *bookingService) ChangeDestination(trackingID cargo.TrackingID, unLocode location.UNLocode) error {
+	c, err := s.cargoRepository.Find(trackingID)
 
 	if err != nil {
 		return errors.New("Could not find cargo.")

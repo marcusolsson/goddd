@@ -22,7 +22,7 @@ type HandlingActivity struct {
 // HandlingEvent is used to register the event when, for instance, a cargo is
 // unloaded from a carrier at a some loacation at a given time.
 type HandlingEvent struct {
-	TrackingId TrackingId
+	TrackingID TrackingID
 	Activity   HandlingActivity
 }
 
@@ -78,7 +78,7 @@ func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
 // HandlingEventRepository provides access a handling event store.
 type HandlingEventRepository interface {
 	Store(e HandlingEvent)
-	QueryHandlingHistory(TrackingId) HandlingHistory
+	QueryHandlingHistory(TrackingID) HandlingHistory
 }
 
 // HandlingEventFactory creates handling events.
@@ -88,10 +88,10 @@ type HandlingEventFactory struct {
 	LocationRepository location.LocationRepository
 }
 
-func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingId TrackingId,
+func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, completionTime time.Time, trackingID TrackingID,
 	voyageNumber voyage.VoyageNumber, unLocode location.UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
 
-	if _, err := f.CargoRepository.Find(trackingId); err != nil {
+	if _, err := f.CargoRepository.Find(trackingID); err != nil {
 		return HandlingEvent{}, err
 	}
 
@@ -107,7 +107,7 @@ func (f *HandlingEventFactory) CreateHandlingEvent(registrationTime time.Time, c
 	}
 
 	return HandlingEvent{
-		TrackingId: trackingId,
+		TrackingID: trackingID,
 		Activity: HandlingActivity{
 			Type:         eventType,
 			Location:     unLocode,

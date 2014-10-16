@@ -12,12 +12,12 @@ import (
 	"code.google.com/p/go-uuid/uuid"
 )
 
-// TrackingId uniquely identifies a particular cargo.
-type TrackingId string
+// TrackingID uniquely identifies a particular cargo.
+type TrackingID string
 
 // Cargo is the central class in the domain model.
 type Cargo struct {
-	TrackingId         TrackingId
+	TrackingID         TrackingID
 	Origin             location.UNLocode
 	RouteSpecification RouteSpecification
 	Itinerary          Itinerary
@@ -43,16 +43,16 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 }
 
 func (c *Cargo) SameIdentity(e shared.Entity) bool {
-	return c.TrackingId == e.(*Cargo).TrackingId
+	return c.TrackingID == e.(*Cargo).TrackingID
 }
 
 // NewCargo creates a new, unrouted cargo.
-func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Cargo {
+func NewCargo(trackingID TrackingID, routeSpecification RouteSpecification) *Cargo {
 	emptyItinerary := Itinerary{}
 	emptyHistory := HandlingHistory{make([]HandlingEvent, 0)}
 
 	return &Cargo{
-		TrackingId:         trackingId,
+		TrackingID:         trackingID,
 		Origin:             routeSpecification.Origin,
 		RouteSpecification: routeSpecification,
 		Delivery:           DeriveDeliveryFrom(routeSpecification, emptyItinerary, emptyHistory),
@@ -62,7 +62,7 @@ func NewCargo(trackingId TrackingId, routeSpecification RouteSpecification) *Car
 // CargoRepository provides access a cargo store.
 type CargoRepository interface {
 	Store(cargo Cargo) error
-	Find(trackingId TrackingId) (Cargo, error)
+	Find(trackingID TrackingID) (Cargo, error)
 	FindAll() []Cargo
 }
 
@@ -70,8 +70,8 @@ type CargoRepository interface {
 var ErrUnknownCargo = errors.New("unknown cargo")
 
 // TODO: Move to infrastructure
-func NextTrackingId() TrackingId {
-	return TrackingId(strings.Split(strings.ToUpper(uuid.New()), "-")[0])
+func NextTrackingID() TrackingID {
+	return TrackingID(strings.Split(strings.ToUpper(uuid.New()), "-")[0])
 }
 
 // RouteSpecification Contains information about a route: its origin,
