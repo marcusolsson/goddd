@@ -33,7 +33,7 @@ func (r *cargoRepositoryInMem) FindAll() []cargo.Cargo {
 	return c
 }
 
-func NewInMemCargoRepository() cargo.CargoRepository {
+func NewInMemCargoRepository() cargo.Repository {
 	return &cargoRepositoryInMem{
 		cargos: make(map[cargo.TrackingID]cargo.Cargo),
 	}

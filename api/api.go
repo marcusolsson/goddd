@@ -166,7 +166,7 @@ func (a *Api) LocationsHandler(w http.ResponseWriter, req *http.Request) {
 	a.Renderer.JSON(w, http.StatusOK, a.Facade.ListShippingLocations())
 }
 
-func storeTestData(r cargo.CargoRepository) {
+func storeTestData(r cargo.Repository) {
 	test1 := cargo.NewCargo("FTL456", cargo.RouteSpecification{
 		Origin:      location.AUMEL,
 		Destination: location.SESTO,

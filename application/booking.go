@@ -27,7 +27,7 @@ type BookingService interface {
 }
 
 type bookingService struct {
-	cargoRepository    cargo.CargoRepository
+	cargoRepository    cargo.Repository
 	locationRepository location.LocationRepository
 	routingService     routing.RoutingService
 }
@@ -105,7 +105,7 @@ func (s *bookingService) ChangeDestination(trackingID cargo.TrackingID, unLocode
 }
 
 // NewBookingService creates a booking service with necessary dependencies.
-func NewBookingService(cr cargo.CargoRepository, lr location.LocationRepository, rs routing.RoutingService) BookingService {
+func NewBookingService(cr cargo.Repository, lr location.LocationRepository, rs routing.RoutingService) BookingService {
 	return &bookingService{
 		cargoRepository:    cr,
 		locationRepository: lr,

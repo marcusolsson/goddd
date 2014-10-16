@@ -42,6 +42,7 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
 }
 
+// SameIdentity returns whether two cargos have the same tracking ID.
 func (c *Cargo) SameIdentity(e shared.Entity) bool {
 	return c.TrackingID == e.(*Cargo).TrackingID
 }
@@ -59,8 +60,8 @@ func NewCargo(trackingID TrackingID, routeSpecification RouteSpecification) *Car
 	}
 }
 
-// CargoRepository provides access a cargo store.
-type CargoRepository interface {
+// Repository provides access a cargo store.
+type Repository interface {
 	Store(cargo Cargo) error
 	Find(trackingID TrackingID) (Cargo, error)
 	FindAll() []Cargo

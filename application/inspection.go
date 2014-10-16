@@ -10,7 +10,7 @@ type CargoInspectionService interface {
 }
 
 type cargoInspectionService struct {
-	cargoRepository         cargo.CargoRepository
+	cargoRepository         cargo.Repository
 	handlingEventRepository cargo.HandlingEventRepository
 	cargoEventHandler       CargoEventHandler
 }
@@ -40,6 +40,6 @@ func (s *cargoInspectionService) InspectCargo(trackingID cargo.TrackingID) {
 
 // NewCargoInspectionService creates a inspection service with necessary
 // dependencies.
-func NewCargoInspectionService(cargoRepository cargo.CargoRepository, handlingEventRepository cargo.HandlingEventRepository, eventHandler CargoEventHandler) CargoInspectionService {
+func NewCargoInspectionService(cargoRepository cargo.Repository, handlingEventRepository cargo.HandlingEventRepository, eventHandler CargoEventHandler) CargoInspectionService {
 	return &cargoInspectionService{cargoRepository, handlingEventRepository, eventHandler}
 }
