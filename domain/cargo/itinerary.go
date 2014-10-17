@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/shared"
 	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
@@ -19,8 +18,8 @@ type Leg struct {
 }
 
 // SameValue returns whether two legs have the same value.
-func (l Leg) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(l, v.(Leg))
+func (l Leg) SameValue(v Leg) bool {
+	return reflect.DeepEqual(l, v)
 }
 
 // NewLeg creates a new itinerary leg.
@@ -98,6 +97,6 @@ func (i Itinerary) IsExpected(event HandlingEvent) bool {
 }
 
 // SameValue returns whether two itineraries have the same value.
-func (i Itinerary) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(i, v.(Itinerary))
+func (i Itinerary) SameValue(v Itinerary) bool {
+	return reflect.DeepEqual(i, v)
 }

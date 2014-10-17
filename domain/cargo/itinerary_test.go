@@ -57,7 +57,7 @@ func (s *S) TestItineraryIsExpected(c *C) {
 
 	c.Check(emptyItinerary.IsExpected(emptyEvent), Equals, true)
 
-	i := Itinerary{[]Leg{
+	i := Itinerary{Legs: []Leg{
 		Leg{VoyageNumber: "001A", LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
 		Leg{VoyageNumber: "001A", LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}}

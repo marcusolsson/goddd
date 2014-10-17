@@ -2,7 +2,6 @@ package voyage
 
 import (
 	"errors"
-	"reflect"
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
@@ -33,22 +32,12 @@ type Schedule struct {
 	CarrierMovements []CarrierMovement
 }
 
-// SameValue returns whether two schedules have the same value.
-func (s Schedule) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(s, v.(Schedule))
-}
-
 // CarrierMovement is a vessel voyage from one location to another.
 type CarrierMovement struct {
 	DepartureLocation location.Location
 	ArrivalLocation   location.Location
 	DepartureTime     time.Time
 	ArrivalTime       time.Time
-}
-
-// SameValue returns whether two carrier movements have the same value.
-func (m CarrierMovement) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(m, v.(CarrierMovement))
 }
 
 // ErrUnknownVoyage is used when a voyage could not be found.

@@ -1,11 +1,9 @@
 package cargo
 
 import (
-	"reflect"
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/shared"
 	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
@@ -30,11 +28,6 @@ type Delivery struct {
 // no additional handling of the cargo has been performed.
 func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
 	return newDelivery(d.LastEvent, itinerary, routeSpecification)
-}
-
-// SameValue returns whether two deliveries have the same value.
-func (d Delivery) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(d, v.(Delivery))
 }
 
 // IsOnTrack checks if the delivery is on track.

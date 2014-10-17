@@ -2,11 +2,9 @@ package cargo
 
 import (
 	"errors"
-	"reflect"
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/shared"
 	"github.com/marcusolsson/goddd/domain/voyage"
 )
 
@@ -69,11 +67,6 @@ func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
 	}
 
 	return h.HandlingEvents[len(h.HandlingEvents)-1], nil
-}
-
-// SameValue returns whether two handling histories have the same value.
-func (h HandlingHistory) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(h, v.(HandlingHistory))
 }
 
 // HandlingEventRepository provides access a handling event store.

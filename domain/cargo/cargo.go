@@ -93,8 +93,8 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 }
 
 // SameValue returns whether two route specifications have the same value.
-func (s RouteSpecification) SameValue(v shared.ValueObject) bool {
-	return reflect.DeepEqual(s, v.(RouteSpecification))
+func (s RouteSpecification) SameValue(v RouteSpecification) bool {
+	return reflect.DeepEqual(s, v)
 }
 
 // RoutingStatus describes status of cargo routing.
