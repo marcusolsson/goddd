@@ -1,5 +1,10 @@
 package cargo
 
+// TODO: It would make sense to have this in its own package. Unfortunately,
+// then there would be a circular dependency between the cargo and handling
+// packages since cargo.Delivery would use handling.HandlingEvent and
+// handling.HandlingEvent would use cargo.TrackingID.
+
 import (
 	"errors"
 	"time"
