@@ -16,11 +16,11 @@ type cargoDTO struct {
 	StatusText           string     `json:"statusText"`
 	Origin               string     `json:"origin"`
 	Destination          string     `json:"destination"`
-	ETA                  string     `json:"eta"`
+	ETA                  time.Time  `json:"eta"`
 	NextExpectedActivity string     `json:"nextExpectedActivity"`
 	Misrouted            bool       `json:"misrouted"`
 	Routed               bool       `json:"routed"`
-	ArrivalDeadline      string     `json:"arrivalDeadline"`
+	ArrivalDeadline      time.Time  `json:"arrivalDeadline"`
 	Events               []eventDTO `json:"events"`
 	Legs                 []legDTO   `json:"legs,omitempty"`
 }
@@ -153,11 +153,11 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoDTO {
 		TrackingID:           string(c.TrackingID),
 		Origin:               string(c.Origin),
 		Destination:          string(c.RouteSpecification.Destination),
-		ETA:                  c.Delivery.ETA.Format(time.RFC3339),
+		ETA:                  c.Delivery.ETA,
 		NextExpectedActivity: "",
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
 		Routed:               !c.Itinerary.IsEmpty(),
-		ArrivalDeadline:      c.RouteSpecification.ArrivalDeadline.Format(time.RFC3339),
+		ArrivalDeadline:      c.RouteSpecification.ArrivalDeadline,
 		StatusText:           assembleStatusText(c),
 		Legs:                 assembleLegs(c),
 		Events:               assembleEvents(c, her),
@@ -186,6 +186,8 @@ func assembleLegs(c cargo.Cargo) []legDTO {
 			VoyageNumber: string(l.VoyageNumber),
 			From:         string(l.LoadLocation),
 			To:           string(l.UnloadLocation),
+			LoadTime:     l.LoadTime,
+			UnloadTime:   l.UnloadTime,
 		})
 	}
 	return legs
