@@ -17,10 +17,6 @@ The purpose of this sample is because I wanted to learn Go and to see how well i
 - How can we use the zero-initialization idiom effectively in DDD? What does a zero-initialized Itinerary mean?
 - Concurrency is one area where Go shines, but initial thought is to keep it out of the domain model. This might be interesting if concurrency is a explicit part of the model.
 
-## REST API
-
-The application exposes a REST API.
-
 ### Try it out!
 
 If you just want to run the server application on you machine, it is not necessary to clone the repository. 
@@ -52,6 +48,9 @@ __Read more:__
 - [Deploy Go applications to App Engine](https://cloud.google.com/appengine/docs/go/)
 - [Deploy Go applications to Heroku](http://blog.wercker.com/2013/07/10/deploying-golang-to-heroku.html)
 
+## REST API
+
+The application exposes a REST API.
 
 ### Cargos
 
