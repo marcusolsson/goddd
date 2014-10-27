@@ -88,6 +88,8 @@ func (f *bookingServiceFacade) AssignCargoToRoute(trackingID string, candidate R
 			VoyageNumber:   voyage.Number(l.VoyageNumber),
 			LoadLocation:   location.UNLocode(l.From),
 			UnloadLocation: location.UNLocode(l.To),
+			LoadTime:       l.LoadTime,
+			UnloadTime:     l.UnloadTime,
 		})
 	}
 
