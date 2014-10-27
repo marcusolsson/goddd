@@ -12,7 +12,7 @@ import (
 )
 
 type cargoDTO struct {
-	TrackingID           string     `json:"trackingID"`
+	TrackingID           string     `json:"trackingId"`
 	StatusText           string     `json:"statusText"`
 	Origin               string     `json:"origin"`
 	Destination          string     `json:"destination"`
