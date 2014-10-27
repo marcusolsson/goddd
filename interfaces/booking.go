@@ -22,7 +22,7 @@ type cargoDTO struct {
 	Routed               bool       `json:"routed"`
 	ArrivalDeadline      string     `json:"arrivalDeadline"`
 	Events               []eventDTO `json:"events"`
-	Legs                 []legDTO   `json:"legs"`
+	Legs                 []legDTO   `json:"legs,omitempty"`
 }
 
 type locationDTO struct {
