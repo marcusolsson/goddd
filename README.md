@@ -33,32 +33,17 @@ If you just want to run the server application on you machine, it is not necessa
 
     `go get -u github.com/marcusolsson/goddd`
 
-    ... or by cloning the repo to 
+    ... or by cloning the repository to:
     
     `$GOPATH/src/github.com/_username_/goddd`
 
 3. Run it!:
 
     `$GOPATH/bin/goddd -port 8080`
-    or `go run main.go -port 8080`
 
+	or
 
-### Contributing
-
-Pull request are more than welcome. If you want to start coding
-
-1. Make sure you have your `$GOPATH` environment set.
-
-    `export GOPATH=$HOME/go`
-
-2. Clone the repository to:
-
-	`$GOPATH/src/github.com/_username_/goddd`
-
-3. Run it!:
-
-	`go run main.go -port 8080`
-
+    `go run main.go -port 8080`
 
 ### Deploying the application
 
