@@ -21,7 +21,9 @@ The purpose of this sample is because I wanted to learn Go and to see how well i
 
 The application exposes a REST API.
 
-### Setup
+### Try it out!
+
+If you just want to run the server application on you machine, it is not necessary to clone the repository. 
 
 1. Make sure you have your `$GOPATH` environment set.
 
@@ -31,9 +33,34 @@ The application exposes a REST API.
 
     `go get -u github.com/marcusolsson/goddd`
 
+    ... or by cloning the repo to 
+    
+    `$GOPATH/src/github.com/_username_/goddd`
+
 3. Run it!:
 
-    `go run main.go`
+    `$GOPATH/bin/goddd -port 8080`
+    or `go run main.go -port 8080`
+
+
+### Contributing
+
+Pull request are more than welcome. If you want to start coding
+
+1. Make sure you have your `$GOPATH` environment set.
+
+    `export GOPATH=$HOME/go`
+
+2. Clone the repository to:
+
+	`$GOPATH/src/github.com/_username_/goddd`
+
+3. Run it!:
+
+	`go run main.go -port 8080`
+
+
+### Deploying the application
 
 _Note:_ ~~The `appengine.go` is used to deploy it on Google App Engine. If you want to deploy it to your own project, edit the `app.yaml` to point to your own project.~~ 
 
