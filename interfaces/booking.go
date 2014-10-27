@@ -35,11 +35,11 @@ type RouteCandidateDTO struct {
 }
 
 type legDTO struct {
-	VoyageNumber string `json:"voyageNumber"`
-	From         string `json:"from"`
-	To           string `json:"to"`
-	LoadTime     string `json:"loadTime"`
-	UnloadTime   string `json:"unloadTime"`
+	VoyageNumber string    `json:"voyageNumber"`
+	From         string    `json:"from"`
+	To           string    `json:"to"`
+	LoadTime     time.Time `json:"loadTime"`
+	UnloadTime   time.Time `json:"unloadTime"`
 }
 
 type eventDTO struct {
@@ -106,11 +106,11 @@ func (f *bookingServiceFacade) RequestRoutesForCargo(trackingID string) []RouteC
 		var legs []legDTO
 		for _, leg := range itin.Legs {
 			legs = append(legs, legDTO{
-				VoyageNumber: "S0001",
+				VoyageNumber: string(leg.VoyageNumber),
 				From:         string(leg.LoadLocation),
 				To:           string(leg.UnloadLocation),
-				LoadTime:     "N/A",
-				UnloadTime:   "N/A",
+				LoadTime:     leg.LoadTime,
+				UnloadTime:   leg.UnloadTime,
 			})
 		}
 		candidates = append(candidates, RouteCandidateDTO{Legs: legs})
