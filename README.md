@@ -19,7 +19,7 @@ The purpose of this sample is because I wanted to learn Go and to see how well i
 
 ### Try it out!
 
-If you just want to run the server application on you machine, it is not necessary to clone the repository. 
+If you just want to run the server application on you machine it's not necessary to clone the repository. `go get` will install the application to your GOPATH. 
 
 1. Make sure you have your `$GOPATH` environment set.
 
