@@ -27,7 +27,7 @@ func NewAPI() *API {
 
 	var (
 		cargoRepository         = infrastructure.NewInMemCargoRepository()
-		locationRepository      = infrastructure.NewLocationRepositoryMongoDB()
+		locationRepository      = infrastructure.NewInMemLocationRepository()
 		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
 		routingService          = infrastructure.NewExternalRoutingService(locationRepository)
 		bookingService          = application.NewBookingService(cargoRepository, locationRepository, routingService)
