@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/marcusolsson/goddd/domain/cargo"
 	"github.com/marcusolsson/goddd/domain/location"
@@ -16,11 +17,11 @@ type routeDTO struct {
 }
 
 type edgeDTO struct {
-	Voyage      string `json:"voyage"`
-	Origin      string `json:"origin"`
-	Destination string `json:"destination"`
-	Departure   string `json:"departure"`
-	Arrival     string `json:"arrival"`
+	Voyage      string    `json:"voyage"`
+	Origin      string    `json:"origin"`
+	Destination string    `json:"destination"`
+	Departure   time.Time `json:"departure"`
+	Arrival     time.Time `json:"arrival"`
 }
 
 type externalRoutingService struct {
@@ -54,6 +55,8 @@ func (s *externalRoutingService) FetchRoutesForSpecification(routeSpecification 
 				VoyageNumber:   voyage.Number(e.Voyage),
 				LoadLocation:   location.UNLocode(e.Origin),
 				UnloadLocation: location.UNLocode(e.Destination),
+				LoadTime:       e.Departure,
+				UnloadTime:     e.Arrival,
 			})
 		}
 
