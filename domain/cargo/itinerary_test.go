@@ -33,10 +33,10 @@ func (s *S) TestItineraryEquality(c *C) {
 		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.SESTO},
 	}}
 
-	c.Check(i1.SameValue(i1), Equals, true)
-	c.Check(i1.SameValue(i2), Equals, true)
-	c.Check(i1.SameValue(i3), Equals, false)
-	c.Check(i2.SameValue(i3), Equals, false)
+	c.Check(i1, DeepEquals, i1)
+	c.Check(i1, DeepEquals, i2)
+	c.Check(i1, Not(DeepEquals), i3)
+	c.Check(i2, Not(DeepEquals), i3)
 }
 
 func (s *S) TestLegEquality(c *C) {
@@ -44,10 +44,10 @@ func (s *S) TestLegEquality(c *C) {
 	l2 := Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL}
 	l3 := Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG}
 
-	c.Check(l1.SameValue(l1), Equals, true)
-	c.Check(l1.SameValue(l2), Equals, true)
-	c.Check(l1.SameValue(l3), Equals, false)
-	c.Check(l2.SameValue(l3), Equals, false)
+	c.Check(l1, DeepEquals, l1)
+	c.Check(l1, DeepEquals, l2)
+	c.Check(l1, Not(DeepEquals), l3)
+	c.Check(l2, Not(DeepEquals), l3)
 }
 
 func (s *S) TestItineraryIsExpected(c *C) {

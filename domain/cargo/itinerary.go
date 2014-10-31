@@ -1,7 +1,6 @@
 package cargo
 
 import (
-	"reflect"
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
@@ -15,11 +14,6 @@ type Leg struct {
 	UnloadLocation location.UNLocode
 	LoadTime       time.Time
 	UnloadTime     time.Time
-}
-
-// SameValue returns whether two legs have the same value.
-func (l Leg) SameValue(v Leg) bool {
-	return reflect.DeepEqual(l, v)
 }
 
 // NewLeg creates a new itinerary leg.
@@ -94,9 +88,4 @@ func (i Itinerary) IsExpected(event HandlingEvent) bool {
 	}
 
 	return true
-}
-
-// SameValue returns whether two itineraries have the same value.
-func (i Itinerary) SameValue(v Itinerary) bool {
-	return reflect.DeepEqual(i, v)
 }

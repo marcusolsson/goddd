@@ -1,10 +1,6 @@
 package location
 
-import (
-	"errors"
-
-	"github.com/marcusolsson/goddd/domain/shared"
-)
+import "errors"
 
 // UNLocode is the United Nations location code that uniquely identifies a
 // particular location.
@@ -18,11 +14,6 @@ type UNLocode string
 type Location struct {
 	UNLocode UNLocode
 	Name     string
-}
-
-// SameIdentity returns whether two locations have the same UN Locode.
-func (l Location) SameIdentity(e shared.Entity) bool {
-	return l.UNLocode == e.(Location).UNLocode
 }
 
 // ErrUnknownLocation is used when a location could not be found.

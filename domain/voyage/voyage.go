@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/shared"
 )
 
 // Number uniquely identifies a particular Voyage.
@@ -15,11 +14,6 @@ type Number string
 type Voyage struct {
 	Number   Number
 	Schedule Schedule
-}
-
-// SameIdentity returns whether two voyages have the same voyage number.
-func (v *Voyage) SameIdentity(e shared.Entity) bool {
-	return v.Number == e.(*Voyage).Number
 }
 
 // New creates a voyage with a voyage number and a provided schedule.

@@ -13,6 +13,6 @@ type S struct{}
 var _ = Suite(&S{})
 
 func (s *S) TestEquality(c *C) {
-	c.Check(Stockholm.SameIdentity(Stockholm), Equals, true)
-	c.Check(Stockholm.SameIdentity(Hongkong), Equals, false)
+	c.Check(Stockholm.UNLocode, Equals, Stockholm.UNLocode)
+	c.Check(Stockholm.UNLocode, Not(Equals), Hongkong.UNLocode)
 }

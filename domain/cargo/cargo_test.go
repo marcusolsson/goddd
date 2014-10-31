@@ -40,18 +40,18 @@ func (s *S) TestEquality(c *C) {
 		Destination: location.AUMEL,
 	}
 
-	c.Check(spec1.SameValue(spec1), Equals, true)
-	c.Check(spec1.SameValue(spec2), Equals, false)
+	c.Check(spec1, DeepEquals, spec1)
+	c.Check(spec1, Not(DeepEquals), spec2)
 
 	c1 := NewCargo("ABC", spec1)
 	c2 := NewCargo("CBA", spec1)
 	c3 := NewCargo("ABC", spec2)
 	c4 := NewCargo("ABC", spec1)
 
-	c.Check(c1.SameIdentity(c4), Equals, true)
-	c.Check(c1.SameIdentity(c3), Equals, true)
-	c.Check(c3.SameIdentity(c4), Equals, true)
-	c.Check(c1.SameIdentity(c2), Equals, false)
+	c.Check(c1.TrackingID, Equals, c4.TrackingID)
+	c.Check(c1.TrackingID, Equals, c3.TrackingID)
+	c.Check(c3.TrackingID, Equals, c4.TrackingID)
+	c.Check(c1.TrackingID, Not(Equals), c2.TrackingID)
 }
 
 func (s *S) TestRoutingStatus(c *C) {

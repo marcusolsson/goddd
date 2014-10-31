@@ -2,12 +2,10 @@ package cargo
 
 import (
 	"errors"
-	"reflect"
 	"strings"
 	"time"
 
 	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/shared"
 
 	"code.google.com/p/go-uuid/uuid"
 )
@@ -40,11 +38,6 @@ func (c *Cargo) AssignToRoute(itinerary Itinerary) {
 // based on the current route specification, itinerary and handling of the cargo.
 func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
-}
-
-// SameIdentity returns whether two cargos have the same tracking ID.
-func (c *Cargo) SameIdentity(e shared.Entity) bool {
-	return c.TrackingID == e.(*Cargo).TrackingID
 }
 
 // NewCargo creates a new, unrouted cargo.
@@ -90,11 +83,6 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 	return itinerary.Legs != nil &&
 		s.Origin == itinerary.InitialDepartureLocation() &&
 		s.Destination == itinerary.FinalArrivalLocation()
-}
-
-// SameValue returns whether two route specifications have the same value.
-func (s RouteSpecification) SameValue(v RouteSpecification) bool {
-	return reflect.DeepEqual(s, v)
 }
 
 // RoutingStatus describes status of cargo routing.
