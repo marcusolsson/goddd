@@ -3,6 +3,7 @@ package interfaces
 import (
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/marcusolsson/goddd/application"
@@ -156,7 +157,7 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoDTO {
 		Origin:               string(c.Origin),
 		Destination:          string(c.RouteSpecification.Destination),
 		ETA:                  c.Delivery.ETA,
-		NextExpectedActivity: "",
+		NextExpectedActivity: nextExpectedActivity(c),
 		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
 		Routed:               !c.Itinerary.IsEmpty(),
 		ArrivalDeadline:      c.RouteSpecification.ArrivalDeadline,
@@ -164,6 +165,22 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoDTO {
 		Legs:                 assembleLegs(c),
 		Events:               assembleEvents(c, her),
 	}
+}
+
+func nextExpectedActivity(c cargo.Cargo) string {
+	a := c.Delivery.NextExpectedActivity
+	prefix := "Next expected activity is to"
+
+	switch a.Type {
+	case cargo.Load:
+		return fmt.Sprintf("%s %s cargo onto voyage %s in %s.", prefix, strings.ToLower(a.Type.String()), a.VoyageNumber, a.Location)
+	case cargo.Unload:
+		return fmt.Sprintf("%s %s cargo off of voyage %s in %s.", prefix, strings.ToLower(a.Type.String()), a.VoyageNumber, a.Location)
+	case cargo.NotHandled:
+		return "There are currently no expected activities for this cargo."
+	}
+
+	return fmt.Sprintf("%s %s cargo in %s.", prefix, strings.ToLower(a.Type.String()), a.Location)
 }
 
 func assembleStatusText(c cargo.Cargo) string {
