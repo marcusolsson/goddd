@@ -134,6 +134,9 @@ func calculateNextExpectedActivity(d Delivery) HandlingActivity {
 	switch d.LastEvent.Activity.Type {
 	case NotHandled:
 		return HandlingActivity{Type: Receive, Location: d.RouteSpecification.Origin}
+	case Receive:
+		l := d.Itinerary.Legs[0]
+		return HandlingActivity{Type: Load, Location: l.LoadLocation, VoyageNumber: l.VoyageNumber}
 	case Load:
 		for _, l := range d.Itinerary.Legs {
 			if l.LoadLocation == d.LastEvent.Activity.Location {

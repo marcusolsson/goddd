@@ -95,6 +95,12 @@ func NewInMemVoyageRepository() voyage.Repository {
 	r.voyages[voyage.V300.Number] = *voyage.V300
 	r.voyages[voyage.V400.Number] = *voyage.V400
 
+	r.voyages[voyage.V0100S.Number] = *voyage.V0100S
+	r.voyages[voyage.V0200T.Number] = *voyage.V0200T
+	r.voyages[voyage.V0300A.Number] = *voyage.V0300A
+	r.voyages[voyage.V0301S.Number] = *voyage.V0301S
+	r.voyages[voyage.V0400S.Number] = *voyage.V0400S
+
 	return r
 }
 

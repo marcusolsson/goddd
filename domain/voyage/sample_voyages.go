@@ -26,4 +26,12 @@ var (
 			CarrierMovement{DepartureLocation: location.Helsinki, ArrivalLocation: location.Hamburg},
 		},
 	})
+
+	// These voyages are hard-coded into the current pathfinder. Make sure
+	// they exist.
+	V0100S = New("0100S", Schedule{[]CarrierMovement{}})
+	V0200T = New("0200T", Schedule{[]CarrierMovement{}})
+	V0300A = New("0300A", Schedule{[]CarrierMovement{}})
+	V0301S = New("0301S", Schedule{[]CarrierMovement{}})
+	V0400S = New("0400S", Schedule{[]CarrierMovement{}})
 )

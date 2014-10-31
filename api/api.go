@@ -20,25 +20,29 @@ import (
 
 type API struct {
 	Renderer *render.Render
-	Facade   interfaces.BookingServiceFacade
+	Booking  interfaces.BookingServiceFacade
+	Handling interfaces.HandlingEventServiceFacade
 }
 
 func NewAPI() *API {
 
 	var (
-		cargoRepository         = infrastructure.NewInMemCargoRepository()
-		locationRepository      = infrastructure.NewInMemLocationRepository()
-		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
-		routingService          = infrastructure.NewExternalRoutingService(locationRepository)
-		bookingService          = application.NewBookingService(cargoRepository, locationRepository, routingService)
-		bookingServiceFacade    = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
+		cargoRepository            = infrastructure.NewInMemCargoRepository()
+		locationRepository         = infrastructure.NewInMemLocationRepository()
+		voyageRepository           = infrastructure.NewInMemVoyageRepository()
+		handlingEventRepository    = infrastructure.NewInMemHandlingEventRepository()
+		routingService             = infrastructure.NewExternalRoutingService(locationRepository)
+		bookingService             = application.NewBookingService(cargoRepository, locationRepository, routingService)
+		bookingServiceFacade       = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
+		handlingEventServiceFacade = interfaces.NewHandlingEventServiceFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
 	)
 
 	storeTestData(cargoRepository)
 
 	return &API{
 		Renderer: render.New(render.Options{IndentJSON: true}),
-		Facade:   bookingServiceFacade,
+		Booking:  bookingServiceFacade,
+		Handling: handlingEventServiceFacade,
 	}
 }
 
@@ -55,6 +59,7 @@ func RegisterHandlers() {
 	router.HandleFunc("/cargos/{id}/assign_to_route", a.AssignToRouteHandler).Methods("POST")
 	router.HandleFunc("/cargos/{id}/change_destination", a.ChangeDestinationHandler).Methods("POST")
 	router.HandleFunc("/locations", a.LocationsHandler).Methods("GET")
+	router.HandleFunc("/incidents", a.RegisterIncidentHandler).Methods("POST")
 
 	n := negroni.Classic()
 
@@ -76,12 +81,12 @@ var (
 )
 
 func (a *API) CargosHandler(w http.ResponseWriter, req *http.Request) {
-	a.Renderer.JSON(w, http.StatusOK, a.Facade.ListAllCargos())
+	a.Renderer.JSON(w, http.StatusOK, a.Booking.ListAllCargos())
 }
 
 func (a *API) CargoHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	c, err := a.Facade.LoadCargoForRouting(vars["id"])
+	c, err := a.Booking.LoadCargoForRouting(vars["id"])
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusNotFound, ResourceNotFound)
@@ -93,7 +98,7 @@ func (a *API) CargoHandler(w http.ResponseWriter, req *http.Request) {
 
 func (a *API) RequestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 	vars := mux.Vars(req)
-	a.Renderer.JSON(w, http.StatusOK, a.Facade.RequestRoutesForCargo(vars["id"]))
+	a.Renderer.JSON(w, http.StatusOK, a.Booking.RequestRoutesForCargo(vars["id"]))
 }
 
 func (a *API) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
@@ -104,7 +109,7 @@ func (a *API) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
 	}
 
 	vars := mux.Vars(req)
-	if err := a.Facade.AssignCargoToRoute(vars["id"], candidate); err != nil {
+	if err := a.Booking.AssignCargoToRoute(vars["id"], candidate); err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 		return
 	}
@@ -122,7 +127,7 @@ func (a *API) ChangeDestinationHandler(w http.ResponseWriter, req *http.Request)
 	}
 
 	vars := mux.Vars(req)
-	if err := a.Facade.ChangeDestination(vars["id"], fmt.Sprintf("%s", found["destination"])); err != nil {
+	if err := a.Booking.ChangeDestination(vars["id"], fmt.Sprintf("%s", found["destination"])); err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 		return
 	}
@@ -145,14 +150,14 @@ func (a *API) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 		arrivalDeadline = found["arrivalDeadline"].(string)
 	)
 
-	trackingID, err := a.Facade.BookNewCargo(origin, destination, arrivalDeadline)
+	trackingID, err := a.Booking.BookNewCargo(origin, destination, arrivalDeadline)
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 		return
 	}
 
-	c, err := a.Facade.LoadCargoForRouting(trackingID)
+	c, err := a.Booking.LoadCargoForRouting(trackingID)
 
 	if err != nil {
 		a.Renderer.JSON(w, http.StatusNotFound, ResourceNotFound)
@@ -163,7 +168,30 @@ func (a *API) BookCargoHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func (a *API) LocationsHandler(w http.ResponseWriter, req *http.Request) {
-	a.Renderer.JSON(w, http.StatusOK, a.Facade.ListShippingLocations())
+	a.Renderer.JSON(w, http.StatusOK, a.Booking.ListShippingLocations())
+}
+
+func (a *API) RegisterIncidentHandler(w http.ResponseWriter, req *http.Request) {
+	v := queryParams(req.URL.Query())
+	found, missing := v.validateQueryParams("completionTime", "trackingId", "voyage", "location", "eventType")
+
+	if len(missing) > 0 {
+		a.Renderer.JSON(w, http.StatusBadRequest, map[string]interface{}{"error": "missing parameter", "missing": missing})
+		return
+	}
+
+	var (
+		completionTime = found["completionTime"].(string)
+		trackingID     = found["trackingId"].(string)
+		voyageNumber   = found["voyage"].(string)
+		location       = found["location"].(string)
+		eventType      = found["eventType"].(string)
+	)
+
+	if err := a.Handling.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, location, eventType); err != nil {
+		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
+		return
+	}
 }
 
 func storeTestData(r cargo.Repository) {
