@@ -16,26 +16,26 @@ type S struct{}
 
 var _ = Suite(&S{})
 
-type stubCargoEventHandler struct {
+type stubEventHandler struct {
 	handledEvents []interface{}
 }
 
-func (h *stubCargoEventHandler) CargoWasMisdirected(c cargo.Cargo) {
+func (h *stubEventHandler) CargoWasMisdirected(c cargo.Cargo) {
 	h.handledEvents = append(h.handledEvents, c)
 }
 
-func (h *stubCargoEventHandler) CargoHasArrived(c cargo.Cargo) {
+func (h *stubEventHandler) CargoHasArrived(c cargo.Cargo) {
 	h.handledEvents = append(h.handledEvents, c)
 }
 
 func (s *S) TestInspectMisdirectedCargo(c *C) {
 
 	var (
-		cargoRepository         = repository.NewInMemCargoRepository()
-		handlingEventRepository = repository.NewInMemHandlingEventRepository()
-		cargoEventHandler       = &stubCargoEventHandler{make([]interface{}, 0)}
+		cargoRepository         = repository.NewCargo()
+		handlingEventRepository = repository.NewHandlingEvent()
+		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
 
-		inspectionService CargoInspectionService = &cargoInspectionService{
+		inspectionService = &service{
 			cargoRepository:         cargoRepository,
 			handlingEventRepository: handlingEventRepository,
 			cargoEventHandler:       cargoEventHandler,
@@ -71,11 +71,11 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 func (s *S) TestInspectUnloadedCargo(c *C) {
 
 	var (
-		cargoRepository         = repository.NewInMemCargoRepository()
-		handlingEventRepository = repository.NewInMemHandlingEventRepository()
-		cargoEventHandler       = &stubCargoEventHandler{make([]interface{}, 0)}
+		cargoRepository         = repository.NewCargo()
+		handlingEventRepository = repository.NewHandlingEvent()
+		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
 
-		inspectionService CargoInspectionService = &cargoInspectionService{
+		inspectionService = &service{
 			cargoRepository:         cargoRepository,
 			handlingEventRepository: handlingEventRepository,
 			cargoEventHandler:       cargoEventHandler,

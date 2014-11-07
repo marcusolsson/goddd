@@ -22,10 +22,10 @@ type S struct{}
 var _ = Suite(&S{})
 
 var (
-	cargoRepository         = repository.NewInMemCargoRepository()
-	locationRepository      = repository.NewInMemLocationRepository()
-	voyageRepository        = repository.NewInMemVoyageRepository()
-	handlingEventRepository = repository.NewInMemHandlingEventRepository()
+	cargoRepository         = repository.NewCargo()
+	locationRepository      = repository.NewLocation()
+	voyageRepository        = repository.NewVoyage()
+	handlingEventRepository = repository.NewHandlingEvent()
 )
 
 var (
@@ -46,9 +46,9 @@ var (
 )
 
 var (
-	bookingService         = booking.NewBookingService(cargoRepository, locationRepository, routingService)
-	cargoInspectionService = inspection.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
-	handlingEventService   = handling.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
+	bookingService         = booking.NewService(cargoRepository, locationRepository, routingService)
+	cargoInspectionService = inspection.NewService(cargoRepository, handlingEventRepository, cargoEventHandler)
+	handlingEventService   = handling.NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 )
 
 func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
@@ -277,7 +277,7 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 // Stub HandlingEventHandler
 type stubHandlingEventHandler struct {
-	InspectionService inspection.CargoInspectionService
+	InspectionService inspection.Service
 }
 
 func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {

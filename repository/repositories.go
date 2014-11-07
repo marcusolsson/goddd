@@ -6,17 +6,17 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-type cargoRepositoryInMem struct {
+type cargoRepository struct {
 	cargos map[cargo.TrackingID]cargo.Cargo
 }
 
-func (r *cargoRepositoryInMem) Store(c cargo.Cargo) error {
+func (r *cargoRepository) Store(c cargo.Cargo) error {
 	r.cargos[c.TrackingID] = c
 
 	return nil
 }
 
-func (r *cargoRepositoryInMem) Find(trackingID cargo.TrackingID) (cargo.Cargo, error) {
+func (r *cargoRepository) Find(trackingID cargo.TrackingID) (cargo.Cargo, error) {
 
 	if val, ok := r.cargos[trackingID]; ok {
 		return val, nil
@@ -25,7 +25,7 @@ func (r *cargoRepositoryInMem) Find(trackingID cargo.TrackingID) (cargo.Cargo, e
 	return cargo.Cargo{}, cargo.ErrUnknownCargo
 }
 
-func (r *cargoRepositoryInMem) FindAll() []cargo.Cargo {
+func (r *cargoRepository) FindAll() []cargo.Cargo {
 	c := make([]cargo.Cargo, 0, len(r.cargos))
 	for _, val := range r.cargos {
 		c = append(c, val)
@@ -33,17 +33,17 @@ func (r *cargoRepositoryInMem) FindAll() []cargo.Cargo {
 	return c
 }
 
-func NewInMemCargoRepository() cargo.Repository {
-	return &cargoRepositoryInMem{
+func NewCargo() cargo.Repository {
+	return &cargoRepository{
 		cargos: make(map[cargo.TrackingID]cargo.Cargo),
 	}
 }
 
-type locationRepositoryInMem struct {
+type locationRepository struct {
 	locations map[location.UNLocode]location.Location
 }
 
-func (r *locationRepositoryInMem) Find(locode location.UNLocode) (location.Location, error) {
+func (r *locationRepository) Find(locode location.UNLocode) (location.Location, error) {
 	if l, ok := r.locations[locode]; ok {
 		return l, nil
 	}
@@ -51,7 +51,7 @@ func (r *locationRepositoryInMem) Find(locode location.UNLocode) (location.Locat
 	return location.Location{}, location.ErrUnknownLocation
 }
 
-func (r *locationRepositoryInMem) FindAll() []location.Location {
+func (r *locationRepository) FindAll() []location.Location {
 	l := make([]location.Location, 0, len(r.locations))
 	for _, val := range r.locations {
 		l = append(l, val)
@@ -59,8 +59,8 @@ func (r *locationRepositoryInMem) FindAll() []location.Location {
 	return l
 }
 
-func NewInMemLocationRepository() location.Repository {
-	r := &locationRepositoryInMem{
+func NewLocation() location.Repository {
+	r := &locationRepository{
 		locations: make(map[location.UNLocode]location.Location),
 	}
 
@@ -74,11 +74,11 @@ func NewInMemLocationRepository() location.Repository {
 	return r
 }
 
-type voyageRepositoryInMem struct {
+type voyageRepository struct {
 	voyages map[voyage.Number]voyage.Voyage
 }
 
-func (r *voyageRepositoryInMem) Find(voyageNumber voyage.Number) (voyage.Voyage, error) {
+func (r *voyageRepository) Find(voyageNumber voyage.Number) (voyage.Voyage, error) {
 	if v, ok := r.voyages[voyageNumber]; ok {
 		return v, nil
 	}
@@ -86,8 +86,8 @@ func (r *voyageRepositoryInMem) Find(voyageNumber voyage.Number) (voyage.Voyage,
 	return voyage.Voyage{}, voyage.ErrUnknownVoyage
 }
 
-func NewInMemVoyageRepository() voyage.Repository {
-	r := &voyageRepositoryInMem{
+func NewVoyage() voyage.Repository {
+	r := &voyageRepository{
 		voyages: make(map[voyage.Number]voyage.Voyage),
 	}
 
@@ -104,11 +104,11 @@ func NewInMemVoyageRepository() voyage.Repository {
 	return r
 }
 
-type handlingEventRepositoryInMem struct {
+type handlingEventRepository struct {
 	events map[cargo.TrackingID][]cargo.HandlingEvent
 }
 
-func (r *handlingEventRepositoryInMem) Store(e cargo.HandlingEvent) {
+func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
 	// Make array if it's the first event with this tracking ID.
 	if _, ok := r.events[e.TrackingID]; !ok {
 		r.events[e.TrackingID] = make([]cargo.HandlingEvent, 0)
@@ -116,12 +116,12 @@ func (r *handlingEventRepositoryInMem) Store(e cargo.HandlingEvent) {
 	r.events[e.TrackingID] = append(r.events[e.TrackingID], e)
 }
 
-func (r *handlingEventRepositoryInMem) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
+func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
 	return cargo.HandlingHistory{r.events[trackingID]}
 }
 
-func NewInMemHandlingEventRepository() cargo.HandlingEventRepository {
-	return &handlingEventRepositoryInMem{
+func NewHandlingEvent() cargo.HandlingEventRepository {
+	return &handlingEventRepository{
 		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
 	}
 }

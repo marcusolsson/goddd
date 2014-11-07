@@ -47,7 +47,7 @@ type eventDTO struct {
 	Expected    bool   `json:"expected"`
 }
 
-type BookingServiceFacade interface {
+type Facade interface {
 	BookNewCargo(origin, destination string, arrivalDeadline string) (string, error)
 	LoadCargoForRouting(trackingID string) (cargoDTO, error)
 	AssignCargoToRoute(trackingID string, candidate RouteCandidateDTO) error
@@ -57,21 +57,21 @@ type BookingServiceFacade interface {
 	ListAllCargos() []cargoDTO
 }
 
-type bookingServiceFacade struct {
+type facade struct {
 	cargoRepository         cargo.Repository
 	locationRepository      location.Repository
 	handlingEventRepository cargo.HandlingEventRepository
-	bookingService          BookingService
+	Service                 Service
 }
 
-func (f *bookingServiceFacade) BookNewCargo(origin, destination string, arrivalDeadline string) (string, error) {
+func (f *facade) BookNewCargo(origin, destination string, arrivalDeadline string) (string, error) {
 	millis, _ := strconv.ParseInt(fmt.Sprintf("%s", arrivalDeadline), 10, 64)
-	trackingID, err := f.bookingService.BookNewCargo(location.UNLocode(origin), location.UNLocode(destination), time.Unix(millis/1000, 0))
+	trackingID, err := f.Service.BookNewCargo(location.UNLocode(origin), location.UNLocode(destination), time.Unix(millis/1000, 0))
 
 	return string(trackingID), err
 }
 
-func (f *bookingServiceFacade) LoadCargoForRouting(trackingID string) (cargoDTO, error) {
+func (f *facade) LoadCargoForRouting(trackingID string) (cargoDTO, error) {
 	c, err := f.cargoRepository.Find(cargo.TrackingID(trackingID))
 
 	if err != nil {
@@ -81,7 +81,7 @@ func (f *bookingServiceFacade) LoadCargoForRouting(trackingID string) (cargoDTO,
 	return assemble(c, f.handlingEventRepository), nil
 }
 
-func (f *bookingServiceFacade) AssignCargoToRoute(trackingID string, candidate RouteCandidateDTO) error {
+func (f *facade) AssignCargoToRoute(trackingID string, candidate RouteCandidateDTO) error {
 	var legs []cargo.Leg
 	for _, l := range candidate.Legs {
 		legs = append(legs, cargo.Leg{
@@ -93,15 +93,15 @@ func (f *bookingServiceFacade) AssignCargoToRoute(trackingID string, candidate R
 		})
 	}
 
-	return f.bookingService.AssignCargoToRoute(cargo.Itinerary{Legs: legs}, cargo.TrackingID(trackingID))
+	return f.Service.AssignCargoToRoute(cargo.Itinerary{Legs: legs}, cargo.TrackingID(trackingID))
 }
 
-func (f *bookingServiceFacade) ChangeDestination(trackingID string, destinationUNLocode string) error {
-	return f.bookingService.ChangeDestination(cargo.TrackingID(trackingID), location.UNLocode(destinationUNLocode))
+func (f *facade) ChangeDestination(trackingID string, destinationUNLocode string) error {
+	return f.Service.ChangeDestination(cargo.TrackingID(trackingID), location.UNLocode(destinationUNLocode))
 }
 
-func (f *bookingServiceFacade) RequestRoutesForCargo(trackingID string) []RouteCandidateDTO {
-	itineraries := f.bookingService.RequestPossibleRoutesForCargo(cargo.TrackingID(trackingID))
+func (f *facade) RequestRoutesForCargo(trackingID string) []RouteCandidateDTO {
+	itineraries := f.Service.RequestPossibleRoutesForCargo(cargo.TrackingID(trackingID))
 
 	var candidates []RouteCandidateDTO
 	for _, itin := range itineraries {
@@ -121,7 +121,7 @@ func (f *bookingServiceFacade) RequestRoutesForCargo(trackingID string) []RouteC
 	return candidates
 }
 
-func (f *bookingServiceFacade) ListShippingLocations() []locationDTO {
+func (f *facade) ListShippingLocations() []locationDTO {
 	locations := f.locationRepository.FindAll()
 
 	dtos := make([]locationDTO, len(locations))
@@ -135,7 +135,7 @@ func (f *bookingServiceFacade) ListShippingLocations() []locationDTO {
 	return dtos
 }
 
-func (f *bookingServiceFacade) ListAllCargos() []cargoDTO {
+func (f *facade) ListAllCargos() []cargoDTO {
 	cargos := f.cargoRepository.FindAll()
 	dtos := make([]cargoDTO, len(cargos))
 
@@ -146,8 +146,8 @@ func (f *bookingServiceFacade) ListAllCargos() []cargoDTO {
 	return dtos
 }
 
-func NewBookingServiceFacade(cargoRepository cargo.Repository, locationRepository location.Repository, handlingEventRepository cargo.HandlingEventRepository, bookingService BookingService) BookingServiceFacade {
-	return &bookingServiceFacade{cargoRepository, locationRepository, handlingEventRepository, bookingService}
+func NewFacade(s Service) Facade {
+	return &facade{Service: s}
 }
 
 func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoDTO {

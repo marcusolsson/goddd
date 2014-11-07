@@ -21,21 +21,21 @@ import (
 
 type API struct {
 	Renderer *render.Render
-	Booking  booking.BookingServiceFacade
-	Handling handling.HandlingEventServiceFacade
+	Booking  booking.Facade
+	Handling handling.Facade
 }
 
 func NewAPI() *API {
 
 	var (
-		cargoRepository            = repository.NewInMemCargoRepository()
-		locationRepository         = repository.NewInMemLocationRepository()
-		voyageRepository           = repository.NewInMemVoyageRepository()
-		handlingEventRepository    = repository.NewInMemHandlingEventRepository()
-		routingService             = routing.NewExternalRoutingService(locationRepository)
-		bookingService             = booking.NewBookingService(cargoRepository, locationRepository, routingService)
-		bookingServiceFacade       = booking.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
-		handlingEventServiceFacade = handling.NewHandlingEventServiceFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
+		cargoRepository            = repository.NewCargo()
+		locationRepository         = repository.NewLocation()
+		voyageRepository           = repository.NewVoyage()
+		handlingEventRepository    = repository.NewHandlingEvent()
+		routingService             = routing.NewService(locationRepository)
+		bookingService             = booking.NewService(cargoRepository, locationRepository, routingService)
+		bookingServiceFacade       = booking.NewFacade(bookingService)
+		handlingEventServiceFacade = handling.NewFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
 	)
 
 	storeTestData(cargoRepository)

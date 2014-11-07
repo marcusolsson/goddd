@@ -11,8 +11,8 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-// RoutingService is a provides access to an external routing service.
-type RoutingService interface {
+// Service provides access to an external routing service.
+type Service interface {
 	// FetchRoutesForSpecification finds all possible routes that satisfy a
 	// given specification.
 	FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary
@@ -30,11 +30,11 @@ type edgeDTO struct {
 	Arrival     time.Time `json:"arrival"`
 }
 
-type externalRoutingService struct {
+type service struct {
 	locationRepository location.Repository
 }
 
-func (s *externalRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
+func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 
 	query := "from=" + string(routeSpecification.Origin) + "&to=" + string(routeSpecification.Destination)
 	resp, err := http.Get("http://ddd-pathfinder.herokuapp.com/paths?" + query)
@@ -72,6 +72,6 @@ func (s *externalRoutingService) FetchRoutesForSpecification(routeSpecification 
 	return itineraries
 }
 
-func NewExternalRoutingService(locationRepository location.Repository) RoutingService {
-	return &externalRoutingService{locationRepository: locationRepository}
+func NewService(locationRepository location.Repository) Service {
+	return &service{locationRepository: locationRepository}
 }

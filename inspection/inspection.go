@@ -2,26 +2,26 @@ package inspection
 
 import "github.com/marcusolsson/goddd/cargo"
 
-type CargoEventHandler interface {
+type EventHandler interface {
 	CargoWasMisdirected(cargo.Cargo)
 	CargoHasArrived(cargo.Cargo)
 }
 
-type CargoInspectionService interface {
+type Service interface {
 	// InspectCargo inspects cargo and send relevant notifications to
 	// interested parties, for example if a cargo has been misdirected, or
 	// unloaded at the final destination.
 	InspectCargo(trackingID cargo.TrackingID)
 }
 
-type cargoInspectionService struct {
+type service struct {
 	cargoRepository         cargo.Repository
 	handlingEventRepository cargo.HandlingEventRepository
-	cargoEventHandler       CargoEventHandler
+	cargoEventHandler       EventHandler
 }
 
 // TODO: Should be transactional
-func (s *cargoInspectionService) InspectCargo(trackingID cargo.TrackingID) {
+func (s *service) InspectCargo(trackingID cargo.TrackingID) {
 	c, err := s.cargoRepository.Find(trackingID)
 
 	if err != nil {
@@ -43,8 +43,8 @@ func (s *cargoInspectionService) InspectCargo(trackingID cargo.TrackingID) {
 	s.cargoRepository.Store(c)
 }
 
-// NewCargoInspectionService creates a inspection service with necessary
+// NewService creates a inspection service with necessary
 // dependencies.
-func NewCargoInspectionService(cargoRepository cargo.Repository, handlingEventRepository cargo.HandlingEventRepository, eventHandler CargoEventHandler) CargoInspectionService {
-	return &cargoInspectionService{cargoRepository, handlingEventRepository, eventHandler}
+func NewService(cargoRepository cargo.Repository, handlingEventRepository cargo.HandlingEventRepository, eventHandler EventHandler) Service {
+	return &service{cargoRepository, handlingEventRepository, eventHandler}
 }

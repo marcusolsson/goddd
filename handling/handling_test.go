@@ -18,31 +18,31 @@ type S struct{}
 
 var _ = Suite(&S{})
 
-type stubHandlingEventHandler struct {
+type stubEventHandler struct {
 	handledEvents []interface{}
 }
 
-func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
+func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 	h.handledEvents = append(h.handledEvents, event)
 }
 
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
-		cargoRepository         = repository.NewInMemCargoRepository()
-		voyageRepository        = repository.NewInMemVoyageRepository()
-		locationRepository      = repository.NewInMemLocationRepository()
-		handlingEventRepository = repository.NewInMemHandlingEventRepository()
+		cargoRepository         = repository.NewCargo()
+		voyageRepository        = repository.NewVoyage()
+		locationRepository      = repository.NewLocation()
+		handlingEventRepository = repository.NewHandlingEvent()
 	)
 
 	var (
-		handlingEventHandler = &stubHandlingEventHandler{make([]interface{}, 0)}
+		handlingEventHandler = &stubEventHandler{make([]interface{}, 0)}
 		handlingEventFactory = cargo.HandlingEventFactory{
 			CargoRepository:    cargoRepository,
 			VoyageRepository:   voyageRepository,
 			LocationRepository: locationRepository,
 		}
-		handlingEventService = &handlingEventService{
+		handlingEventService = &service{
 			handlingEventRepository: handlingEventRepository,
 			handlingEventFactory:    handlingEventFactory,
 			handlingEventHandler:    handlingEventHandler,

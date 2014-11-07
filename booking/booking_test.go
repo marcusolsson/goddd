@@ -18,10 +18,10 @@ var _ = Suite(&S{})
 
 func (s *S) TestBookNewCargo(c *C) {
 
-	cargoRepository := repository.NewInMemCargoRepository()
-	locationRepository := repository.NewInMemLocationRepository()
+	cargoRepository := repository.NewCargo()
+	locationRepository := repository.NewLocation()
 
-	bookingService := &bookingService{
+	bookingService := &service{
 		cargoRepository:    cargoRepository,
 		locationRepository: locationRepository,
 	}
@@ -61,11 +61,11 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
-	cargoRepository := repository.NewInMemCargoRepository()
-	locationRepository := repository.NewInMemLocationRepository()
+	cargoRepository := repository.NewCargo()
+	locationRepository := repository.NewLocation()
 	routingService := &stubRoutingService{}
 
-	var bookingService BookingService = &bookingService{
+	var bookingService = &service{
 		cargoRepository:    cargoRepository,
 		locationRepository: locationRepository,
 		routingService:     routingService,
@@ -84,11 +84,11 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 }
 
 func (s *S) TestAssignCargoToRoute(c *C) {
-	cargoRepository := repository.NewInMemCargoRepository()
-	locationRepository := repository.NewInMemLocationRepository()
+	cargoRepository := repository.NewCargo()
+	locationRepository := repository.NewLocation()
 	routingService := &stubRoutingService{}
 
-	var bookingService BookingService = &bookingService{
+	var bookingService = &service{
 		cargoRepository:    cargoRepository,
 		locationRepository: locationRepository,
 		routingService:     routingService,
@@ -113,12 +113,12 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 func (s *S) TestChangeCargoDestination(c *C) {
 
 	var (
-		cargoRepository    = repository.NewInMemCargoRepository()
-		locationRepository = repository.NewInMemLocationRepository()
+		cargoRepository    = repository.NewCargo()
+		locationRepository = repository.NewLocation()
 		routingService     = &stubRoutingService{}
 	)
 
-	var bookingService BookingService = &bookingService{
+	var bookingService = &service{
 		cargoRepository:    cargoRepository,
 		locationRepository: locationRepository,
 		routingService:     routingService,

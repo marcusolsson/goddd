@@ -8,24 +8,24 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-type HandlingEventHandler interface {
+type EventHandler interface {
 	CargoWasHandled(cargo.HandlingEvent)
 }
 
-type HandlingEventService interface {
+type Service interface {
 	// RegisterHandlingEvent registers a handling event in the system, and
 	// notifies interested parties that a cargo has been handled.
 	RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.Number,
 		unLocode location.UNLocode, eventType cargo.HandlingEventType) error
 }
 
-type handlingEventService struct {
+type service struct {
 	handlingEventRepository cargo.HandlingEventRepository
 	handlingEventFactory    cargo.HandlingEventFactory
-	handlingEventHandler    HandlingEventHandler
+	handlingEventHandler    EventHandler
 }
 
-func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.Number,
+func (s *service) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.Number,
 	unLocode location.UNLocode, eventType cargo.HandlingEventType) error {
 
 	registrationTime := time.Now()
@@ -43,10 +43,10 @@ func (s *handlingEventService) RegisterHandlingEvent(completionTime time.Time, t
 	return nil
 }
 
-// NewHandlingEventService creates a handling event service with necessary
+// NewService creates a handling event service with necessary
 // dependencies.
-func NewHandlingEventService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h HandlingEventHandler) HandlingEventService {
-	return &handlingEventService{
+func NewService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h EventHandler) Service {
+	return &service{
 		handlingEventRepository: r,
 		handlingEventFactory:    f,
 		handlingEventHandler:    h,
