@@ -25,7 +25,10 @@ func (f *facade) RegisterHandlingEvent(completionTime, trackingID, voyageNumber,
 
 func NewFacade(cargoRepository cargo.Repository, locationRepository location.Repository, voyageRepository voyage.Repository, handlingEventRepository cargo.HandlingEventRepository) Facade {
 	cargoEventHandler := &cargoEventHandler{}
-	cargoInspectionService := inspection.NewService(cargoRepository, handlingEventRepository, cargoEventHandler)
+
+	handlingEventHandler := &handlingEventHandler{
+		InspectionService: inspection.NewService(cargoRepository, handlingEventRepository, cargoEventHandler),
+	}
 
 	handlingEventFactory := cargo.HandlingEventFactory{
 		CargoRepository:    cargoRepository,
@@ -33,13 +36,7 @@ func NewFacade(cargoRepository cargo.Repository, locationRepository location.Rep
 		LocationRepository: locationRepository,
 	}
 
-	handlingEventHandler := &handlingEventHandler{
-		InspectionService: cargoInspectionService,
-	}
-
-	handlingEventService := NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
-
-	return &facade{Service: handlingEventService}
+	return &facade{Service: NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)}
 }
 
 type handlingEventHandler struct {
