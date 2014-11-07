@@ -1,6 +1,6 @@
 package voyage
 
-import "github.com/marcusolsson/goddd/domain/location"
+import "github.com/marcusolsson/goddd/location"
 
 var (
 	V100 = New("V100", Schedule{

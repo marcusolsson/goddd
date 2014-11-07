@@ -1,12 +1,20 @@
-package application
+package inspection
 
 import (
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
-	"github.com/marcusolsson/goddd/infrastructure"
+	"testing"
+
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/repository"
+	"github.com/marcusolsson/goddd/voyage"
 	. "gopkg.in/check.v1"
 )
+
+func Test(t *testing.T) { TestingT(t) }
+
+type S struct{}
+
+var _ = Suite(&S{})
 
 type stubCargoEventHandler struct {
 	handledEvents []interface{}
@@ -23,8 +31,8 @@ func (h *stubCargoEventHandler) CargoHasArrived(c cargo.Cargo) {
 func (s *S) TestInspectMisdirectedCargo(c *C) {
 
 	var (
-		cargoRepository         = infrastructure.NewInMemCargoRepository()
-		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
+		cargoRepository         = repository.NewInMemCargoRepository()
+		handlingEventRepository = repository.NewInMemHandlingEventRepository()
 		cargoEventHandler       = &stubCargoEventHandler{make([]interface{}, 0)}
 
 		inspectionService CargoInspectionService = &cargoInspectionService{
@@ -63,8 +71,8 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 func (s *S) TestInspectUnloadedCargo(c *C) {
 
 	var (
-		cargoRepository         = infrastructure.NewInMemCargoRepository()
-		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
+		cargoRepository         = repository.NewInMemCargoRepository()
+		handlingEventRepository = repository.NewInMemHandlingEventRepository()
 		cargoEventHandler       = &stubCargoEventHandler{make([]interface{}, 0)}
 
 		inspectionService CargoInspectionService = &cargoInspectionService{

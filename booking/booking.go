@@ -1,12 +1,12 @@
-package application
+package booking
 
 import (
 	"errors"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/routing"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/routing"
 )
 
 type BookingService interface {

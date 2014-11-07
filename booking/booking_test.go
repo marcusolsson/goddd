@@ -1,13 +1,12 @@
-package application
+package booking
 
 import (
 	"testing"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/infrastructure"
-
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/repository"
 	. "gopkg.in/check.v1"
 )
 
@@ -19,8 +18,8 @@ var _ = Suite(&S{})
 
 func (s *S) TestBookNewCargo(c *C) {
 
-	cargoRepository := infrastructure.NewInMemCargoRepository()
-	locationRepository := infrastructure.NewInMemLocationRepository()
+	cargoRepository := repository.NewInMemCargoRepository()
+	locationRepository := repository.NewInMemLocationRepository()
 
 	bookingService := &bookingService{
 		cargoRepository:    cargoRepository,
@@ -62,8 +61,8 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
-	cargoRepository := infrastructure.NewInMemCargoRepository()
-	locationRepository := infrastructure.NewInMemLocationRepository()
+	cargoRepository := repository.NewInMemCargoRepository()
+	locationRepository := repository.NewInMemLocationRepository()
 	routingService := &stubRoutingService{}
 
 	var bookingService BookingService = &bookingService{
@@ -85,8 +84,8 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 }
 
 func (s *S) TestAssignCargoToRoute(c *C) {
-	cargoRepository := infrastructure.NewInMemCargoRepository()
-	locationRepository := infrastructure.NewInMemLocationRepository()
+	cargoRepository := repository.NewInMemCargoRepository()
+	locationRepository := repository.NewInMemLocationRepository()
 	routingService := &stubRoutingService{}
 
 	var bookingService BookingService = &bookingService{
@@ -114,8 +113,8 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 func (s *S) TestChangeCargoDestination(c *C) {
 
 	var (
-		cargoRepository    = infrastructure.NewInMemCargoRepository()
-		locationRepository = infrastructure.NewInMemLocationRepository()
+		cargoRepository    = repository.NewInMemCargoRepository()
+		locationRepository = repository.NewInMemLocationRepository()
 		routingService     = &stubRoutingService{}
 	)
 

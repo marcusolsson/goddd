@@ -1,14 +1,22 @@
-package application
+package handling
 
 import (
+	"testing"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
-	"github.com/marcusolsson/goddd/infrastructure"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/repository"
+	"github.com/marcusolsson/goddd/voyage"
+
 	. "gopkg.in/check.v1"
 )
+
+func Test(t *testing.T) { TestingT(t) }
+
+type S struct{}
+
+var _ = Suite(&S{})
 
 type stubHandlingEventHandler struct {
 	handledEvents []interface{}
@@ -21,10 +29,10 @@ func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	var (
-		cargoRepository         = infrastructure.NewInMemCargoRepository()
-		voyageRepository        = infrastructure.NewInMemVoyageRepository()
-		locationRepository      = infrastructure.NewInMemLocationRepository()
-		handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
+		cargoRepository         = repository.NewInMemCargoRepository()
+		voyageRepository        = repository.NewInMemVoyageRepository()
+		locationRepository      = repository.NewInMemLocationRepository()
+		handlingEventRepository = repository.NewInMemHandlingEventRepository()
 	)
 
 	var (

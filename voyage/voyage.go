@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/location"
 )
 
 // Number uniquely identifies a particular Voyage.

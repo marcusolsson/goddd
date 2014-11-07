@@ -5,9 +5,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/location"
-
 	"code.google.com/p/go-uuid/uuid"
+
+	"github.com/marcusolsson/goddd/location"
 )
 
 // TrackingID uniquely identifies a particular cargo.

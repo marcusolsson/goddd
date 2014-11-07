@@ -1,9 +1,9 @@
-package infrastructure
+package repository
 
 import (
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/voyage"
 )
 
 type cargoRepositoryInMem struct {

@@ -1,12 +1,16 @@
-package application
+package handling
 
 import (
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/voyage"
 )
+
+type HandlingEventHandler interface {
+	CargoWasHandled(cargo.HandlingEvent)
+}
 
 type HandlingEventService interface {
 	// RegisterHandlingEvent registers a handling event in the system, and

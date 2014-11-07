@@ -1,4 +1,4 @@
-package interfaces
+package booking
 
 import (
 	"fmt"
@@ -6,10 +6,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/marcusolsson/goddd/application"
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/voyage"
 )
 
 type cargoDTO struct {
@@ -62,7 +61,7 @@ type bookingServiceFacade struct {
 	cargoRepository         cargo.Repository
 	locationRepository      location.Repository
 	handlingEventRepository cargo.HandlingEventRepository
-	bookingService          application.BookingService
+	bookingService          BookingService
 }
 
 func (f *bookingServiceFacade) BookNewCargo(origin, destination string, arrivalDeadline string) (string, error) {
@@ -147,7 +146,7 @@ func (f *bookingServiceFacade) ListAllCargos() []cargoDTO {
 	return dtos
 }
 
-func NewBookingServiceFacade(cargoRepository cargo.Repository, locationRepository location.Repository, handlingEventRepository cargo.HandlingEventRepository, bookingService application.BookingService) BookingServiceFacade {
+func NewBookingServiceFacade(cargoRepository cargo.Repository, locationRepository location.Repository, handlingEventRepository cargo.HandlingEventRepository, bookingService BookingService) BookingServiceFacade {
 	return &bookingServiceFacade{cargoRepository, locationRepository, handlingEventRepository, bookingService}
 }
 

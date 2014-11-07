@@ -3,8 +3,8 @@ package cargo
 import (
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/voyage"
 )
 
 // Leg describes the transportation between two locations on a voyage.

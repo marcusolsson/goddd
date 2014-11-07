@@ -4,11 +4,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/marcusolsson/goddd/application"
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
-	"github.com/marcusolsson/goddd/infrastructure"
+	"github.com/marcusolsson/goddd/booking"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/handling"
+	"github.com/marcusolsson/goddd/inspection"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/repository"
+	"github.com/marcusolsson/goddd/voyage"
 
 	. "gopkg.in/check.v1"
 )
@@ -20,10 +22,10 @@ type S struct{}
 var _ = Suite(&S{})
 
 var (
-	cargoRepository         = infrastructure.NewInMemCargoRepository()
-	locationRepository      = infrastructure.NewInMemLocationRepository()
-	voyageRepository        = infrastructure.NewInMemVoyageRepository()
-	handlingEventRepository = infrastructure.NewInMemHandlingEventRepository()
+	cargoRepository         = repository.NewInMemCargoRepository()
+	locationRepository      = repository.NewInMemLocationRepository()
+	voyageRepository        = repository.NewInMemVoyageRepository()
+	handlingEventRepository = repository.NewInMemHandlingEventRepository()
 )
 
 var (
@@ -44,9 +46,9 @@ var (
 )
 
 var (
-	bookingService         = application.NewBookingService(cargoRepository, locationRepository, routingService)
-	cargoInspectionService = application.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
-	handlingEventService   = application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
+	bookingService         = booking.NewBookingService(cargoRepository, locationRepository, routingService)
+	cargoInspectionService = inspection.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
+	handlingEventService   = handling.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 )
 
 func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
@@ -275,7 +277,7 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 // Stub HandlingEventHandler
 type stubHandlingEventHandler struct {
-	InspectionService application.CargoInspectionService
+	InspectionService inspection.CargoInspectionService
 }
 
 func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {

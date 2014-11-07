@@ -1,6 +1,11 @@
-package application
+package inspection
 
-import "github.com/marcusolsson/goddd/domain/cargo"
+import "github.com/marcusolsson/goddd/cargo"
+
+type CargoEventHandler interface {
+	CargoWasMisdirected(cargo.Cargo)
+	CargoHasArrived(cargo.Cargo)
+}
 
 type CargoInspectionService interface {
 	// InspectCargo inspects cargo and send relevant notifications to

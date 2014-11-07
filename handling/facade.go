@@ -1,13 +1,13 @@
-package interfaces
+package handling
 
 import (
 	"strconv"
 	"time"
 
-	"github.com/marcusolsson/goddd/application"
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/inspection"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/voyage"
 )
 
 type HandlingEventServiceFacade interface {
@@ -15,7 +15,7 @@ type HandlingEventServiceFacade interface {
 }
 
 type handlingEventServiceFacade struct {
-	Service application.HandlingEventService
+	Service HandlingEventService
 }
 
 func (f *handlingEventServiceFacade) RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType string) error {
@@ -25,7 +25,7 @@ func (f *handlingEventServiceFacade) RegisterHandlingEvent(completionTime, track
 
 func NewHandlingEventServiceFacade(cargoRepository cargo.Repository, locationRepository location.Repository, voyageRepository voyage.Repository, handlingEventRepository cargo.HandlingEventRepository) HandlingEventServiceFacade {
 	cargoEventHandler := &cargoEventHandler{}
-	cargoInspectionService := application.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
+	cargoInspectionService := inspection.NewCargoInspectionService(cargoRepository, handlingEventRepository, cargoEventHandler)
 
 	handlingEventFactory := cargo.HandlingEventFactory{
 		CargoRepository:    cargoRepository,
@@ -37,13 +37,13 @@ func NewHandlingEventServiceFacade(cargoRepository cargo.Repository, locationRep
 		InspectionService: cargoInspectionService,
 	}
 
-	handlingEventService := application.NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
+	handlingEventService := NewHandlingEventService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 
 	return &handlingEventServiceFacade{Service: handlingEventService}
 }
 
 type handlingEventHandler struct {
-	InspectionService application.CargoInspectionService
+	InspectionService inspection.CargoInspectionService
 }
 
 func (h *handlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {

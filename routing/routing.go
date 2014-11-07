@@ -1,4 +1,4 @@
-package infrastructure
+package routing
 
 import (
 	"encoding/json"
@@ -6,11 +6,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/routing"
-	"github.com/marcusolsson/goddd/domain/voyage"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/voyage"
 )
+
+// RoutingService is a provides access to an external routing service.
+type RoutingService interface {
+	// FetchRoutesForSpecification finds all possible routes that satisfy a
+	// given specification.
+	FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary
+}
 
 type routeDTO struct {
 	Edges []edgeDTO `json:"edges"`
@@ -66,6 +72,6 @@ func (s *externalRoutingService) FetchRoutesForSpecification(routeSpecification 
 	return itineraries
 }
 
-func NewExternalRoutingService(locationRepository location.Repository) routing.RoutingService {
+func NewExternalRoutingService(locationRepository location.Repository) RoutingService {
 	return &externalRoutingService{locationRepository: locationRepository}
 }

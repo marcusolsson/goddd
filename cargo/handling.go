@@ -9,8 +9,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/domain/voyage"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/voyage"
 )
 
 // HandlingActivity represents how and where a cargo can be handled, and can

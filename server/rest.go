@@ -11,30 +11,31 @@ import (
 	"github.com/hariharan-uno/cors"
 	"gopkg.in/unrolled/render.v1"
 
-	"github.com/marcusolsson/goddd/application"
-	"github.com/marcusolsson/goddd/domain/cargo"
-	"github.com/marcusolsson/goddd/domain/location"
-	"github.com/marcusolsson/goddd/infrastructure"
-	"github.com/marcusolsson/goddd/interfaces"
+	"github.com/marcusolsson/goddd/booking"
+	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/handling"
+	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/repository"
+	"github.com/marcusolsson/goddd/routing"
 )
 
 type API struct {
 	Renderer *render.Render
-	Booking  interfaces.BookingServiceFacade
-	Handling interfaces.HandlingEventServiceFacade
+	Booking  booking.BookingServiceFacade
+	Handling handling.HandlingEventServiceFacade
 }
 
 func NewAPI() *API {
 
 	var (
-		cargoRepository            = infrastructure.NewInMemCargoRepository()
-		locationRepository         = infrastructure.NewInMemLocationRepository()
-		voyageRepository           = infrastructure.NewInMemVoyageRepository()
-		handlingEventRepository    = infrastructure.NewInMemHandlingEventRepository()
-		routingService             = infrastructure.NewExternalRoutingService(locationRepository)
-		bookingService             = application.NewBookingService(cargoRepository, locationRepository, routingService)
-		bookingServiceFacade       = interfaces.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
-		handlingEventServiceFacade = interfaces.NewHandlingEventServiceFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
+		cargoRepository            = repository.NewInMemCargoRepository()
+		locationRepository         = repository.NewInMemLocationRepository()
+		voyageRepository           = repository.NewInMemVoyageRepository()
+		handlingEventRepository    = repository.NewInMemHandlingEventRepository()
+		routingService             = routing.NewExternalRoutingService(locationRepository)
+		bookingService             = booking.NewBookingService(cargoRepository, locationRepository, routingService)
+		bookingServiceFacade       = booking.NewBookingServiceFacade(cargoRepository, locationRepository, handlingEventRepository, bookingService)
+		handlingEventServiceFacade = handling.NewHandlingEventServiceFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
 	)
 
 	storeTestData(cargoRepository)
@@ -103,7 +104,7 @@ func (a *API) RequestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 
 func (a *API) AssignToRouteHandler(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
-	candidate := interfaces.RouteCandidateDTO{}
+	candidate := booking.RouteCandidateDTO{}
 	if err := decoder.Decode(&candidate); err != nil {
 		a.Renderer.JSON(w, http.StatusBadRequest, InvalidInput)
 	}

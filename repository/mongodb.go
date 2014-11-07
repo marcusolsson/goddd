@@ -1,10 +1,10 @@
-package infrastructure
+package repository
 
 import (
 	"log"
 	"os"
 
-	"github.com/marcusolsson/goddd/domain/location"
+	"github.com/marcusolsson/goddd/location"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )

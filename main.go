@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/marcusolsson/goddd/api"
+	"github.com/marcusolsson/goddd/server"
 )
 
 var port int
