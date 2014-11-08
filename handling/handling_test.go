@@ -57,7 +57,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 		eventType      = cargo.Load
 	)
 
-	cargoRepository.Store(*cargo.NewCargo(trackingID, cargo.RouteSpecification{}))
+	cargoRepository.Store(*cargo.New(trackingID, cargo.RouteSpecification{}))
 
 	err := handlingEventService.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType)
 

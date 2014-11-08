@@ -124,7 +124,7 @@ func (s *S) TestChangeCargoDestination(c *C) {
 		routingService:     routingService,
 	}
 
-	c1 := cargo.NewCargo("ABC", cargo.RouteSpecification{
+	c1 := cargo.New("ABC", cargo.RouteSpecification{
 		Origin:          location.Stockholm.UNLocode,
 		Destination:     location.Hongkong.UNLocode,
 		ArrivalDeadline: time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC),

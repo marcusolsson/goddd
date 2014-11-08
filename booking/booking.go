@@ -41,7 +41,7 @@ func (s *service) BookNewCargo(originLocode location.UNLocode, destinationLocode
 		ArrivalDeadline: arrivalDeadline,
 	}
 
-	c := cargo.NewCargo(trackingID, routeSpecification)
+	c := cargo.New(trackingID, routeSpecification)
 
 	s.cargoRepository.Store(*c)
 

@@ -43,7 +43,7 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 	)
 
 	trackingID := cargo.TrackingID("ABC123")
-	misdirectedCargo := cargo.NewCargo(trackingID, cargo.RouteSpecification{
+	misdirectedCargo := cargo.New(trackingID, cargo.RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
 	})
@@ -83,7 +83,7 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 	)
 
 	trackingID := cargo.TrackingID("ABC123")
-	unloadedCargo := cargo.NewCargo(trackingID, cargo.RouteSpecification{
+	unloadedCargo := cargo.New(trackingID, cargo.RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
 	})

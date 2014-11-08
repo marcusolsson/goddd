@@ -22,7 +22,7 @@ func (s *S) TestConstruction(c *C) {
 		ArrivalDeadline: time.Date(2009, time.March, 13, 0, 0, 0, 0, time.UTC),
 	}
 
-	cargo := NewCargo(trackingID, specification)
+	cargo := New(trackingID, specification)
 
 	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
 	c.Check(cargo.Delivery.TransportStatus, Equals, NotReceived)
@@ -42,10 +42,10 @@ func (s *S) TestEquality(c *C) {
 	c.Check(spec1, DeepEquals, spec1)
 	c.Check(spec1, Not(DeepEquals), spec2)
 
-	c1 := NewCargo("ABC", spec1)
-	c2 := NewCargo("CBA", spec1)
-	c3 := NewCargo("ABC", spec2)
-	c4 := NewCargo("ABC", spec1)
+	c1 := New("ABC", spec1)
+	c2 := New("CBA", spec1)
+	c3 := New("ABC", spec2)
+	c4 := New("ABC", spec1)
 
 	c.Check(c1.TrackingID, Equals, c4.TrackingID)
 	c.Check(c1.TrackingID, Equals, c3.TrackingID)
@@ -54,7 +54,7 @@ func (s *S) TestEquality(c *C) {
 }
 
 func (s *S) TestRoutingStatus(c *C) {
-	cargo := NewCargo("ABC", RouteSpecification{})
+	cargo := New("ABC", RouteSpecification{})
 
 	good := Itinerary{Legs: make([]Leg, 1)}
 	good.Legs[0] = Leg{
@@ -84,7 +84,7 @@ func (s *S) TestRoutingStatus(c *C) {
 }
 
 func (s *S) TestLastKnownLocationUnknownWhenNoEvents(c *C) {
-	cargo := NewCargo("ABC", RouteSpecification{
+	cargo := New("ABC", RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
 	})
@@ -137,7 +137,7 @@ func (s *S) TestTransportStatusStringer(c *C) {
 }
 
 func populateCargoReceivedInStockholm() *Cargo {
-	cargo := NewCargo("XYZ", RouteSpecification{
+	cargo := New("XYZ", RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.AUMEL,
 	})
@@ -159,7 +159,7 @@ func populateCargoReceivedInStockholm() *Cargo {
 }
 
 func populateCargoClaimedInMelbourne() *Cargo {
-	cargo := NewCargo("XYZ", RouteSpecification{
+	cargo := New("XYZ", RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.AUMEL,
 	})

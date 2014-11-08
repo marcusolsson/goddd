@@ -196,13 +196,13 @@ func (a *API) RegisterIncidentHandler(w http.ResponseWriter, req *http.Request) 
 }
 
 func storeTestData(r cargo.Repository) {
-	test1 := cargo.NewCargo("FTL456", cargo.RouteSpecification{
+	test1 := cargo.New("FTL456", cargo.RouteSpecification{
 		Origin:      location.AUMEL,
 		Destination: location.SESTO,
 	})
 	r.Store(*test1)
 
-	test2 := cargo.NewCargo("ABC123", cargo.RouteSpecification{
+	test2 := cargo.New("ABC123", cargo.RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
 	})

@@ -40,8 +40,8 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
 }
 
-// NewCargo creates a new, unrouted cargo.
-func NewCargo(trackingID TrackingID, routeSpecification RouteSpecification) *Cargo {
+// New creates a new, unrouted cargo.
+func New(trackingID TrackingID, routeSpecification RouteSpecification) *Cargo {
 	emptyItinerary := Itinerary{}
 	emptyHistory := HandlingHistory{make([]HandlingEvent, 0)}
 
