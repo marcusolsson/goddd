@@ -3,7 +3,10 @@ package cargo
 // TODO: It would make sense to have this in its own package. Unfortunately,
 // then there would be a circular dependency between the cargo and handling
 // packages since cargo.Delivery would use handling.HandlingEvent and
-// handling.HandlingEvent would use cargo.TrackingID.
+// handling.HandlingEvent would use cargo.TrackingID. Also,
+// HandlingEventFactory depends on the cargo repository.
+//
+// It would make sense not having the cargo package depend on handling.
 
 import (
 	"errors"
@@ -23,7 +26,7 @@ type HandlingActivity struct {
 }
 
 // HandlingEvent is used to register the event when, for instance, a cargo is
-// unloaded from a carrier at a some loacation at a given time.
+// unloaded from a carrier at a some location at a given time.
 type HandlingEvent struct {
 	TrackingID TrackingID
 	Activity   HandlingActivity
