@@ -43,8 +43,7 @@ func (s *service) RegisterHandlingEvent(completionTime time.Time, trackingID car
 	return nil
 }
 
-// NewService creates a handling event service with necessary
-// dependencies.
+// NewService creates a handling event service with necessary dependencies.
 func NewService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h EventHandler) Service {
 	return &service{
 		handlingEventRepository: r,

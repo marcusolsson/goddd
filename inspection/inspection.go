@@ -43,8 +43,7 @@ func (s *service) InspectCargo(trackingID cargo.TrackingID) {
 	s.cargoRepository.Store(c)
 }
 
-// NewService creates a inspection service with necessary
-// dependencies.
+// NewService creates a inspection service with necessary dependencies.
 func NewService(cargoRepository cargo.Repository, handlingEventRepository cargo.HandlingEventRepository, eventHandler EventHandler) Service {
 	return &service{cargoRepository, handlingEventRepository, eventHandler}
 }
