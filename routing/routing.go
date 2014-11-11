@@ -30,9 +30,7 @@ type edgeDTO struct {
 	Arrival     time.Time `json:"arrival"`
 }
 
-type service struct {
-	locationRepository location.Repository
-}
+type service struct{}
 
 func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 
@@ -72,6 +70,6 @@ func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpec
 	return itineraries
 }
 
-func NewService(locationRepository location.Repository) Service {
-	return &service{locationRepository: locationRepository}
+func NewService() Service {
+	return &service{}
 }

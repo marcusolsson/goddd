@@ -32,7 +32,7 @@ func NewAPI() *API {
 		locationRepository         = repository.NewLocation()
 		voyageRepository           = repository.NewVoyage()
 		handlingEventRepository    = repository.NewHandlingEvent()
-		routingService             = routing.NewService(locationRepository)
+		routingService             = routing.NewService()
 		bookingService             = booking.NewService(cargoRepository, locationRepository, routingService)
 		bookingServiceFacade       = booking.NewFacade(bookingService)
 		handlingEventServiceFacade = handling.NewFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
