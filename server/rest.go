@@ -32,7 +32,7 @@ func NewAPI() *API {
 		locationRepository         = repository.NewLocation()
 		voyageRepository           = repository.NewVoyage()
 		handlingEventRepository    = repository.NewHandlingEvent()
-		routingService             = routing.NewService()
+		routingService             = routing.NewService("http://ddd-pathfinder.herokuapp.com")
 		bookingService             = booking.NewService(cargoRepository, locationRepository, routingService)
 		bookingServiceFacade       = booking.NewFacade(bookingService)
 		handlingEventServiceFacade = handling.NewFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)

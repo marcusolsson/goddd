@@ -30,12 +30,14 @@ type edgeDTO struct {
 	Arrival     time.Time `json:"arrival"`
 }
 
-type service struct{}
+type service struct {
+	addr string
+}
 
 func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 
 	query := "from=" + string(routeSpecification.Origin) + "&to=" + string(routeSpecification.Destination)
-	resp, err := http.Get("http://ddd-pathfinder.herokuapp.com/paths?" + query)
+	resp, err := http.Get(s.addr + "/paths?" + query)
 
 	if err != nil {
 		return []cargo.Itinerary{}
@@ -70,6 +72,6 @@ func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpec
 	return itineraries
 }
 
-func NewService() Service {
-	return &service{}
+func NewService(a string) Service {
+	return &service{addr: a}
 }
