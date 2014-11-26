@@ -48,45 +48,6 @@ __Read more:__
 - [Deploy Go applications to App Engine](https://cloud.google.com/appengine/docs/go/)
 - [Deploy Go applications to Heroku](http://blog.wercker.com/2013/07/10/deploying-golang-to-heroku.html)
 
-## REST API
-
-The application exposes a REST API.
-
-### Cargos
-
-#### GET /cargos
-Returns a list of all currently booked cargos.
-
-#### GET /cargos/:id
-Returns a cargo with a given tracking ID.
-
-#### POST /cargos
-Books a cargo.
-
-| URL Param | Description |
-|:----------|:------------|
-|origin=[string]|UN locode of the origin|
-|destination=[string]|UN locode of the destination|
-|arrivalDeadline=[timestamp]|Timestamp of the arrival deadline|
-
-#### POST /cargos/:id/change_destination
-Updates the route of a cargo with a new destination.
-
-| URL Param | Description |
-|:----------|:------------|
-|destination=[string]|UN locode of the destination|
-
-#### GET /cargos/:id/request_routes
-Requests the possible routes for a booked cargo.
-
-#### POST /cargos/:id/assign_to_route
-Assigns the cargo to a route. Typically one of the routes returned by `/cargos/:id/request_routes`.
-
-### Locations
-
-#### GET /locations
-Returns a list of the registered locations.
-
 ## Copyright
 
 Copyright © 2014 Marcus Olsson. See [LICENSE](LICENSE) for details.
