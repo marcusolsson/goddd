@@ -18,18 +18,18 @@ func (s *S) TestCreateEmptyItinerary(c *C) {
 func (s *S) TestItineraryEquality(c *C) {
 
 	i1 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+		{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}}
 
 	i2 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+		{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}}
 
 	i3 := Itinerary{Legs: []Leg{
-		Leg{LoadLocation: location.CNHKG, UnloadLocation: location.AUMEL},
-		Leg{LoadLocation: location.AUMEL, UnloadLocation: location.SESTO},
+		{LoadLocation: location.CNHKG, UnloadLocation: location.AUMEL},
+		{LoadLocation: location.AUMEL, UnloadLocation: location.SESTO},
 	}}
 
 	c.Check(i1, DeepEquals, i1)
@@ -57,8 +57,8 @@ func (s *S) TestItineraryIsExpected(c *C) {
 	c.Check(emptyItinerary.IsExpected(emptyEvent), Equals, true)
 
 	i := Itinerary{Legs: []Leg{
-		Leg{VoyageNumber: "001A", LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		Leg{VoyageNumber: "001A", LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+		{VoyageNumber: "001A", LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		{VoyageNumber: "001A", LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}}
 
 	c.Check(i.IsExpected(emptyEvent), Equals, true)

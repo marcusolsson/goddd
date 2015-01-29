@@ -51,8 +51,8 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 	var voyageNumber voyage.Number = "001A"
 
 	misdirectedCargo.AssignToRoute(cargo.Itinerary{Legs: []cargo.Leg{
-		cargo.Leg{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		cargo.Leg{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+		{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}})
 
 	cargoRepository.Store(*misdirectedCargo)
@@ -91,8 +91,8 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 	var voyageNumber voyage.Number = "001A"
 
 	unloadedCargo.AssignToRoute(cargo.Itinerary{Legs: []cargo.Leg{
-		cargo.Leg{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		cargo.Leg{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+		{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}})
 
 	cargoRepository.Store(*unloadedCargo)

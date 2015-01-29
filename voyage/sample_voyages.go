@@ -5,25 +5,25 @@ import "github.com/marcusolsson/goddd/location"
 var (
 	V100 = New("V100", Schedule{
 		[]CarrierMovement{
-			CarrierMovement{DepartureLocation: location.Hongkong, ArrivalLocation: location.Tokyo},
-			CarrierMovement{DepartureLocation: location.Tokyo, ArrivalLocation: location.NewYork},
+			{DepartureLocation: location.Hongkong, ArrivalLocation: location.Tokyo},
+			{DepartureLocation: location.Tokyo, ArrivalLocation: location.NewYork},
 		},
 	})
 
 	V300 = New("V300", Schedule{
 		[]CarrierMovement{
-			CarrierMovement{DepartureLocation: location.Tokyo, ArrivalLocation: location.Rotterdam},
-			CarrierMovement{DepartureLocation: location.Rotterdam, ArrivalLocation: location.Hamburg},
-			CarrierMovement{DepartureLocation: location.Hamburg, ArrivalLocation: location.Melbourne},
-			CarrierMovement{DepartureLocation: location.Melbourne, ArrivalLocation: location.Tokyo},
+			{DepartureLocation: location.Tokyo, ArrivalLocation: location.Rotterdam},
+			{DepartureLocation: location.Rotterdam, ArrivalLocation: location.Hamburg},
+			{DepartureLocation: location.Hamburg, ArrivalLocation: location.Melbourne},
+			{DepartureLocation: location.Melbourne, ArrivalLocation: location.Tokyo},
 		},
 	})
 
 	V400 = New("V400", Schedule{
 		[]CarrierMovement{
-			CarrierMovement{DepartureLocation: location.Hamburg, ArrivalLocation: location.Stockholm},
-			CarrierMovement{DepartureLocation: location.Stockholm, ArrivalLocation: location.Helsinki},
-			CarrierMovement{DepartureLocation: location.Helsinki, ArrivalLocation: location.Hamburg},
+			{DepartureLocation: location.Hamburg, ArrivalLocation: location.Stockholm},
+			{DepartureLocation: location.Stockholm, ArrivalLocation: location.Helsinki},
+			{DepartureLocation: location.Helsinki, ArrivalLocation: location.Hamburg},
 		},
 	})
 

@@ -48,14 +48,14 @@ type stubRoutingService struct{}
 func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 
 	legs := []cargo.Leg{
-		cargo.Leg{
+		{
 			LoadLocation:   routeSpecification.Origin,
 			UnloadLocation: routeSpecification.Destination,
 		},
 	}
 
 	return []cargo.Itinerary{
-		cargo.Itinerary{Legs: legs},
+		{Legs: legs},
 	}
 }
 
