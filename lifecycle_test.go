@@ -259,7 +259,7 @@ type stubRoutingService struct{}
 func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 	if routeSpecification.Origin == location.CNHKG {
 		return []cargo.Itinerary{
-			cargo.Itinerary{Legs: []cargo.Leg{
+			{Legs: []cargo.Leg{
 				cargo.NewLeg("V100", location.CNHKG, location.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)),
 				cargo.NewLeg("V200", location.USNYC, location.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)),
 				cargo.NewLeg("V300", location.USCHI, location.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)),
@@ -268,7 +268,7 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 	}
 
 	return []cargo.Itinerary{
-		cargo.Itinerary{Legs: []cargo.Leg{
+		{Legs: []cargo.Leg{
 			cargo.NewLeg("V300", location.JNTKO, location.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)),
 			cargo.NewLeg("V400", location.DEHAM, location.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)),
 		}},
