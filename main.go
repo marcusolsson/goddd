@@ -14,7 +14,7 @@ func main() {
 	flag.IntVar(&port, "port", 8080, "the server port")
 	flag.Parse()
 
-	api.RegisterHandlers()
+	server.RegisterHandlers()
 
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 }
