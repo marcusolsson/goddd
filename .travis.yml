@@ -1,5 +1,17 @@
 language: go
-
 sudo: false
-
 go: 1.4
+install:
+- go get github.com/GeertJohan/fgt
+- go get github.com/golang/lint/golint
+- go get -v -u github.com/kr/godep
+script:
+- fgt golint ./...
+- godep go test -v ./...
+after_success:
+- godep go build -o goddd
+deploy:
+  provider: heroku
+  api_key:
+    secure: VvFwmpnNpEplxvsiUEB+2ZCYCanhH+7QnCNEyltZXAvTr468G0KNwJkT6axZgfaWWxB+JVXP3MiijjJW06f5itW5dJKIhbEHysM3oyEBaQ8gWRq/cTl9EziydWW8OYllSSBeoGScjNqseiGdWFAWXvMNPbAtO7z38+Um28uKXsk=
+  app: murmuring-oasis-1247

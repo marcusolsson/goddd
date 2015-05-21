@@ -1,1 +1,1 @@
-web: goddd -port $PORT
+web: ./goddd
