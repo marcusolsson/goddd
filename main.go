@@ -81,12 +81,12 @@ func cargosHandler(w http.ResponseWriter, req *http.Request) {
 
 	cargos := cargoRepository.FindAll()
 
-	dtos := make([]booking.CargoDTO, len(cargos))
+	result := make([]cargoView, len(cargos))
 	for i, c := range cargos {
-		dtos[i] = booking.Assemble(c, handlingEventRepository)
+		result[i] = assemble(c, handlingEventRepository)
 	}
 
-	b, err := json.Marshal(dtos)
+	b, err := json.Marshal(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -109,7 +109,7 @@ func cargoHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	b, err := json.Marshal(booking.Assemble(c, handlingEventRepository))
+	b, err := json.Marshal(assemble(c, handlingEventRepository))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -128,11 +128,11 @@ func requestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 
 	itineraries := bookingService.RequestPossibleRoutesForCargo(cargo.TrackingID(vars["id"]))
 
-	var candidates []booking.RouteCandidateDTO
+	var result []routeView
 	for _, itin := range itineraries {
-		var legs []booking.LegDTO
+		var legs []legView
 		for _, leg := range itin.Legs {
-			legs = append(legs, booking.LegDTO{
+			legs = append(legs, legView{
 				VoyageNumber: string(leg.VoyageNumber),
 				From:         string(leg.LoadLocation),
 				To:           string(leg.UnloadLocation),
@@ -140,10 +140,10 @@ func requestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 				UnloadTime:   leg.UnloadTime,
 			})
 		}
-		candidates = append(candidates, booking.RouteCandidateDTO{Legs: legs})
+		result = append(result, routeView{Legs: legs})
 	}
 
-	b, err := json.Marshal(candidates)
+	b, err := json.Marshal(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -165,14 +165,14 @@ func assignToRouteHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	defer req.Body.Close()
 
-	var candidate booking.RouteCandidateDTO
-	if err := json.Unmarshal(b, &candidate); err != nil {
+	var route routeView
+	if err := json.Unmarshal(b, &route); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 
 	var legs []cargo.Leg
-	for _, l := range candidate.Legs {
+	for _, l := range route.Legs {
 		legs = append(legs, cargo.Leg{
 			VoyageNumber:   voyage.Number(l.VoyageNumber),
 			LoadLocation:   location.UNLocode(l.From),
@@ -247,9 +247,7 @@ func bookCargoHandler(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	dto := booking.Assemble(c, handlingEventRepository)
-
-	b, err := json.Marshal(dto)
+	b, err := json.Marshal(assemble(c, handlingEventRepository))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -266,15 +264,15 @@ func locationsHandler(w http.ResponseWriter, req *http.Request) {
 
 	locations := locationRepository.FindAll()
 
-	dtos := make([]booking.LocationDTO, len(locations))
+	result := make([]locationView, len(locations))
 	for i, loc := range locations {
-		dtos[i] = booking.LocationDTO{
+		result[i] = locationView{
 			UNLocode: string(loc.UNLocode),
 			Name:     loc.Name,
 		}
 	}
 
-	b, err := json.Marshal(dtos)
+	b, err := json.Marshal(result)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return

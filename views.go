@@ -1,4 +1,4 @@
-package booking
+package main
 
 import (
 	"fmt"
@@ -8,30 +8,30 @@ import (
 	"github.com/marcusolsson/goddd/cargo"
 )
 
-type CargoDTO struct {
-	TrackingID           string     `json:"trackingId"`
-	StatusText           string     `json:"statusText"`
-	Origin               string     `json:"origin"`
-	Destination          string     `json:"destination"`
-	ETA                  time.Time  `json:"eta"`
-	NextExpectedActivity string     `json:"nextExpectedActivity"`
-	Misrouted            bool       `json:"misrouted"`
-	Routed               bool       `json:"routed"`
-	ArrivalDeadline      time.Time  `json:"arrivalDeadline"`
-	Events               []eventDTO `json:"events"`
-	Legs                 []LegDTO   `json:"legs,omitempty"`
+type cargoView struct {
+	TrackingID           string      `json:"trackingId"`
+	StatusText           string      `json:"statusText"`
+	Origin               string      `json:"origin"`
+	Destination          string      `json:"destination"`
+	ETA                  time.Time   `json:"eta"`
+	NextExpectedActivity string      `json:"nextExpectedActivity"`
+	Misrouted            bool        `json:"misrouted"`
+	Routed               bool        `json:"routed"`
+	ArrivalDeadline      time.Time   `json:"arrivalDeadline"`
+	Events               []eventView `json:"events"`
+	Legs                 []legView   `json:"legs,omitempty"`
 }
 
-type LocationDTO struct {
+type locationView struct {
 	UNLocode string `json:"locode"`
 	Name     string `json:"name"`
 }
 
-type RouteCandidateDTO struct {
-	Legs []LegDTO `json:"legs"`
+type routeView struct {
+	Legs []legView `json:"legs"`
 }
 
-type LegDTO struct {
+type legView struct {
 	VoyageNumber string    `json:"voyageNumber"`
 	From         string    `json:"from"`
 	To           string    `json:"to"`
@@ -39,13 +39,14 @@ type LegDTO struct {
 	UnloadTime   time.Time `json:"unloadTime"`
 }
 
-type eventDTO struct {
+type eventView struct {
 	Description string `json:"description"`
 	Expected    bool   `json:"expected"`
 }
 
-func Assemble(c cargo.Cargo, her cargo.HandlingEventRepository) CargoDTO {
-	return CargoDTO{
+// Assemble ...
+func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoView {
+	return cargoView{
 		TrackingID:           string(c.TrackingID),
 		Origin:               string(c.Origin),
 		Destination:          string(c.RouteSpecification.Destination),
@@ -91,10 +92,10 @@ func assembleStatusText(c cargo.Cargo) string {
 	}
 }
 
-func assembleLegs(c cargo.Cargo) []LegDTO {
-	var legs []LegDTO
+func assembleLegs(c cargo.Cargo) []legView {
+	var legs []legView
 	for _, l := range c.Itinerary.Legs {
-		legs = append(legs, LegDTO{
+		legs = append(legs, legView{
 			VoyageNumber: string(l.VoyageNumber),
 			From:         string(l.LoadLocation),
 			To:           string(l.UnloadLocation),
@@ -105,9 +106,9 @@ func assembleLegs(c cargo.Cargo) []LegDTO {
 	return legs
 }
 
-func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []eventDTO {
+func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []eventView {
 	h := r.QueryHandlingHistory(c.TrackingID)
-	events := make([]eventDTO, len(h.HandlingEvents))
+	events := make([]eventView, len(h.HandlingEvents))
 	for i, e := range h.HandlingEvents {
 		var description string
 
@@ -128,7 +129,7 @@ func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []eventDTO {
 			description = "[Unknown status]"
 		}
 
-		events[i] = eventDTO{Description: description, Expected: c.Itinerary.IsExpected(e)}
+		events[i] = eventView{Description: description, Expected: c.Itinerary.IsExpected(e)}
 	}
 
 	return events
