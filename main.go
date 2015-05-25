@@ -22,32 +22,57 @@ import (
 )
 
 var (
-	cargoRepository            = repository.NewCargo()
-	locationRepository         = repository.NewLocation()
-	voyageRepository           = repository.NewVoyage()
-	handlingEventRepository    = repository.NewHandlingEvent()
-	routingService             = routing.NewService("http://ddd-pathfinder.herokuapp.com")
-	bookingService             = booking.NewService(cargoRepository, locationRepository, routingService)
-	handlingEventServiceFacade = handling.NewFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
+	defaultPort              = "8080"
+	defaultRoutingServiceURL = "http://ddd-pathfinder.herokuapp.com"
 )
 
-var (
-	defaultPort = "8080"
-)
+type context struct {
+	cargoRepository            cargo.Repository
+	locationRepository         location.Repository
+	bookingService             booking.Service
+	handlingEventRepository    cargo.HandlingEventRepository
+	handlingEventServiceFacade handling.Facade
+}
+
+type ctxHandler func(w http.ResponseWriter, r *http.Request, ctx *context)
+
+func handlerFunc(ctx *context, fn ctxHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		fn(w, r, ctx)
+	})
+}
 
 func main() {
+	var (
+		cargoRepository            = repository.NewCargo()
+		locationRepository         = repository.NewLocation()
+		voyageRepository           = repository.NewVoyage()
+		handlingEventRepository    = repository.NewHandlingEvent()
+		routingService             = routing.NewService(defaultRoutingServiceURL)
+		bookingService             = booking.NewService(cargoRepository, locationRepository, routingService)
+		handlingEventServiceFacade = handling.NewFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
+	)
+
+	ctx := &context{
+		cargoRepository:            cargoRepository,
+		locationRepository:         locationRepository,
+		bookingService:             bookingService,
+		handlingEventRepository:    handlingEventRepository,
+		handlingEventServiceFacade: handlingEventServiceFacade,
+	}
+
 	storeTestData(cargoRepository)
 
 	r := mux.NewRouter()
 
-	r.HandleFunc("/cargos", cargosHandler).Methods("GET")
-	r.HandleFunc("/cargos", bookCargoHandler).Methods("POST")
-	r.HandleFunc("/cargos/{id}", cargoHandler).Methods("GET")
-	r.HandleFunc("/cargos/{id}/request_routes", requestRoutesHandler).Methods("GET")
-	r.HandleFunc("/cargos/{id}/assign_to_route", assignToRouteHandler).Methods("POST")
-	r.HandleFunc("/cargos/{id}/change_destination", changeDestinationHandler).Methods("POST")
-	r.HandleFunc("/locations", locationsHandler).Methods("GET")
-	r.HandleFunc("/incidents", registerIncidentHandler).Methods("POST")
+	r.Handle("/cargos", handlerFunc(ctx, cargosHandler)).Methods("GET")
+	r.Handle("/cargos", handlerFunc(ctx, bookCargoHandler)).Methods("POST")
+	r.Handle("/cargos/{id}", handlerFunc(ctx, cargoHandler)).Methods("GET")
+	r.Handle("/cargos/{id}/request_routes", handlerFunc(ctx, requestRoutesHandler)).Methods("GET")
+	r.Handle("/cargos/{id}/assign_to_route", handlerFunc(ctx, assignToRouteHandler)).Methods("POST")
+	r.Handle("/cargos/{id}/change_destination", handlerFunc(ctx, changeDestinationHandler)).Methods("POST")
+	r.Handle("/locations", handlerFunc(ctx, locationsHandler)).Methods("GET")
+	r.Handle("/incidents", handlerFunc(ctx, registerIncidentHandler)).Methods("POST")
 
 	n := negroni.Classic()
 
@@ -73,17 +98,17 @@ func port() string {
 	return p
 }
 
-func cargosHandler(w http.ResponseWriter, req *http.Request) {
+func cargosHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	cargos := cargoRepository.FindAll()
+	cargos := ctx.cargoRepository.FindAll()
 
 	result := make([]cargoView, len(cargos))
 	for i, c := range cargos {
-		result[i] = assemble(c, handlingEventRepository)
+		result[i] = assemble(c, ctx.handlingEventRepository)
 	}
 
 	b, err := json.Marshal(result)
@@ -95,7 +120,7 @@ func cargosHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(b)
 }
 
-func cargoHandler(w http.ResponseWriter, req *http.Request) {
+func cargoHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -103,13 +128,13 @@ func cargoHandler(w http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-	c, err := cargoRepository.Find(cargo.TrackingID(vars["id"]))
+	c, err := ctx.cargoRepository.Find(cargo.TrackingID(vars["id"]))
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	b, err := json.Marshal(assemble(c, handlingEventRepository))
+	b, err := json.Marshal(assemble(c, ctx.handlingEventRepository))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -118,7 +143,7 @@ func cargoHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(b)
 }
 
-func requestRoutesHandler(w http.ResponseWriter, req *http.Request) {
+func requestRoutesHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -126,7 +151,7 @@ func requestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-	itineraries := bookingService.RequestPossibleRoutesForCargo(cargo.TrackingID(vars["id"]))
+	itineraries := ctx.bookingService.RequestPossibleRoutesForCargo(cargo.TrackingID(vars["id"]))
 
 	var result []routeView
 	for _, itin := range itineraries {
@@ -152,7 +177,7 @@ func requestRoutesHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(b)
 }
 
-func assignToRouteHandler(w http.ResponseWriter, req *http.Request) {
+func assignToRouteHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -184,13 +209,13 @@ func assignToRouteHandler(w http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-	if err := bookingService.AssignCargoToRoute(cargo.Itinerary{Legs: legs}, cargo.TrackingID(vars["id"])); err != nil {
+	if err := ctx.bookingService.AssignCargoToRoute(cargo.Itinerary{Legs: legs}, cargo.TrackingID(vars["id"])); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 }
 
-func changeDestinationHandler(w http.ResponseWriter, req *http.Request) {
+func changeDestinationHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -207,13 +232,13 @@ func changeDestinationHandler(w http.ResponseWriter, req *http.Request) {
 
 	vars := mux.Vars(req)
 
-	if err := bookingService.ChangeDestination(cargo.TrackingID(vars["id"]), location.UNLocode(found["destination"].(string))); err != nil {
+	if err := ctx.bookingService.ChangeDestination(cargo.TrackingID(vars["id"]), location.UNLocode(found["destination"].(string))); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 }
 
-func bookCargoHandler(w http.ResponseWriter, req *http.Request) {
+func bookCargoHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "POST" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -235,19 +260,19 @@ func bookCargoHandler(w http.ResponseWriter, req *http.Request) {
 	)
 
 	millis, _ := strconv.ParseInt(arrivalDeadline, 10, 64)
-	trackingID, err := bookingService.BookNewCargo(location.UNLocode(origin), location.UNLocode(destination), time.Unix(millis/1000, 0))
+	trackingID, err := ctx.bookingService.BookNewCargo(location.UNLocode(origin), location.UNLocode(destination), time.Unix(millis/1000, 0))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 
-	c, err := cargoRepository.Find(trackingID)
+	c, err := ctx.cargoRepository.Find(trackingID)
 	if err != nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
 	}
 
-	b, err := json.Marshal(assemble(c, handlingEventRepository))
+	b, err := json.Marshal(assemble(c, ctx.handlingEventRepository))
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		return
@@ -256,13 +281,13 @@ func bookCargoHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(b)
 }
 
-func locationsHandler(w http.ResponseWriter, req *http.Request) {
+func locationsHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	locations := locationRepository.FindAll()
+	locations := ctx.locationRepository.FindAll()
 
 	result := make([]locationView, len(locations))
 	for i, loc := range locations {
@@ -281,7 +306,7 @@ func locationsHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(b)
 }
 
-func registerIncidentHandler(w http.ResponseWriter, req *http.Request) {
+func registerIncidentHandler(w http.ResponseWriter, req *http.Request, ctx *context) {
 	if req.Method != "GET" {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -304,7 +329,7 @@ func registerIncidentHandler(w http.ResponseWriter, req *http.Request) {
 		eventType      = found["eventType"].(string)
 	)
 
-	if err := handlingEventServiceFacade.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, location, eventType); err != nil {
+	if err := ctx.handlingEventServiceFacade.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, location, eventType); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
