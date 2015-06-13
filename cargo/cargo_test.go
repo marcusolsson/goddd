@@ -15,7 +15,7 @@ type S struct{}
 var _ = Suite(&S{})
 
 func (s *S) TestConstruction(c *C) {
-	trackingID := TrackingID("XYZ")
+	trackingID := NextTrackingID()
 	specification := RouteSpecification{
 		Origin:          location.SESTO,
 		Destination:     location.AUMEL,

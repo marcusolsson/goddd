@@ -29,18 +29,13 @@ func (h *stubEventHandler) CargoHasArrived(c cargo.Cargo) {
 }
 
 func (s *S) TestInspectMisdirectedCargo(c *C) {
-
 	var (
 		cargoRepository         = repository.NewCargo()
 		handlingEventRepository = repository.NewHandlingEvent()
 		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
-
-		inspectionService = &service{
-			cargoRepository:         cargoRepository,
-			handlingEventRepository: handlingEventRepository,
-			cargoEventHandler:       cargoEventHandler,
-		}
 	)
+
+	inspectionService := NewService(cargoRepository, handlingEventRepository, cargoEventHandler)
 
 	trackingID := cargo.TrackingID("ABC123")
 	misdirectedCargo := cargo.New(trackingID, cargo.RouteSpecification{
@@ -66,6 +61,8 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 	inspectionService.InspectCargo(trackingID)
 
 	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
+
+	inspectionService.InspectCargo("no_such_id")
 }
 
 func (s *S) TestInspectUnloadedCargo(c *C) {

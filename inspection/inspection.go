@@ -23,7 +23,6 @@ type service struct {
 // TODO: Should be transactional
 func (s *service) InspectCargo(trackingID cargo.TrackingID) {
 	c, err := s.cargoRepository.Find(trackingID)
-
 	if err != nil {
 		return
 	}

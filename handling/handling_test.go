@@ -27,7 +27,6 @@ func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 }
 
 func (s *S) TestRegisterHandlingEvent(c *C) {
-
 	var (
 		cargoRepository         = repository.NewCargo()
 		voyageRepository        = repository.NewVoyage()
@@ -42,12 +41,9 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 			VoyageRepository:   voyageRepository,
 			LocationRepository: locationRepository,
 		}
-		handlingEventService = &service{
-			handlingEventRepository: handlingEventRepository,
-			handlingEventFactory:    handlingEventFactory,
-			handlingEventHandler:    handlingEventHandler,
-		}
 	)
+
+	handlingEventService := NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 
 	var (
 		completionTime = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -59,8 +55,13 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 
 	cargoRepository.Store(*cargo.New(trackingID, cargo.RouteSpecification{}))
 
-	err := handlingEventService.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType)
+	var err error
 
+	err = handlingEventService.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType)
 	c.Check(err, IsNil)
+
+	err = handlingEventService.RegisterHandlingEvent(completionTime, "no_such_id", voyageNumber, unLocode, eventType)
+	c.Check(err, Not(IsNil))
+
 	c.Check(len(handlingEventHandler.handledEvents), Equals, 1)
 }
