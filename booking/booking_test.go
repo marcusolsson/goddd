@@ -21,10 +21,7 @@ func (s *S) TestBookNewCargo(c *C) {
 	cargoRepository := repository.NewCargo()
 	locationRepository := repository.NewLocation()
 
-	bookingService := &service{
-		cargoRepository:    cargoRepository,
-		locationRepository: locationRepository,
-	}
+	var bookingService = NewService(cargoRepository, locationRepository, nil)
 
 	origin, destination := location.SESTO, location.AUMEL
 	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -65,14 +62,12 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 	locationRepository := repository.NewLocation()
 	routingService := &stubRoutingService{}
 
-	var bookingService = &service{
-		cargoRepository:    cargoRepository,
-		locationRepository: locationRepository,
-		routingService:     routingService,
-	}
+	var bookingService = NewService(cargoRepository, locationRepository, routingService)
 
 	origin, destination := location.Stockholm, location.Melbourne
 	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+
+	c.Check(bookingService.RequestPossibleRoutesForCargo("no_such_id"), Not(IsNil))
 
 	trackingID, err := bookingService.BookNewCargo(origin.UNLocode, destination.UNLocode, arrivalDeadline)
 
@@ -88,11 +83,7 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 	locationRepository := repository.NewLocation()
 	routingService := &stubRoutingService{}
 
-	var bookingService = &service{
-		cargoRepository:    cargoRepository,
-		locationRepository: locationRepository,
-		routingService:     routingService,
-	}
+	var bookingService = NewService(cargoRepository, locationRepository, routingService)
 
 	origin, destination := location.Stockholm, location.Melbourne
 	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -108,21 +99,18 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 	err = bookingService.AssignCargoToRoute(itineraries[0], trackingID)
 
 	c.Assert(err, IsNil)
+
+	c.Assert(bookingService.AssignCargoToRoute(cargo.Itinerary{}, "no_such_id"), Not(IsNil))
 }
 
 func (s *S) TestChangeCargoDestination(c *C) {
-
 	var (
 		cargoRepository    = repository.NewCargo()
 		locationRepository = repository.NewLocation()
 		routingService     = &stubRoutingService{}
 	)
 
-	var bookingService = &service{
-		cargoRepository:    cargoRepository,
-		locationRepository: locationRepository,
-		routingService:     routingService,
-	}
+	var bookingService = NewService(cargoRepository, locationRepository, routingService)
 
 	c1 := cargo.New("ABC", cargo.RouteSpecification{
 		Origin:          location.Stockholm.UNLocode,
@@ -130,10 +118,15 @@ func (s *S) TestChangeCargoDestination(c *C) {
 		ArrivalDeadline: time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC),
 	})
 
+	c.Check(bookingService.ChangeDestination("no_such_id", location.Stockholm.UNLocode), Not(IsNil))
+
 	var err error
 
 	err = cargoRepository.Store(*c1)
 	c.Assert(err, IsNil)
+
+	c.Check(bookingService.ChangeDestination(c1.TrackingID, "no_such_unlocode"), Not(IsNil))
+
 	c.Assert(c1.RouteSpecification.Destination, Equals, location.CNHKG)
 
 	err = bookingService.ChangeDestination(c1.TrackingID, location.AUMEL)

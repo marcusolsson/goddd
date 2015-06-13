@@ -9,6 +9,7 @@ import (
 	"github.com/marcusolsson/goddd/routing"
 )
 
+// Service ...
 type Service interface {
 	// BookNewCargo registers a new cargo in the tracking system, not yet
 	// routed.
@@ -33,7 +34,6 @@ type service struct {
 }
 
 func (s *service) BookNewCargo(originLocode location.UNLocode, destinationLocode location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
-
 	trackingID := cargo.NextTrackingID()
 	routeSpecification := cargo.RouteSpecification{
 		Origin:          originLocode,
@@ -50,7 +50,6 @@ func (s *service) BookNewCargo(originLocode location.UNLocode, destinationLocode
 
 func (s *service) RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []cargo.Itinerary {
 	c, err := s.cargoRepository.Find(trackingID)
-
 	if err != nil {
 		return []cargo.Itinerary{}
 	}
@@ -62,7 +61,6 @@ func (s *service) AssignCargoToRoute(itinerary cargo.Itinerary, trackingID cargo
 	var err error
 
 	c, err := s.cargoRepository.Find(trackingID)
-
 	if err != nil {
 		return err
 	}
@@ -78,13 +76,11 @@ func (s *service) AssignCargoToRoute(itinerary cargo.Itinerary, trackingID cargo
 
 func (s *service) ChangeDestination(trackingID cargo.TrackingID, unLocode location.UNLocode) error {
 	c, err := s.cargoRepository.Find(trackingID)
-
 	if err != nil {
 		return errors.New("Could not find cargo.")
 	}
 
 	l, err := s.locationRepository.Find(unLocode)
-
 	if err != nil {
 		return err
 	}
