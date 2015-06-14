@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/voyage"
 )
@@ -47,5 +48,19 @@ func NewService(r cargo.HandlingEventRepository, f cargo.HandlingEventFactory, h
 		handlingEventRepository: r,
 		handlingEventFactory:    f,
 		handlingEventHandler:    h,
+	}
+}
+
+type handlingEventHandler struct {
+	InspectionService inspection.Service
+}
+
+func (h *handlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
+	h.InspectionService.InspectCargo(event.TrackingID)
+}
+
+func NewEventHandler(s inspection.Service) *handlingEventHandler {
+	return &handlingEventHandler{
+		InspectionService: s,
 	}
 }

@@ -15,6 +15,7 @@ import (
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
+	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/routing"
@@ -27,11 +28,11 @@ var (
 )
 
 type context struct {
-	cargoRepository            cargo.Repository
-	locationRepository         location.Repository
-	bookingService             booking.Service
-	handlingEventRepository    cargo.HandlingEventRepository
-	handlingEventServiceFacade handling.Facade
+	cargoRepository         cargo.Repository
+	locationRepository      location.Repository
+	handlingEventRepository cargo.HandlingEventRepository
+	bookingService          booking.Service
+	handlingEventService    handling.Service
 }
 
 type ctxHandler func(w http.ResponseWriter, r *http.Request, ctx *context)
@@ -44,21 +45,32 @@ func handlerFunc(ctx *context, fn ctxHandler) http.Handler {
 
 func main() {
 	var (
-		cargoRepository            = repository.NewCargo()
-		locationRepository         = repository.NewLocation()
-		voyageRepository           = repository.NewVoyage()
-		handlingEventRepository    = repository.NewHandlingEvent()
-		routingService             = routing.NewService(defaultRoutingServiceURL)
-		bookingService             = booking.NewService(cargoRepository, locationRepository, routingService)
-		handlingEventServiceFacade = handling.NewFacade(cargoRepository, locationRepository, voyageRepository, handlingEventRepository)
+		cargoRepository         = repository.NewCargo()
+		locationRepository      = repository.NewLocation()
+		voyageRepository        = repository.NewVoyage()
+		handlingEventRepository = repository.NewHandlingEvent()
+		routingService          = routing.NewService(defaultRoutingServiceURL)
+		bookingService          = booking.NewService(cargoRepository, locationRepository, routingService)
+	)
+
+	var (
+		handlingEventFactory = cargo.HandlingEventFactory{
+			CargoRepository:    cargoRepository,
+			VoyageRepository:   voyageRepository,
+			LocationRepository: locationRepository,
+		}
+		handlingEventHandler = handling.NewEventHandler(
+			inspection.NewService(cargoRepository, handlingEventRepository, nil),
+		)
+		handlingEventService = handling.NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 	)
 
 	ctx := &context{
-		cargoRepository:            cargoRepository,
-		locationRepository:         locationRepository,
-		bookingService:             bookingService,
-		handlingEventRepository:    handlingEventRepository,
-		handlingEventServiceFacade: handlingEventServiceFacade,
+		cargoRepository:         cargoRepository,
+		locationRepository:      locationRepository,
+		handlingEventRepository: handlingEventRepository,
+		bookingService:          bookingService,
+		handlingEventService:    handlingEventService,
 	}
 
 	storeTestData(cargoRepository)
@@ -325,14 +337,26 @@ func registerIncidentHandler(w http.ResponseWriter, req *http.Request, ctx *cont
 		completionTime = found["completionTime"].(string)
 		trackingID     = found["trackingId"].(string)
 		voyageNumber   = found["voyage"].(string)
-		location       = found["location"].(string)
+		unLocode       = found["location"].(string)
 		eventType      = found["eventType"].(string)
 	)
 
-	if err := ctx.handlingEventServiceFacade.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, location, eventType); err != nil {
+	millis, _ := strconv.ParseInt(completionTime, 10, 64)
+	if err := ctx.handlingEventService.RegisterHandlingEvent(time.Unix(millis/1000, 0), cargo.TrackingID(trackingID), voyage.Number(voyageNumber), location.UNLocode(unLocode), stringToEventType(eventType)); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+}
+
+func stringToEventType(s string) cargo.HandlingEventType {
+	types := map[string]cargo.HandlingEventType{
+		cargo.Receive.String(): cargo.Receive,
+		cargo.Load.String():    cargo.Load,
+		cargo.Unload.String():  cargo.Unload,
+		cargo.Customs.String(): cargo.Customs,
+		cargo.Claim.String():   cargo.Claim,
+	}
+	return types[s]
 }
 
 func storeTestData(r cargo.Repository) {
