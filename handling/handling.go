@@ -9,10 +9,12 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
+// EventHandler provides a means of subscribing to registered handling events.
 type EventHandler interface {
 	CargoWasHandled(cargo.HandlingEvent)
 }
 
+// Service provides handling operations.
 type Service interface {
 	// RegisterHandlingEvent registers a handling event in the system, and
 	// notifies interested parties that a cargo has been handled.
@@ -59,7 +61,8 @@ func (h *handlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 	h.InspectionService.InspectCargo(event.TrackingID)
 }
 
-func NewEventHandler(s inspection.Service) *handlingEventHandler {
+// NewEventHandler returns a new instance of a EventHandler.
+func NewEventHandler(s inspection.Service) EventHandler {
 	return &handlingEventHandler{
 		InspectionService: s,
 	}

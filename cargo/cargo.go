@@ -88,6 +88,7 @@ func (s RouteSpecification) IsSatisfiedBy(itinerary Itinerary) bool {
 // RoutingStatus describes status of cargo routing.
 type RoutingStatus int
 
+// Valid routing statuses.
 const (
 	NotRouted RoutingStatus = iota
 	Misrouted
@@ -109,6 +110,7 @@ func (s RoutingStatus) String() string {
 // TransportStatus describes status of cargo transportation.
 type TransportStatus int
 
+// Valid transport statuses.
 const (
 	NotReceived TransportStatus = iota
 	InPort

@@ -236,7 +236,7 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	err = handlingEventService.RegisterHandlingEvent(toDate(2009, time.March, 16), trackingID, voyage.V400.Number, location.SESTO, cargo.Claim)
 	chk.Check(err, IsNil)
 
-	c, err = cargoRepository.Find(trackingID)
+	c, _ = cargoRepository.Find(trackingID)
 
 	chk.Check(c.Delivery.LastKnownLocation, Equals, location.SESTO)
 	chk.Check(c.Delivery.TransportStatus, Equals, cargo.Claimed)

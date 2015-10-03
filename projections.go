@@ -6,7 +6,49 @@ import (
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/location"
 )
+
+// CargoProjectionService provides cargo projections.
+type CargoProjectionService interface {
+	FindAll() []cargoView
+	Find(id string) (cargoView, error)
+}
+
+type cargoProjectionService struct {
+	cargoRepository         cargo.Repository
+	handlingEventRepository cargo.HandlingEventRepository
+}
+
+func (s *cargoProjectionService) FindAll() []cargoView {
+	cargos := s.cargoRepository.FindAll()
+	var result []cargoView
+	for _, c := range cargos {
+		result = append(result, assemble(c, s.handlingEventRepository))
+	}
+	return result
+}
+
+func (s *cargoProjectionService) Find(id string) (cargoView, error) {
+	c, err := s.cargoRepository.Find(cargo.TrackingID(id))
+	if err != nil {
+		return cargoView{}, err
+	}
+	return assemble(c, s.handlingEventRepository), nil
+}
+
+// LocationProjectionService provides location projections.
+type LocationProjectionService interface {
+	FindAll() []location.Location
+}
+
+type locationProjectionService struct {
+	repository location.Repository
+}
+
+func (ls *locationProjectionService) FindAll() []location.Location {
+	return ls.repository.FindAll()
+}
 
 type cargoView struct {
 	TrackingID           string      `json:"trackingId"`
@@ -20,11 +62,6 @@ type cargoView struct {
 	ArrivalDeadline      time.Time   `json:"arrivalDeadline"`
 	Events               []eventView `json:"events"`
 	Legs                 []legView   `json:"legs,omitempty"`
-}
-
-type locationView struct {
-	UNLocode string `json:"locode"`
-	Name     string `json:"name"`
 }
 
 type routeView struct {
@@ -44,7 +81,6 @@ type eventView struct {
 	Expected    bool   `json:"expected"`
 }
 
-// Assemble ...
 func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) cargoView {
 	return cargoView{
 		TrackingID:           string(c.TrackingID),

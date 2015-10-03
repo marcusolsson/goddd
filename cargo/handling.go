@@ -35,6 +35,7 @@ type HandlingEvent struct {
 // HandlingEventType describes type of a handling event.
 type HandlingEventType int
 
+// Valid handling event types.
 const (
 	NotHandled HandlingEventType = iota
 	Load

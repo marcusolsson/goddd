@@ -96,11 +96,11 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 
 	c.Assert(itineraries, HasLen, 1)
 
-	err = bookingService.AssignCargoToRoute(itineraries[0], trackingID)
+	err = bookingService.AssignCargoToRoute(trackingID, itineraries[0])
 
 	c.Assert(err, IsNil)
 
-	c.Assert(bookingService.AssignCargoToRoute(cargo.Itinerary{}, "no_such_id"), Not(IsNil))
+	c.Assert(bookingService.AssignCargoToRoute("no_such_id", cargo.Itinerary{}), Not(IsNil))
 }
 
 func (s *S) TestChangeCargoDestination(c *C) {

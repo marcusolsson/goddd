@@ -18,6 +18,10 @@ type Service interface {
 	FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary
 }
 
+type routeResponse struct {
+	Paths []routeDTO `json:"paths"`
+}
+
 type routeDTO struct {
 	Edges []edgeDTO `json:"edges"`
 }
@@ -35,7 +39,6 @@ type service struct {
 }
 
 func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
-
 	query := "from=" + string(routeSpecification.Origin) + "&to=" + string(routeSpecification.Destination)
 	resp, err := http.Get(s.addr + "/paths?" + query)
 
@@ -46,7 +49,7 @@ func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpec
 
 	body, err := ioutil.ReadAll(resp.Body)
 
-	var routes []routeDTO
+	var routes routeResponse
 	err = json.Unmarshal(body, &routes)
 
 	if err != nil {
@@ -54,7 +57,7 @@ func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpec
 	}
 
 	var itineraries []cargo.Itinerary
-	for _, r := range routes {
+	for _, r := range routes.Paths {
 		var legs []cargo.Leg
 		for _, e := range r.Edges {
 			legs = append(legs, cargo.Leg{
@@ -72,6 +75,7 @@ func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpec
 	return itineraries
 }
 
+// NewService returns a new instance of the routing service.
 func NewService(a string) Service {
 	return &service{addr: a}
 }

@@ -1,5 +1,6 @@
 package location
 
+// Sample UN locodes.
 var (
 	SESTO UNLocode = "SESTO"
 	AUMEL UNLocode = "AUMEL"
@@ -12,6 +13,7 @@ var (
 	FIHEL UNLocode = "FIHEL"
 )
 
+// Sample locations.
 var (
 	Stockholm = Location{SESTO, "Stockholm"}
 	Melbourne = Location{AUMEL, "Melbourne"}

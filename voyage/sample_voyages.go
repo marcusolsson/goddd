@@ -2,6 +2,7 @@ package voyage
 
 import "github.com/marcusolsson/goddd/location"
 
+// A set of sample voyages.
 var (
 	V100 = New("V100", Schedule{
 		[]CarrierMovement{
@@ -26,9 +27,11 @@ var (
 			{DepartureLocation: location.Helsinki, ArrivalLocation: location.Hamburg},
 		},
 	})
+)
 
-	// These voyages are hard-coded into the current pathfinder. Make sure
-	// they exist.
+// These voyages are hard-coded into the current pathfinder. Make sure
+// they exist.
+var (
 	V0100S = New("0100S", Schedule{[]CarrierMovement{}})
 	V0200T = New("0200T", Schedule{[]CarrierMovement{}})
 	V0300A = New("0300A", Schedule{[]CarrierMovement{}})

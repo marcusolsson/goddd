@@ -33,6 +33,7 @@ func (r *cargoRepository) FindAll() []cargo.Cargo {
 	return c
 }
 
+// NewCargo returns a new instance of a in-memory cargo repository.
 func NewCargo() cargo.Repository {
 	return &cargoRepository{
 		cargos: make(map[cargo.TrackingID]cargo.Cargo),
@@ -59,6 +60,7 @@ func (r *locationRepository) FindAll() []location.Location {
 	return l
 }
 
+// NewLocation returns a new instance of a in-memory location repository.
 func NewLocation() location.Repository {
 	r := &locationRepository{
 		locations: make(map[location.UNLocode]location.Location),
@@ -86,6 +88,7 @@ func (r *voyageRepository) Find(voyageNumber voyage.Number) (voyage.Voyage, erro
 	return voyage.Voyage{}, voyage.ErrUnknownVoyage
 }
 
+// NewVoyage returns a new instance of a in-memory voyage repository.
 func NewVoyage() voyage.Repository {
 	r := &voyageRepository{
 		voyages: make(map[voyage.Number]voyage.Voyage),
@@ -117,9 +120,10 @@ func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
 }
 
 func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
-	return cargo.HandlingHistory{r.events[trackingID]}
+	return cargo.HandlingHistory{HandlingEvents: r.events[trackingID]}
 }
 
+// NewHandlingEvent returns a new instance of a in-memory handling event repository.
 func NewHandlingEvent() cargo.HandlingEventRepository {
 	return &handlingEventRepository{
 		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),

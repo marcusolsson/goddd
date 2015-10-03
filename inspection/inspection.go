@@ -2,11 +2,13 @@ package inspection
 
 import "github.com/marcusolsson/goddd/cargo"
 
+// EventHandler provides means of subscribing to inspection events.
 type EventHandler interface {
 	CargoWasMisdirected(cargo.Cargo)
 	CargoHasArrived(cargo.Cargo)
 }
 
+// Service provides cargo inspection operations.
 type Service interface {
 	// InspectCargo inspects cargo and send relevant notifications to
 	// interested parties, for example if a cargo has been misdirected, or
