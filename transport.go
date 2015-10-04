@@ -336,3 +336,41 @@ func makeRegisterIncidentEndpoint(hs handling.Service) endpoint.Endpoint {
 		return registerIncidentResponse{}, nil
 	}
 }
+
+// Fetch routes
+
+type fetchRoutesRequest struct {
+	From string
+	To   string
+}
+
+type fetchRoutesResponse struct {
+	Paths []struct {
+		Edges []struct {
+			Origin      string    `json:"origin"`
+			Destination string    `json:"destination"`
+			Voyage      string    `json:"voyage"`
+			Departure   time.Time `json:"departure"`
+			Arrival     time.Time `json:"arrival"`
+		} `json:"edges"`
+	} `json:"paths"`
+}
+
+func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
+	var response fetchRoutesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func encodeFetchRoutesRequest(r *http.Request, request interface{}) error {
+	req := request.(fetchRoutesRequest)
+
+	vals := r.URL.Query()
+	vals.Add("from", req.From)
+	vals.Add("to", req.To)
+	r.URL.RawQuery = vals.Encode()
+
+	return nil
+}

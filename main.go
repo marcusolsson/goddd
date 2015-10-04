@@ -21,7 +21,7 @@ import (
 
 var (
 	defaultPort              = "8080"
-	defaultRoutingServiceURL = "http://ddd-pathfinder.herokuapp.com"
+	defaultRoutingServiceURL = "http://localhost:7878"
 )
 
 func main() {
@@ -45,17 +45,17 @@ func main() {
 		)
 	)
 
-	// Configure the routing service which will serve as a proxy.
-	routingService := routing.NewService(routingServiceURL())
-
 	// Facilitate testing by adding some cargos.
 	storeTestData(cargoRepository)
 
 	ctx := context.Background()
 
+	// Configure the routing service which will serve as a proxy.
+	var rs routing.Service
+	rs = proxyingMiddleware(routingServiceURL(), ctx)(rs)
 	// Create handlers for all booking endpoint.
 	var bs booking.Service
-	bs = booking.NewService(cargoRepository, locationRepository, routingService)
+	bs = booking.NewService(cargoRepository, locationRepository, rs)
 
 	bookCargoHandler := httptransport.NewServer(
 		ctx,
