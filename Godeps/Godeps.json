@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/marcusolsson/goddd",
-	"GoVersion": "go1.4.2",
+	"GoVersion": "go1.5",
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go-uuid/uuid",
@@ -8,9 +8,16 @@
 			"Rev": "7dda39b2e7d5e265014674c5af696ba4186679e9"
 		},
 		{
-			"ImportPath": "github.com/codegangsta/negroni",
-			"Comment": "v0.1-32-gc64702c",
-			"Rev": "c64702ca03d0f858ab7866638b69e85f0d4c6ee7"
+			"ImportPath": "github.com/go-kit/kit/endpoint",
+			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
+		},
+		{
+			"ImportPath": "github.com/go-kit/kit/log",
+			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
+		},
+		{
+			"ImportPath": "github.com/go-kit/kit/transport/http",
+			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
 		},
 		{
 			"ImportPath": "github.com/gorilla/context",
@@ -21,12 +28,17 @@
 			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
 		},
 		{
-			"ImportPath": "github.com/hariharan-uno/cors",
-			"Rev": "31f4634c19d87fbff9ee31b4f375c0d79dc52016"
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "01256db42e5106196a3473ec1620727a383500e8"
 		},
 		{
-			"ImportPath": "gopkg.in/mgo.v2",
-			"Rev": "231ce7e0549b5ce60d35ed805bff505cab7098e4"
+			"ImportPath": "gopkg.in/logfmt.v0",
+			"Rev": "c50dc9aa845e681529d8e49d3dc11ec0195aacac"
+		},
+		{
+			"ImportPath": "gopkg.in/stack.v1",
+			"Comment": "v1.4.0",
+			"Rev": "0585967eab0016c8e4e2d55ac20585b469574cec"
 		}
 	]
 }
