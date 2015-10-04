@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/http"
 	"os"
 
@@ -15,6 +14,8 @@ import (
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/routing"
+
+	"github.com/go-kit/kit/log"
 
 	httptransport "github.com/go-kit/kit/transport/http"
 )
@@ -49,6 +50,7 @@ func main() {
 	storeTestData(cargoRepository)
 
 	ctx := context.Background()
+	logger := log.NewLogfmtLogger(os.Stdout)
 
 	// Configure the routing service which will serve as a proxy.
 	var rs routing.Service
@@ -57,6 +59,7 @@ func main() {
 	// Create handlers for all booking endpoints.
 	var bs booking.Service
 	bs = booking.NewService(cargoRepository, locationRepository, rs)
+	bs = loggingMiddleware{logger, bs}
 
 	bookCargoHandler := httptransport.NewServer(
 		ctx,
@@ -140,7 +143,11 @@ func main() {
 	r.Handle("/incidents", registerIncidentHandler).Methods("POST")
 
 	http.Handle("/", r)
-	log.Fatal(http.ListenAndServe(":"+port(), nil))
+
+	addr := ":" + port()
+
+	_ = logger.Log("msg", "HTTP", "addr", addr)
+	_ = logger.Log("err", http.ListenAndServe(addr, nil))
 }
 
 func port() string {
