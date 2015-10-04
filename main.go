@@ -53,7 +53,8 @@ func main() {
 	// Configure the routing service which will serve as a proxy.
 	var rs routing.Service
 	rs = proxyingMiddleware(routingServiceURL(), ctx)(rs)
-	// Create handlers for all booking endpoint.
+
+	// Create handlers for all booking endpoints.
 	var bs booking.Service
 	bs = booking.NewService(cargoRepository, locationRepository, rs)
 

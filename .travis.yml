@@ -15,6 +15,6 @@ deploy:
   api_key:
     secure: VvFwmpnNpEplxvsiUEB+2ZCYCanhH+7QnCNEyltZXAvTr468G0KNwJkT6axZgfaWWxB+JVXP3MiijjJW06f5itW5dJKIhbEHysM3oyEBaQ8gWRq/cTl9EziydWW8OYllSSBeoGScjNqseiGdWFAWXvMNPbAtO7z38+Um28uKXsk=
   skip_cleanup: true
-  app: murmuring-oasis-1247
+  app: dddsample-go
   on:
     repo: marcusolsson/goddd
