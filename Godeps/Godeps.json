@@ -8,6 +8,14 @@
 			"Rev": "7dda39b2e7d5e265014674c5af696ba4186679e9"
 		},
 		{
+			"ImportPath": "github.com/afex/hystrix-go/hystrix",
+			"Rev": "fbe18f9a5a3bb3f74497d82695b19ad907a56e0f"
+		},
+		{
+			"ImportPath": "github.com/go-kit/kit/circuitbreaker",
+			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
+		},
+		{
 			"ImportPath": "github.com/go-kit/kit/endpoint",
 			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
 		},
@@ -26,6 +34,14 @@
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
+		},
+		{
+			"ImportPath": "github.com/sony/gobreaker",
+			"Rev": "cf09a95f6fb68c45049db50a89687d509e164bbd"
+		},
+		{
+			"ImportPath": "github.com/streadway/handy/breaker",
+			"Rev": "b8cb1681462b5fca34da3de14378a56d512e0dc7"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
