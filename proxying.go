@@ -13,6 +13,7 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
+// RoutingServiceMiddle is a function for chaining routing service middleware.
 type RoutingServiceMiddleware func(routing.Service) routing.Service
 
 type proxyRoutingService struct {
