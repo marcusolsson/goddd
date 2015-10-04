@@ -3,6 +3,7 @@ package main
 import (
 	"net/url"
 
+	"github.com/go-kit/kit/circuitbreaker"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
@@ -54,8 +55,10 @@ func (s proxyRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 func proxyingMiddleware(proxyURL string, ctx context.Context) RoutingServiceMiddleware {
 	return func(next routing.Service) routing.Service {
-		endpoint := makeFetchRoutesEndpoint(ctx, proxyURL)
-		return proxyRoutingService{ctx, endpoint, next}
+		var e endpoint.Endpoint
+		e = makeFetchRoutesEndpoint(ctx, proxyURL)
+		e = circuitbreaker.Hystrix("fetch-routes")(e)
+		return proxyRoutingService{ctx, e, next}
 	}
 }
 
