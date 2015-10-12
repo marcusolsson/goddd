@@ -60,8 +60,8 @@ type Repository interface {
 	FindAll() []Cargo
 }
 
-// ErrUnknownCargo is used when a cargo could not be found.
-var ErrUnknownCargo = errors.New("unknown cargo")
+// ErrUnknown is used when a cargo could not be found.
+var ErrUnknown = errors.New("unknown cargo")
 
 // NextTrackingID generates a new tracking ID.
 // TODO: Move to infrastructure

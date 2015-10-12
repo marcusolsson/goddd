@@ -16,8 +16,8 @@ type Location struct {
 	Name     string
 }
 
-// ErrUnknownLocation is used when a location could not be found.
-var ErrUnknownLocation = errors.New("unknown location")
+// ErrUnknown is used when a location could not be found.
+var ErrUnknown = errors.New("unknown location")
 
 // Repository provides access a location store.
 type Repository interface {

@@ -22,7 +22,7 @@ func (r *cargoRepository) Find(trackingID cargo.TrackingID) (cargo.Cargo, error)
 		return val, nil
 	}
 
-	return cargo.Cargo{}, cargo.ErrUnknownCargo
+	return cargo.Cargo{}, cargo.ErrUnknown
 }
 
 func (r *cargoRepository) FindAll() []cargo.Cargo {
@@ -49,7 +49,7 @@ func (r *locationRepository) Find(locode location.UNLocode) (location.Location, 
 		return l, nil
 	}
 
-	return location.Location{}, location.ErrUnknownLocation
+	return location.Location{}, location.ErrUnknown
 }
 
 func (r *locationRepository) FindAll() []location.Location {
@@ -85,7 +85,7 @@ func (r *voyageRepository) Find(voyageNumber voyage.Number) (voyage.Voyage, erro
 		return v, nil
 	}
 
-	return voyage.Voyage{}, voyage.ErrUnknownVoyage
+	return voyage.Voyage{}, voyage.ErrUnknown
 }
 
 // NewVoyage returns a new instance of a in-memory voyage repository.

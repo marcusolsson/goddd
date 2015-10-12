@@ -28,26 +28,26 @@ var (
 func main() {
 	// Configure repositories.
 	var (
-		cargoRepository         = repository.NewCargo()
-		locationRepository      = repository.NewLocation()
-		voyageRepository        = repository.NewVoyage()
-		handlingEventRepository = repository.NewHandlingEvent()
+		cargos         = repository.NewCargo()
+		locations      = repository.NewLocation()
+		voyages        = repository.NewVoyage()
+		handlingEvents = repository.NewHandlingEvent()
 	)
 
 	// Configure some questionable dependencies.
 	var (
 		handlingEventFactory = cargo.HandlingEventFactory{
-			CargoRepository:    cargoRepository,
-			VoyageRepository:   voyageRepository,
-			LocationRepository: locationRepository,
+			CargoRepository:    cargos,
+			VoyageRepository:   voyages,
+			LocationRepository: locations,
 		}
 		handlingEventHandler = handling.NewEventHandler(
-			inspection.NewService(cargoRepository, handlingEventRepository, nil),
+			inspection.NewService(cargos, handlingEvents, nil),
 		)
 	)
 
 	// Facilitate testing by adding some cargos.
-	storeTestData(cargoRepository)
+	storeTestData(cargos)
 
 	ctx := context.Background()
 	logger := log.NewLogfmtLogger(os.Stdout)
@@ -58,7 +58,7 @@ func main() {
 
 	// Create handlers for all booking endpoints.
 	var bs booking.Service
-	bs = booking.NewService(cargoRepository, locationRepository, rs)
+	bs = booking.NewService(cargos, locations, rs)
 	bs = loggingMiddleware{logger, bs}
 
 	bookCargoHandler := httptransport.NewServer(
@@ -89,8 +89,8 @@ func main() {
 	// Create handlers for the cargo endpoints.
 	var cs CargoProjectionService
 	cs = &cargoProjectionService{
-		cargoRepository:         cargoRepository,
-		handlingEventRepository: handlingEventRepository,
+		cargoRepository:         cargos,
+		handlingEventRepository: handlingEvents,
 	}
 
 	listCargosHandler := httptransport.NewServer(
@@ -109,7 +109,7 @@ func main() {
 	// Create handler for the location endpoint.
 	var ls LocationProjectionService
 	ls = &locationProjectionService{
-		repository: locationRepository,
+		repository: locations,
 	}
 
 	listLocationsHandler := httptransport.NewServer(
@@ -121,7 +121,7 @@ func main() {
 
 	// Create handler for the handling endpoint used for registering incidents.
 	var hs handling.Service
-	hs = handling.NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
+	hs = handling.NewService(handlingEvents, handlingEventFactory, handlingEventHandler)
 
 	registerIncidentHandler := httptransport.NewServer(
 		ctx,

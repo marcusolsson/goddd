@@ -34,8 +34,8 @@ type CarrierMovement struct {
 	ArrivalTime       time.Time
 }
 
-// ErrUnknownVoyage is used when a voyage could not be found.
-var ErrUnknownVoyage = errors.New("unknown voyage")
+// ErrUnknown is used when a voyage could not be found.
+var ErrUnknown = errors.New("unknown voyage")
 
 // Repository provides access a voyage store.
 type Repository interface {
