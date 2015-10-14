@@ -20,10 +20,12 @@ func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpec
 	return nil
 }
 
+// Route is a read model for routing views.
 type Route struct {
 	Legs []Leg `json:"legs"`
 }
 
+// Leg is a read model for routing views.
 type Leg struct {
 	VoyageNumber string    `json:"voyageNumber"`
 	From         string    `json:"from"`

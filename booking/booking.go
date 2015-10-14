@@ -1,3 +1,5 @@
+// Package booking provides the use-case of booking a cargo. Used by views
+// facing an administrator.
 package booking
 
 import (
@@ -9,7 +11,7 @@ import (
 	"github.com/marcusolsson/goddd/routing"
 )
 
-// Service ...
+// Service is the interface that provides booking methods.
 type Service interface {
 	// BookNewCargo registers a new cargo in the tracking system, not yet
 	// routed.
@@ -130,6 +132,7 @@ func NewService(cr cargo.Repository, lr location.Repository, her cargo.HandlingE
 	}
 }
 
+// Cargo is a read model for booking views.
 type Cargo struct {
 	ArrivalDeadline time.Time `json:"arrivalDeadline"`
 	Destination     string    `json:"destination"`
@@ -140,6 +143,7 @@ type Cargo struct {
 	TrackingID      string    `json:"trackingId"`
 }
 
+// Leg is a read model for booking views.
 type Leg struct {
 	VoyageNumber string    `json:"voyageNumber"`
 	From         string    `json:"from"`

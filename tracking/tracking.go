@@ -1,3 +1,5 @@
+// Package tracking provides the use-case of tracking a cargo. Used by views
+// facing the end-user.
 package tracking
 
 import (
@@ -8,7 +10,9 @@ import (
 	"github.com/marcusolsson/goddd/cargo"
 )
 
+// Service is the interface that provides the basic Track method.
 type Service interface {
+	// Track returns a cargo matching a tracking ID.
 	Track(id string) (Cargo, error)
 }
 
@@ -25,10 +29,12 @@ func (s *service) Track(id string) (Cargo, error) {
 	return assemble(c, s.handlingEvents), nil
 }
 
+// NewService returns a new instance of the default Service.
 func NewService() Service {
 	return &service{}
 }
 
+// Cargo is a read model for tracking views.
 type Cargo struct {
 	TrackingID           string    `json:"trackingId"`
 	StatusText           string    `json:"statusText"`
@@ -42,6 +48,7 @@ type Cargo struct {
 	Events               []Event   `json:"events"`
 }
 
+// Event is a read model for tracking views.
 type Event struct {
 	Description string `json:"description"`
 	Expected    bool   `json:"expected"`
