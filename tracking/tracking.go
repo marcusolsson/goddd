@@ -30,8 +30,11 @@ func (s *service) Track(id string) (Cargo, error) {
 }
 
 // NewService returns a new instance of the default Service.
-func NewService() Service {
-	return &service{}
+func NewService(cargos cargo.Repository, handlingEvents cargo.HandlingEventRepository) Service {
+	return &service{
+		cargos:         cargos,
+		handlingEvents: handlingEvents,
+	}
 }
 
 // Cargo is a read model for tracking views.
