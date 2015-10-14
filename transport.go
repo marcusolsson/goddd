@@ -264,7 +264,7 @@ type listLocationsRequest struct {
 }
 
 type listLocationsResponse struct {
-	Locations []location.Location
+	Locations []booking.Location `json:"locations"`
 }
 
 func decodeListLocationsRequest(r *http.Request) (interface{}, error) {

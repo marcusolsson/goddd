@@ -32,7 +32,7 @@ type Service interface {
 	Cargos() []Cargo
 
 	// Locations returns a list of registered locations.
-	Locations() []location.Location
+	Locations() []Location
 }
 
 type service struct {
@@ -118,8 +118,15 @@ func (s *service) Cargos() []Cargo {
 	return result
 }
 
-func (s *service) Locations() []location.Location {
-	return s.locationRepository.FindAll()
+func (s *service) Locations() []Location {
+	var result []Location
+	for _, v := range s.locationRepository.FindAll() {
+		result = append(result, Location{
+			UNLocode: string(v.UNLocode),
+			Name:     v.Name,
+		})
+	}
+	return result
 }
 
 // NewService creates a booking service with necessary dependencies.
@@ -130,6 +137,11 @@ func NewService(cr cargo.Repository, lr location.Repository, her cargo.HandlingE
 		handlingEventRepository: her,
 		routingService:          rs,
 	}
+}
+
+type Location struct {
+	UNLocode string `json:"locode"`
+	Name     string `json:"name"`
 }
 
 // Cargo is a read model for booking views.
