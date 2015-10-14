@@ -139,6 +139,7 @@ func NewService(cr cargo.Repository, lr location.Repository, her cargo.HandlingE
 	}
 }
 
+// Location is a read model for booking views.
 type Location struct {
 	UNLocode string `json:"locode"`
 	Name     string `json:"name"`
