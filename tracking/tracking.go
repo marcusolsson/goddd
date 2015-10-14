@@ -30,32 +30,19 @@ func NewService() Service {
 }
 
 type Cargo struct {
-	TrackingID           string      `json:"trackingId"`
-	StatusText           string      `json:"statusText"`
-	Origin               string      `json:"origin"`
-	Destination          string      `json:"destination"`
-	ETA                  time.Time   `json:"eta"`
-	NextExpectedActivity string      `json:"nextExpectedActivity"`
-	Misrouted            bool        `json:"misrouted"`
-	Routed               bool        `json:"routed"`
-	ArrivalDeadline      time.Time   `json:"arrivalDeadline"`
-	Events               []eventView `json:"events"`
-	Legs                 []legView   `json:"legs,omitempty"`
+	TrackingID           string    `json:"trackingId"`
+	StatusText           string    `json:"statusText"`
+	Origin               string    `json:"origin"`
+	Destination          string    `json:"destination"`
+	ETA                  time.Time `json:"eta"`
+	NextExpectedActivity string    `json:"nextExpectedActivity"`
+	Misrouted            bool      `json:"misrouted"`
+	Routed               bool      `json:"routed"`
+	ArrivalDeadline      time.Time `json:"arrivalDeadline"`
+	Events               []Event   `json:"events"`
 }
 
-type routeView struct {
-	Legs []legView `json:"legs"`
-}
-
-type legView struct {
-	VoyageNumber string    `json:"voyageNumber"`
-	From         string    `json:"from"`
-	To           string    `json:"to"`
-	LoadTime     time.Time `json:"loadTime"`
-	UnloadTime   time.Time `json:"unloadTime"`
-}
-
-type eventView struct {
+type Event struct {
 	Description string `json:"description"`
 	Expected    bool   `json:"expected"`
 }
@@ -67,11 +54,8 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
 		Destination:          string(c.RouteSpecification.Destination),
 		ETA:                  c.Delivery.ETA,
 		NextExpectedActivity: nextExpectedActivity(c),
-		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
-		Routed:               !c.Itinerary.IsEmpty(),
 		ArrivalDeadline:      c.RouteSpecification.ArrivalDeadline,
 		StatusText:           assembleStatusText(c),
-		Legs:                 assembleLegs(c),
 		Events:               assembleEvents(c, her),
 	}
 }
@@ -107,23 +91,9 @@ func assembleStatusText(c cargo.Cargo) string {
 	}
 }
 
-func assembleLegs(c cargo.Cargo) []legView {
-	var legs []legView
-	for _, l := range c.Itinerary.Legs {
-		legs = append(legs, legView{
-			VoyageNumber: string(l.VoyageNumber),
-			From:         string(l.LoadLocation),
-			To:           string(l.UnloadLocation),
-			LoadTime:     l.LoadTime,
-			UnloadTime:   l.UnloadTime,
-		})
-	}
-	return legs
-}
-
-func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []eventView {
+func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []Event {
 	h := r.QueryHandlingHistory(c.TrackingID)
-	events := make([]eventView, len(h.HandlingEvents))
+	events := make([]Event, len(h.HandlingEvents))
 	for i, e := range h.HandlingEvents {
 		var description string
 
@@ -144,7 +114,7 @@ func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []eventView 
 			description = "[Unknown status]"
 		}
 
-		events[i] = eventView{Description: description, Expected: c.Itinerary.IsExpected(e)}
+		events[i] = Event{Description: description, Expected: c.Itinerary.IsExpected(e)}
 	}
 
 	return events
