@@ -25,6 +25,9 @@ type Service interface {
 
 	// ChangeDestination changes the destination of a cargo.
 	ChangeDestination(trackingID cargo.TrackingID, unLocode location.UNLocode) error
+
+	// Locations returns a list of registered locations.
+	Locations() []location.Location
 }
 
 type service struct {
@@ -98,6 +101,10 @@ func (s *service) RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []c
 	}
 
 	return s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
+}
+
+func (s *service) Locations() []location.Location {
+	return s.locationRepository.FindAll()
 }
 
 // NewService creates a booking service with necessary dependencies.

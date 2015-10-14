@@ -85,6 +85,12 @@ func main() {
 		decodeChangeDestinationRequest,
 		encodeResponse,
 	)
+	listLocationsHandler := httptransport.NewServer(
+		ctx,
+		makeListLocationsEndpoint(bs),
+		decodeListLocationsRequest,
+		encodeResponse,
+	)
 
 	// Create handlers for the cargo endpoints.
 	var cs CargoProjectionService
@@ -103,19 +109,6 @@ func main() {
 		ctx,
 		makeFindCargoEndpoint(cs),
 		decodeFindCargoRequest,
-		encodeResponse,
-	)
-
-	// Create handler for the location endpoint.
-	var ls LocationProjectionService
-	ls = &locationProjectionService{
-		repository: locations,
-	}
-
-	listLocationsHandler := httptransport.NewServer(
-		ctx,
-		makeListLocationsEndpoint(ls),
-		decodeListLocationsRequest,
 		encodeResponse,
 	)
 
@@ -142,12 +135,20 @@ func main() {
 	r.Handle("/locations", listLocationsHandler).Methods("GET")
 	r.Handle("/incidents", registerIncidentHandler).Methods("POST")
 
-	http.Handle("/", r)
+	http.Handle("/", accessControl(r))
 
 	addr := ":" + port()
 
 	_ = logger.Log("msg", "HTTP", "addr", addr)
 	_ = logger.Log("err", http.ListenAndServe(addr, nil))
+}
+
+func accessControl(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+
+		h.ServeHTTP(w, r)
+	})
 }
 
 func port() string {

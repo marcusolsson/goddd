@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
 )
 
 // CargoProjectionService provides cargo projections.
@@ -35,19 +34,6 @@ func (s *cargoProjectionService) Find(id string) (cargoView, error) {
 		return cargoView{}, err
 	}
 	return assemble(c, s.handlingEventRepository), nil
-}
-
-// LocationProjectionService provides location projections.
-type LocationProjectionService interface {
-	FindAll() []location.Location
-}
-
-type locationProjectionService struct {
-	repository location.Repository
-}
-
-func (ls *locationProjectionService) FindAll() []location.Location {
-	return ls.repository.FindAll()
 }
 
 type cargoView struct {

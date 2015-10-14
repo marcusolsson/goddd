@@ -269,13 +269,10 @@ func decodeListLocationsRequest(r *http.Request) (interface{}, error) {
 	return listLocationsRequest{}, nil
 }
 
-func makeListLocationsEndpoint(ls LocationProjectionService) endpoint.Endpoint {
+func makeListLocationsEndpoint(bs booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		_ = request.(listLocationsRequest)
-
-		locations := ls.FindAll()
-
-		return listLocationsResponse{Locations: locations}, nil
+		return listLocationsResponse{Locations: bs.Locations()}, nil
 	}
 }
 
