@@ -16,6 +16,8 @@ import (
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/routing"
+	"github.com/marcusolsson/goddd/tracking"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
@@ -28,12 +30,12 @@ func encodeResponse(w http.ResponseWriter, resp interface{}) error {
 type listCargosRequest struct{}
 
 type listCargosResponse struct {
-	Cargos []cargoView `json:"cargos"`
+	Cargos []booking.Cargo `json:"cargos"`
 }
 
-func makeListCargosEndpoint(cs CargoProjectionService) endpoint.Endpoint {
+func makeListCargosEndpoint(bs booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		return listCargosResponse{Cargos: cs.FindAll()}, nil
+		return listCargosResponse{Cargos: bs.Cargos()}, nil
 	}
 }
 
@@ -48,14 +50,14 @@ type findCargoRequest struct {
 }
 
 type findCargoResponse struct {
-	Cargo cargoView `json:"cargo"`
+	Cargo tracking.Cargo `json:"cargo"`
 }
 
-func makeFindCargoEndpoint(cs CargoProjectionService) endpoint.Endpoint {
+func makeFindCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(findCargoRequest)
 
-		c, err := cs.Find(req.ID)
+		c, err := ts.Track(req.ID)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +129,7 @@ type requestRoutesRequest struct {
 }
 
 type requestRoutesResponse struct {
-	Routes []routeView `json:"routes"`
+	Routes []routing.Route `json:"routes"`
 }
 
 func makeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
@@ -136,11 +138,11 @@ func makeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
 
 		itineraries := s.RequestPossibleRoutesForCargo(req.ID)
 
-		result := []routeView{}
+		result := []routing.Route{}
 		for _, itin := range itineraries {
-			var legs []legView
+			var legs []routing.Leg
 			for _, leg := range itin.Legs {
-				legs = append(legs, legView{
+				legs = append(legs, routing.Leg{
 					VoyageNumber: string(leg.VoyageNumber),
 					From:         string(leg.LoadLocation),
 					To:           string(leg.UnloadLocation),
@@ -148,7 +150,7 @@ func makeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
 					UnloadTime:   leg.UnloadTime,
 				})
 			}
-			result = append(result, routeView{Legs: legs})
+			result = append(result, routing.Route{Legs: legs})
 		}
 
 		return requestRoutesResponse{Routes: result}, nil
@@ -195,7 +197,7 @@ func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 	}
 	defer r.Body.Close()
 
-	var route routeView
+	var route routing.Route
 	if err := json.Unmarshal(b, &route); err != nil {
 		return nil, err
 	}

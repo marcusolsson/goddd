@@ -1,6 +1,10 @@
 package routing
 
-import "github.com/marcusolsson/goddd/cargo"
+import (
+	"time"
+
+	"github.com/marcusolsson/goddd/cargo"
+)
 
 // Service provides access to an external routing service.
 type Service interface {
@@ -14,4 +18,16 @@ type service struct {
 
 func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
 	return nil
+}
+
+type Route struct {
+	Legs []Leg `json:"legs"`
+}
+
+type Leg struct {
+	VoyageNumber string    `json:"voyageNumber"`
+	From         string    `json:"from"`
+	To           string    `json:"to"`
+	LoadTime     time.Time `json:"loadTime"`
+	UnloadTime   time.Time `json:"unloadTime"`
 }

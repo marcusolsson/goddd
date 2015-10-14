@@ -46,7 +46,7 @@ var (
 )
 
 var (
-	bookingService         = booking.NewService(cargoRepository, locationRepository, routingService)
+	bookingService         = booking.NewService(cargoRepository, locationRepository, handlingEventRepository, routingService)
 	cargoInspectionService = inspection.NewService(cargoRepository, handlingEventRepository, cargoEventHandler)
 	handlingEventService   = handling.NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
 )

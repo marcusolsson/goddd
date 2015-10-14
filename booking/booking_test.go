@@ -18,10 +18,13 @@ var _ = Suite(&S{})
 
 func (s *S) TestBookNewCargo(c *C) {
 
-	cargoRepository := repository.NewCargo()
-	locationRepository := repository.NewLocation()
+	var (
+		cargoRepository    = repository.NewCargo()
+		locationRepository = repository.NewLocation()
+		handlingEvents     = repository.NewHandlingEvent()
+	)
 
-	var bookingService = NewService(cargoRepository, locationRepository, nil)
+	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, nil)
 
 	origin, destination := location.SESTO, location.AUMEL
 	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -58,11 +61,14 @@ func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification carg
 
 func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
-	cargoRepository := repository.NewCargo()
-	locationRepository := repository.NewLocation()
-	routingService := &stubRoutingService{}
+	var (
+		cargoRepository    = repository.NewCargo()
+		locationRepository = repository.NewLocation()
+		handlingEvents     = repository.NewHandlingEvent()
+		routingService     = &stubRoutingService{}
+	)
 
-	var bookingService = NewService(cargoRepository, locationRepository, routingService)
+	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, routingService)
 
 	origin, destination := location.Stockholm, location.Melbourne
 	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -79,11 +85,14 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 }
 
 func (s *S) TestAssignCargoToRoute(c *C) {
-	cargoRepository := repository.NewCargo()
-	locationRepository := repository.NewLocation()
-	routingService := &stubRoutingService{}
+	var (
+		cargoRepository    = repository.NewCargo()
+		locationRepository = repository.NewLocation()
+		handlingEvents     = repository.NewHandlingEvent()
+		routingService     = &stubRoutingService{}
+	)
 
-	var bookingService = NewService(cargoRepository, locationRepository, routingService)
+	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, routingService)
 
 	origin, destination := location.Stockholm, location.Melbourne
 	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -107,10 +116,11 @@ func (s *S) TestChangeCargoDestination(c *C) {
 	var (
 		cargoRepository    = repository.NewCargo()
 		locationRepository = repository.NewLocation()
+		handlingEvents     = repository.NewHandlingEvent()
 		routingService     = &stubRoutingService{}
 	)
 
-	var bookingService = NewService(cargoRepository, locationRepository, routingService)
+	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, routingService)
 
 	c1 := cargo.New("ABC", cargo.RouteSpecification{
 		Origin:          location.Stockholm.UNLocode,

@@ -14,6 +14,7 @@ import (
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/routing"
+	"github.com/marcusolsson/goddd/tracking"
 
 	"github.com/go-kit/kit/log"
 
@@ -58,7 +59,7 @@ func main() {
 
 	// Create handlers for all booking endpoints.
 	var bs booking.Service
-	bs = booking.NewService(cargos, locations, rs)
+	bs = booking.NewService(cargos, locations, handlingEvents, rs)
 	bs = loggingMiddleware{logger, bs}
 
 	bookCargoHandler := httptransport.NewServer(
@@ -85,6 +86,12 @@ func main() {
 		decodeChangeDestinationRequest,
 		encodeResponse,
 	)
+	listCargosHandler := httptransport.NewServer(
+		ctx,
+		makeListCargosEndpoint(bs),
+		decodeListCargosRequest,
+		encodeResponse,
+	)
 	listLocationsHandler := httptransport.NewServer(
 		ctx,
 		makeListLocationsEndpoint(bs),
@@ -92,22 +99,12 @@ func main() {
 		encodeResponse,
 	)
 
-	// Create handlers for the cargo endpoints.
-	var cs CargoProjectionService
-	cs = &cargoProjectionService{
-		cargoRepository:         cargos,
-		handlingEventRepository: handlingEvents,
-	}
+	var ts tracking.Service
+	ts = tracking.NewService()
 
-	listCargosHandler := httptransport.NewServer(
-		ctx,
-		makeListCargosEndpoint(cs),
-		decodeListCargosRequest,
-		encodeResponse,
-	)
 	findCargoHandler := httptransport.NewServer(
 		ctx,
-		makeFindCargoEndpoint(cs),
+		makeFindCargoEndpoint(ts),
 		decodeFindCargoRequest,
 		encodeResponse,
 	)
