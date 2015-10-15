@@ -8,18 +8,55 @@ This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net
 
 This project is intended for inspirational purpose and should **not** be considered a tutorial or guide on how to do DDD in Go. 
 
-Organization
-============
+Application
+===========
 
-**booking**, **handling** and **tracking** are the three main use-cases. 
+booking
+-------
 
-- booking - actions available to a person with administrative permissions to book an order. Uses an external _routing service_ provided by the **routing** package.
-- handling - allows the staff at each location to register handling events along the route
-- tracking - provided to our customer to see the status of their cargo
+Used by persons with administrative permissions to book an order. 
 
-**cargo** package currently contains most of the domain logic.
+### POST /cargos
 
-**repository** provides in-memory implementations of the domain repositories.
+Books a cargo
+
+### GET /cargos/:id/request_routes
+
+Requests routes based on current specification. Uses an external _routing service_ provided by the **routing** package.
+
+### POST /cargos/:id/assign_to_route
+
+Assigns given route to the cargo.
+
+### POST /cargos/:id/change_destination
+
+Change destination of the cargo. This might result in a misrouted cargo.
+
+### GET /cargos
+
+Lists all booked cargos.
+
+### GET /locations
+
+Lists all registered locations.
+
+handling
+--------
+
+Allows the staff at each location to register handling events along the route
+
+### POST /incidents
+
+Registers handling events along the route.
+
+tracking
+--------
+
+Provided to our customer to see the status of their cargo
+
+### GET /cargos/:id
+
+Returns the cargo's tracking information.
 
 Porting from Java
 =================
