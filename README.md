@@ -16,27 +16,27 @@ booking
 
 Used by persons with administrative permissions to book an order. 
 
-### POST /cargos
+#### POST /cargos
 
 Books a cargo
 
-### GET /cargos/:id/request_routes
+#### GET /cargos/:id/request_routes
 
 Requests routes based on current specification. Uses an external _routing service_ provided by the **routing** package.
 
-### POST /cargos/:id/assign_to_route
+#### POST /cargos/:id/assign_to_route
 
 Assigns given route to the cargo.
 
-### POST /cargos/:id/change_destination
+#### POST /cargos/:id/change_destination
 
 Change destination of the cargo. This might result in a misrouted cargo.
 
-### GET /cargos
+#### GET /cargos
 
 Lists all booked cargos.
 
-### GET /locations
+#### GET /locations
 
 Lists all registered locations.
 
@@ -45,7 +45,7 @@ handling
 
 Allows the staff at each location to register handling events along the route
 
-### POST /incidents
+#### POST /incidents
 
 Registers handling events along the route.
 
@@ -54,7 +54,7 @@ tracking
 
 Provided to our customer to see the status of their cargo
 
-### GET /cargos/:id
+#### GET /cargos/:id
 
 Returns the cargo's tracking information.
 
