@@ -103,8 +103,9 @@ func assembleStatusText(c cargo.Cargo) string {
 
 func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []Event {
 	h := r.QueryHandlingHistory(c.TrackingID)
-	events := make([]Event, len(h.HandlingEvents))
-	for i, e := range h.HandlingEvents {
+
+	var events []Event
+	for _, e := range h.HandlingEvents {
 		var description string
 
 		switch e.Activity.Type {
@@ -124,7 +125,10 @@ func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []Event {
 			description = "[Unknown status]"
 		}
 
-		events[i] = Event{Description: description, Expected: c.Itinerary.IsExpected(e)}
+		events = append(events, Event{
+			Description: description,
+			Expected:    c.Itinerary.IsExpected(e),
+		})
 	}
 
 	return events

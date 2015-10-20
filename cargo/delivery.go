@@ -46,7 +46,6 @@ func DeriveDeliveryFrom(rs RouteSpecification, itinerary Itinerary, history Hand
 // newDelivery creates a up-to-date delivery based on an handling event,
 // itinerary and a route specification.
 func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, rs RouteSpecification) Delivery {
-
 	var (
 		routingStatus           = calculateRoutingStatus(itinerary, rs)
 		transportStatus         = calculateTransportStatus(lastEvent)

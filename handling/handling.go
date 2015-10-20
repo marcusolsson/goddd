@@ -33,13 +33,13 @@ func (s *service) RegisterHandlingEvent(completionTime time.Time, trackingID car
 
 	registrationTime := time.Now()
 
-	event, err := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingID, voyageNumber, unLocode, eventType)
+	e, err := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingID, voyageNumber, unLocode, eventType)
 	if err != nil {
 		return err
 	}
 
-	s.handlingEventRepository.Store(event)
-	s.handlingEventHandler.CargoWasHandled(event)
+	s.handlingEventRepository.Store(e)
+	s.handlingEventHandler.CargoWasHandled(e)
 
 	return nil
 }

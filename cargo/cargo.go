@@ -41,15 +41,15 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 }
 
 // New creates a new, unrouted cargo.
-func New(trackingID TrackingID, rs RouteSpecification) *Cargo {
-	emptyItinerary := Itinerary{}
-	emptyHistory := HandlingHistory{make([]HandlingEvent, 0)}
+func New(id TrackingID, rs RouteSpecification) *Cargo {
+	itinerary := Itinerary{}
+	history := HandlingHistory{make([]HandlingEvent, 0)}
 
 	return &Cargo{
-		TrackingID:         trackingID,
+		TrackingID:         id,
 		Origin:             rs.Origin,
 		RouteSpecification: rs,
-		Delivery:           DeriveDeliveryFrom(rs, emptyItinerary, emptyHistory),
+		Delivery:           DeriveDeliveryFrom(rs, itinerary, history),
 	}
 }
 
@@ -64,7 +64,7 @@ type Repository interface {
 var ErrUnknown = errors.New("unknown cargo")
 
 // NextTrackingID generates a new tracking ID.
-// TODO: Move to infrastructure
+// TODO: Move to infrastructure(?)
 func NextTrackingID() TrackingID {
 	return TrackingID(strings.Split(strings.ToUpper(uuid.New()), "-")[0])
 }

@@ -3,7 +3,6 @@
 package booking
 
 import (
-	"errors"
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
@@ -42,10 +41,8 @@ type service struct {
 	handlingEventRepository cargo.HandlingEventRepository
 }
 
-func (s *service) AssignCargoToRoute(trackingID cargo.TrackingID, itinerary cargo.Itinerary) error {
-	var err error
-
-	c, err := s.cargoRepository.Find(trackingID)
+func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itinerary) error {
+	c, err := s.cargoRepository.Find(id)
 	if err != nil {
 		return err
 	}
@@ -60,24 +57,24 @@ func (s *service) AssignCargoToRoute(trackingID cargo.TrackingID, itinerary carg
 }
 
 func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
-	trackingID := cargo.NextTrackingID()
+	id := cargo.NextTrackingID()
 	rs := cargo.RouteSpecification{
 		Origin:          origin,
 		Destination:     destination,
 		ArrivalDeadline: arrivalDeadline,
 	}
 
-	c := cargo.New(trackingID, rs)
+	c := cargo.New(id, rs)
 
 	s.cargoRepository.Store(*c)
 
 	return c.TrackingID, nil
 }
 
-func (s *service) ChangeDestination(trackingID cargo.TrackingID, destination location.UNLocode) error {
-	c, err := s.cargoRepository.Find(trackingID)
+func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UNLocode) error {
+	c, err := s.cargoRepository.Find(id)
 	if err != nil {
-		return errors.New("Could not find cargo.")
+		return err
 	}
 
 	l, err := s.locationRepository.Find(destination)
@@ -98,8 +95,8 @@ func (s *service) ChangeDestination(trackingID cargo.TrackingID, destination loc
 	return nil
 }
 
-func (s *service) RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []cargo.Itinerary {
-	c, err := s.cargoRepository.Find(trackingID)
+func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary {
+	c, err := s.cargoRepository.Find(id)
 	if err != nil {
 		return []cargo.Itinerary{}
 	}
@@ -108,9 +105,8 @@ func (s *service) RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []c
 }
 
 func (s *service) Cargos() []Cargo {
-	cargos := s.cargoRepository.FindAll()
 	var result []Cargo
-	for _, c := range cargos {
+	for _, c := range s.cargoRepository.FindAll() {
 		result = append(result, assemble(c, s.handlingEventRepository))
 	}
 	return result

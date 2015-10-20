@@ -72,7 +72,7 @@ type HandlingHistory struct {
 // MostRecentlyCompletedEvent returns most recently completed handling event.
 func (h HandlingHistory) MostRecentlyCompletedEvent() (HandlingEvent, error) {
 	if len(h.HandlingEvents) == 0 {
-		return HandlingEvent{}, errors.New("Delivery history is empty")
+		return HandlingEvent{}, errors.New("delivery history is empty")
 	}
 
 	return h.HandlingEvents[len(h.HandlingEvents)-1], nil
