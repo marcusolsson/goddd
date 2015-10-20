@@ -23,10 +23,10 @@ type proxyRoutingService struct {
 	routing.Service
 }
 
-func (s proxyRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
+func (s proxyRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
 	response, err := s.FetchRoutesEndpoint(s.Context, fetchRoutesRequest{
-		From: string(routeSpecification.Origin),
-		To:   string(routeSpecification.Destination),
+		From: string(rs.Origin),
+		To:   string(rs.Destination),
 	})
 	if err != nil {
 		return []cargo.Itinerary{}

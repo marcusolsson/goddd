@@ -156,14 +156,14 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	// Cargo needs to be rerouted
 	//
 
-	routeSpecification := cargo.RouteSpecification{
+	rs := cargo.RouteSpecification{
 		Origin:          location.JNTKO,
 		Destination:     location.SESTO,
 		ArrivalDeadline: arrivalDeadline,
 	}
 
 	// Specify a new route, this time from Tokyo (where it was incorrectly unloaded) to Stockholm
-	c.SpecifyNewRoute(routeSpecification)
+	c.SpecifyNewRoute(rs)
 
 	cargoRepository.Store(c)
 
@@ -256,8 +256,8 @@ func toDate(year int, month time.Month, day int) time.Time {
 // Stub RoutingService
 type stubRoutingService struct{}
 
-func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
-	if routeSpecification.Origin == location.CNHKG {
+func (s *stubRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
+	if rs.Origin == location.CNHKG {
 		return []cargo.Itinerary{
 			{Legs: []cargo.Leg{
 				cargo.NewLeg("V100", location.CNHKG, location.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)),

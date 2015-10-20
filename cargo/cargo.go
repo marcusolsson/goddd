@@ -23,8 +23,8 @@ type Cargo struct {
 }
 
 // SpecifyNewRoute specifies a new route for this cargo.
-func (c *Cargo) SpecifyNewRoute(routeSpecification RouteSpecification) {
-	c.RouteSpecification = routeSpecification
+func (c *Cargo) SpecifyNewRoute(rs RouteSpecification) {
+	c.RouteSpecification = rs
 	c.Delivery = c.Delivery.UpdateOnRouting(c.RouteSpecification, c.Itinerary)
 }
 
@@ -41,15 +41,15 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 }
 
 // New creates a new, unrouted cargo.
-func New(trackingID TrackingID, routeSpecification RouteSpecification) *Cargo {
+func New(trackingID TrackingID, rs RouteSpecification) *Cargo {
 	emptyItinerary := Itinerary{}
 	emptyHistory := HandlingHistory{make([]HandlingEvent, 0)}
 
 	return &Cargo{
 		TrackingID:         trackingID,
-		Origin:             routeSpecification.Origin,
-		RouteSpecification: routeSpecification,
-		Delivery:           DeriveDeliveryFrom(routeSpecification, emptyItinerary, emptyHistory),
+		Origin:             rs.Origin,
+		RouteSpecification: rs,
+		Delivery:           DeriveDeliveryFrom(rs, emptyItinerary, emptyHistory),
 	}
 }
 

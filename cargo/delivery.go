@@ -26,8 +26,8 @@ type Delivery struct {
 // UpdateOnRouting creates a new delivery snapshot to reflect changes in
 // routing, i.e. when the route specification or the itinerary has changed but
 // no additional handling of the cargo has been performed.
-func (d Delivery) UpdateOnRouting(routeSpecification RouteSpecification, itinerary Itinerary) Delivery {
-	return newDelivery(d.LastEvent, itinerary, routeSpecification)
+func (d Delivery) UpdateOnRouting(rs RouteSpecification, itinerary Itinerary) Delivery {
+	return newDelivery(d.LastEvent, itinerary, rs)
 }
 
 // IsOnTrack checks if the delivery is on track.
@@ -38,28 +38,28 @@ func (d Delivery) IsOnTrack() bool {
 // DeriveDeliveryFrom creates a new delivery snapshot based on the complete
 // handling history of a cargo, as well as its route specification and
 // itinerary.
-func DeriveDeliveryFrom(routeSpecification RouteSpecification, itinerary Itinerary, history HandlingHistory) Delivery {
+func DeriveDeliveryFrom(rs RouteSpecification, itinerary Itinerary, history HandlingHistory) Delivery {
 	lastEvent, _ := history.MostRecentlyCompletedEvent()
-	return newDelivery(lastEvent, itinerary, routeSpecification)
+	return newDelivery(lastEvent, itinerary, rs)
 }
 
 // newDelivery creates a up-to-date delivery based on an handling event,
 // itinerary and a route specification.
-func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecification RouteSpecification) Delivery {
+func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, rs RouteSpecification) Delivery {
 
 	var (
-		routingStatus           = calculateRoutingStatus(itinerary, routeSpecification)
+		routingStatus           = calculateRoutingStatus(itinerary, rs)
 		transportStatus         = calculateTransportStatus(lastEvent)
 		lastKnownLocation       = calculateLastKnownLocation(lastEvent)
 		isMisdirected           = calculateMisdirectedStatus(lastEvent, itinerary)
-		isUnloadedAtDestination = calculateUnloadedAtDestination(lastEvent, routeSpecification)
+		isUnloadedAtDestination = calculateUnloadedAtDestination(lastEvent, rs)
 		currentVoyage           = calculateCurrentVoyage(transportStatus, lastEvent)
 	)
 
 	d := Delivery{
 		LastEvent:               lastEvent,
 		Itinerary:               itinerary,
-		RouteSpecification:      routeSpecification,
+		RouteSpecification:      rs,
 		RoutingStatus:           routingStatus,
 		TransportStatus:         transportStatus,
 		LastKnownLocation:       lastKnownLocation,
@@ -76,12 +76,12 @@ func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, routeSpecificatio
 
 // Below are internal functions used when creating a new delivery.
 
-func calculateRoutingStatus(itinerary Itinerary, routeSpecification RouteSpecification) RoutingStatus {
+func calculateRoutingStatus(itinerary Itinerary, rs RouteSpecification) RoutingStatus {
 	if itinerary.Legs == nil {
 		return NotRouted
 	}
 
-	if routeSpecification.IsSatisfiedBy(itinerary) {
+	if rs.IsSatisfiedBy(itinerary) {
 		return Routed
 	}
 
@@ -96,12 +96,12 @@ func calculateMisdirectedStatus(event HandlingEvent, itinerary Itinerary) bool {
 	return !itinerary.IsExpected(event)
 }
 
-func calculateUnloadedAtDestination(event HandlingEvent, routeSpecification RouteSpecification) bool {
+func calculateUnloadedAtDestination(event HandlingEvent, rs RouteSpecification) bool {
 	if event.Activity.Type == NotHandled {
 		return false
 	}
 
-	return event.Activity.Type == Unload && routeSpecification.Destination == event.Activity.Location
+	return event.Activity.Type == Unload && rs.Destination == event.Activity.Location
 }
 
 func calculateTransportStatus(event HandlingEvent) TransportStatus {

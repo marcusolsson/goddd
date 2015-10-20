@@ -61,13 +61,13 @@ func (s *service) AssignCargoToRoute(trackingID cargo.TrackingID, itinerary carg
 
 func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
 	trackingID := cargo.NextTrackingID()
-	routeSpecification := cargo.RouteSpecification{
+	rs := cargo.RouteSpecification{
 		Origin:          origin,
 		Destination:     destination,
 		ArrivalDeadline: arrivalDeadline,
 	}
 
-	c := cargo.New(trackingID, routeSpecification)
+	c := cargo.New(trackingID, rs)
 
 	s.cargoRepository.Store(*c)
 
@@ -85,13 +85,11 @@ func (s *service) ChangeDestination(trackingID cargo.TrackingID, destination loc
 		return err
 	}
 
-	routeSpecification := cargo.RouteSpecification{
+	c.SpecifyNewRoute(cargo.RouteSpecification{
 		Origin:          c.Origin,
 		Destination:     l.UNLocode,
 		ArrivalDeadline: c.RouteSpecification.ArrivalDeadline,
-	}
-
-	c.SpecifyNewRoute(routeSpecification)
+	})
 
 	if err := s.cargoRepository.Store(c); err != nil {
 		return err

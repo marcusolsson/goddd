@@ -45,12 +45,12 @@ func (s *S) TestBookNewCargo(c *C) {
 
 type stubRoutingService struct{}
 
-func (s *stubRoutingService) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
+func (s *stubRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
 
 	legs := []cargo.Leg{
 		{
-			LoadLocation:   routeSpecification.Origin,
-			UnloadLocation: routeSpecification.Destination,
+			LoadLocation:   rs.Origin,
+			UnloadLocation: rs.Destination,
 		},
 	}
 

@@ -10,13 +10,13 @@ import (
 type Service interface {
 	// FetchRoutesForSpecification finds all possible routes that satisfy a
 	// given specification.
-	FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary
+	FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary
 }
 
 type service struct {
 }
 
-func (s *service) FetchRoutesForSpecification(routeSpecification cargo.RouteSpecification) []cargo.Itinerary {
+func (s *service) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
 	return nil
 }
 
