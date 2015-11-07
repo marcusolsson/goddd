@@ -1,4 +1,4 @@
-package main
+package middleware
 
 import (
 	"net/url"
@@ -53,7 +53,7 @@ func (s proxyRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecifica
 	return itineraries
 }
 
-func proxyingMiddleware(proxyURL string, ctx context.Context) RoutingServiceMiddleware {
+func ProxyingMiddleware(proxyURL string, ctx context.Context) RoutingServiceMiddleware {
 	return func(next routing.Service) routing.Service {
 		var e endpoint.Endpoint
 		e = makeFetchRoutesEndpoint(ctx, proxyURL)
@@ -72,7 +72,7 @@ func makeFetchRoutesEndpoint(ctx context.Context, instance string) endpoint.Endp
 	}
 	return httptransport.NewClient(
 		"GET", u,
-		encodeFetchRoutesRequest,
-		decodeFetchRoutesResponse,
+		EncodeFetchRoutesRequest,
+		DecodeFetchRoutesResponse,
 	).Endpoint()
 }

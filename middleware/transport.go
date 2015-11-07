@@ -1,4 +1,4 @@
-package main
+package middleware
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-func encodeResponse(w http.ResponseWriter, resp interface{}) error {
+func EncodeResponse(w http.ResponseWriter, resp interface{}) error {
 	return json.NewEncoder(w).Encode(resp)
 }
 
@@ -33,13 +33,13 @@ type listCargosResponse struct {
 	Cargos []booking.Cargo `json:"cargos"`
 }
 
-func makeListCargosEndpoint(bs booking.Service) endpoint.Endpoint {
+func MakeListCargosEndpoint(bs booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		return listCargosResponse{Cargos: bs.Cargos()}, nil
 	}
 }
 
-func decodeListCargosRequest(r *http.Request) (interface{}, error) {
+func DecodeListCargosRequest(r *http.Request) (interface{}, error) {
 	return listCargosRequest{}, nil
 }
 
@@ -53,7 +53,7 @@ type findCargoResponse struct {
 	Cargo tracking.Cargo `json:"cargo"`
 }
 
-func makeFindCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
+func MakeFindCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(findCargoRequest)
 
@@ -66,7 +66,7 @@ func makeFindCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
 	}
 }
 
-func decodeFindCargoRequest(r *http.Request) (interface{}, error) {
+func DecodeFindCargoRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 
 	id := vars["id"]
@@ -89,7 +89,7 @@ type bookCargoResponse struct {
 	ID cargo.TrackingID `json:"trackingId"`
 }
 
-func makeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
+func MakeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(bookCargoRequest)
 
@@ -102,7 +102,7 @@ func makeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
 	}
 }
 
-func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
+func DecodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var (
 		origin          = r.URL.Query().Get("origin")
 		destination     = r.URL.Query().Get("destination")
@@ -132,7 +132,7 @@ type requestRoutesResponse struct {
 	Routes []routing.Route `json:"routes"`
 }
 
-func makeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
+func MakeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(requestRoutesRequest)
 
@@ -157,7 +157,7 @@ func makeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
 	}
 }
 
-func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
+func DecodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 
 	id := vars["id"]
@@ -178,7 +178,7 @@ type assignToRouteRequest struct {
 type assignToRouteResponse struct {
 }
 
-func makeAssignToRouteEndpoint(s booking.Service) endpoint.Endpoint {
+func MakeAssignToRouteEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(assignToRouteRequest)
 
@@ -190,7 +190,7 @@ func makeAssignToRouteEndpoint(s booking.Service) endpoint.Endpoint {
 	}
 }
 
-func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
+func DecodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return nil, err
@@ -232,7 +232,7 @@ type changeDestinationRequest struct {
 type changeDestinationResponse struct {
 }
 
-func decodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
+func DecodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	id := mux.Vars(r)["id"]
 	destination := r.URL.Query().Get("destination")
 
@@ -246,7 +246,7 @@ func decodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	}, nil
 }
 
-func makeChangeDestinationEndpoint(s booking.Service) endpoint.Endpoint {
+func MakeChangeDestinationEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(changeDestinationRequest)
 
@@ -267,11 +267,11 @@ type listLocationsResponse struct {
 	Locations []booking.Location `json:"locations"`
 }
 
-func decodeListLocationsRequest(r *http.Request) (interface{}, error) {
+func DecodeListLocationsRequest(r *http.Request) (interface{}, error) {
 	return listLocationsRequest{}, nil
 }
 
-func makeListLocationsEndpoint(bs booking.Service) endpoint.Endpoint {
+func MakeListLocationsEndpoint(bs booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		_ = request.(listLocationsRequest)
 		return listLocationsResponse{Locations: bs.Locations()}, nil
@@ -291,7 +291,7 @@ type registerIncidentRequest struct {
 type registerIncidentResponse struct {
 }
 
-func decodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
+func DecodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	var (
 		completionTime = r.URL.Query().Get("completionTime")
 		trackingID     = r.URL.Query().Get("trackingId")
@@ -322,7 +322,7 @@ func stringToEventType(s string) cargo.HandlingEventType {
 	return types[s]
 }
 
-func makeRegisterIncidentEndpoint(hs handling.Service) endpoint.Endpoint {
+func MakeRegisterIncidentEndpoint(hs handling.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(registerIncidentRequest)
 
@@ -355,7 +355,7 @@ type fetchRoutesResponse struct {
 	} `json:"paths"`
 }
 
-func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
+func DecodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
 	var response fetchRoutesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
@@ -363,7 +363,7 @@ func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
 	return response, nil
 }
 
-func encodeFetchRoutesRequest(r *http.Request, request interface{}) error {
+func EncodeFetchRoutesRequest(r *http.Request, request interface{}) error {
 	req := request.(fetchRoutesRequest)
 
 	vals := r.URL.Query()

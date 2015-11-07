@@ -4,21 +4,20 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/go-kit/kit/log"
+	httptransport "github.com/go-kit/kit/transport/http"
+	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 
-	"github.com/gorilla/mux"
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
 	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/middleware"
 	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/tracking"
-
-	"github.com/go-kit/kit/log"
-
-	httptransport "github.com/go-kit/kit/transport/http"
 )
 
 var (
@@ -55,48 +54,48 @@ func main() {
 
 	// Configure the routing service which will serve as a proxy.
 	var rs routing.Service
-	rs = proxyingMiddleware(routingServiceURL(), ctx)(rs)
+	rs = middleware.ProxyingMiddleware(routingServiceURL(), ctx)(rs)
 
 	// Create handlers for all booking endpoints.
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
-	bs = loggingMiddleware{logger, bs}
+	bs = middleware.LoggingMiddleware{logger, bs}
 
 	bookCargoHandler := httptransport.NewServer(
 		ctx,
-		makeBookCargoEndpoint(bs),
-		decodeBookCargoRequest,
-		encodeResponse,
+		middleware.MakeBookCargoEndpoint(bs),
+		middleware.DecodeBookCargoRequest,
+		middleware.EncodeResponse,
 	)
 	requestRoutesHandler := httptransport.NewServer(
 		ctx,
-		makeRequestRoutesEndpoint(bs),
-		decodeRequestRoutesRequest,
-		encodeResponse,
+		middleware.MakeRequestRoutesEndpoint(bs),
+		middleware.DecodeRequestRoutesRequest,
+		middleware.EncodeResponse,
 	)
 	assignToRouteHandler := httptransport.NewServer(
 		ctx,
-		makeAssignToRouteEndpoint(bs),
-		decodeAssignToRouteRequest,
-		encodeResponse,
+		middleware.MakeAssignToRouteEndpoint(bs),
+		middleware.DecodeAssignToRouteRequest,
+		middleware.EncodeResponse,
 	)
 	changeDestinationHandler := httptransport.NewServer(
 		ctx,
-		makeChangeDestinationEndpoint(bs),
-		decodeChangeDestinationRequest,
-		encodeResponse,
+		middleware.MakeChangeDestinationEndpoint(bs),
+		middleware.DecodeChangeDestinationRequest,
+		middleware.EncodeResponse,
 	)
 	listCargosHandler := httptransport.NewServer(
 		ctx,
-		makeListCargosEndpoint(bs),
-		decodeListCargosRequest,
-		encodeResponse,
+		middleware.MakeListCargosEndpoint(bs),
+		middleware.DecodeListCargosRequest,
+		middleware.EncodeResponse,
 	)
 	listLocationsHandler := httptransport.NewServer(
 		ctx,
-		makeListLocationsEndpoint(bs),
-		decodeListLocationsRequest,
-		encodeResponse,
+		middleware.MakeListLocationsEndpoint(bs),
+		middleware.DecodeListLocationsRequest,
+		middleware.EncodeResponse,
 	)
 
 	var ts tracking.Service
@@ -104,9 +103,9 @@ func main() {
 
 	findCargoHandler := httptransport.NewServer(
 		ctx,
-		makeFindCargoEndpoint(ts),
-		decodeFindCargoRequest,
-		encodeResponse,
+		middleware.MakeFindCargoEndpoint(ts),
+		middleware.DecodeFindCargoRequest,
+		middleware.EncodeResponse,
 	)
 
 	// Create handler for the handling endpoint used for registering incidents.
@@ -115,9 +114,9 @@ func main() {
 
 	registerIncidentHandler := httptransport.NewServer(
 		ctx,
-		makeRegisterIncidentEndpoint(hs),
-		decodeRegisterIncidentRequest,
-		encodeResponse,
+		middleware.MakeRegisterIncidentEndpoint(hs),
+		middleware.DecodeRegisterIncidentRequest,
+		middleware.EncodeResponse,
 	)
 
 	// Register all handlers and start serving ...
