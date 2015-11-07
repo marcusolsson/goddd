@@ -21,6 +21,7 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
+// EncodeResponse encodes a response to JSON.
 func EncodeResponse(w http.ResponseWriter, resp interface{}) error {
 	return json.NewEncoder(w).Encode(resp)
 }
@@ -33,12 +34,14 @@ type listCargosResponse struct {
 	Cargos []booking.Cargo `json:"cargos"`
 }
 
+// MakeListCargosEndpoint returns a endpoint to list cargos.
 func MakeListCargosEndpoint(bs booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		return listCargosResponse{Cargos: bs.Cargos()}, nil
 	}
 }
 
+// DecodeListCargosRequest returns a decoded request to list cargos.
 func DecodeListCargosRequest(r *http.Request) (interface{}, error) {
 	return listCargosRequest{}, nil
 }
@@ -53,6 +56,7 @@ type findCargoResponse struct {
 	Cargo tracking.Cargo `json:"cargo"`
 }
 
+// MakeFindCargoEndpoint returns a endpoint to find a cargo.
 func MakeFindCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(findCargoRequest)
@@ -66,6 +70,7 @@ func MakeFindCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
 	}
 }
 
+// DecodeFindCargoRequest returns a decoded request to find a cargo.
 func DecodeFindCargoRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 
@@ -89,6 +94,7 @@ type bookCargoResponse struct {
 	ID cargo.TrackingID `json:"trackingId"`
 }
 
+// MakeBookCargoEndpoint returns a endpoint to book a cargo.
 func MakeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(bookCargoRequest)
@@ -102,6 +108,7 @@ func MakeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
 	}
 }
 
+// DecodeBookCargoRequest returns a decoded request to find a cargo.
 func DecodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var (
 		origin          = r.URL.Query().Get("origin")
@@ -132,6 +139,7 @@ type requestRoutesResponse struct {
 	Routes []routing.Route `json:"routes"`
 }
 
+// MakeRequestRoutesEndpoint returns a endpoint to request routes.
 func MakeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(requestRoutesRequest)
@@ -157,6 +165,7 @@ func MakeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
 	}
 }
 
+// DecodeRequestRoutesRequest returns a decoded request to request routes.
 func DecodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 
@@ -178,6 +187,7 @@ type assignToRouteRequest struct {
 type assignToRouteResponse struct {
 }
 
+// MakeAssignToRouteEndpoint returns a endpoint to assign a cargo to a route.
 func MakeAssignToRouteEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(assignToRouteRequest)
@@ -190,6 +200,8 @@ func MakeAssignToRouteEndpoint(s booking.Service) endpoint.Endpoint {
 	}
 }
 
+// DecodeAssignToRouteRequest returns a decoded request to assign cargo to a
+// route.
 func DecodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -232,6 +244,8 @@ type changeDestinationRequest struct {
 type changeDestinationResponse struct {
 }
 
+// DecodeChangeDestinationRequest returns a decoded request to change
+// destination of a cargo.
 func DecodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	id := mux.Vars(r)["id"]
 	destination := r.URL.Query().Get("destination")
@@ -246,6 +260,8 @@ func DecodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	}, nil
 }
 
+// MakeChangeDestinationEndpoint returns a endpoint to change the destination
+// of a cargo.
 func MakeChangeDestinationEndpoint(s booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(changeDestinationRequest)
@@ -267,10 +283,12 @@ type listLocationsResponse struct {
 	Locations []booking.Location `json:"locations"`
 }
 
+// DecodeListLocationsRequest returns a decoded request to list locations.
 func DecodeListLocationsRequest(r *http.Request) (interface{}, error) {
 	return listLocationsRequest{}, nil
 }
 
+// MakeListLocationsEndpoint returns a endpoint to list locations.
 func MakeListLocationsEndpoint(bs booking.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		_ = request.(listLocationsRequest)
@@ -291,6 +309,8 @@ type registerIncidentRequest struct {
 type registerIncidentResponse struct {
 }
 
+// DecodeRegisterIncidentRequest returns a decoded request to register an
+// incident.
 func DecodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	var (
 		completionTime = r.URL.Query().Get("completionTime")
@@ -322,6 +342,7 @@ func stringToEventType(s string) cargo.HandlingEventType {
 	return types[s]
 }
 
+// MakeRegisterIncidentEndpoint returns a endpoint to register incidents.
 func MakeRegisterIncidentEndpoint(hs handling.Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(registerIncidentRequest)
@@ -355,6 +376,7 @@ type fetchRoutesResponse struct {
 	} `json:"paths"`
 }
 
+// DecodeFetchRoutesResponse returns a decoded request to fetch routes.
 func DecodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
 	var response fetchRoutesResponse
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
@@ -363,6 +385,7 @@ func DecodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
 	return response, nil
 }
 
+// EncodeFetchRoutesRequest encodes a fetch routes request to a HTTP request.
 func EncodeFetchRoutesRequest(r *http.Request, request interface{}) error {
 	req := request.(fetchRoutesRequest)
 
