@@ -59,7 +59,7 @@ func main() {
 	// Create handlers for all booking endpoints.
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
-	bs = middleware.LoggingMiddleware{logger, bs}
+	bs = middleware.LoggingBooking{logger, bs}
 
 	bookCargoHandler := httptransport.NewServer(
 		ctx,
@@ -100,6 +100,7 @@ func main() {
 
 	var ts tracking.Service
 	ts = tracking.NewService(cargos, handlingEvents)
+	ts = middleware.LoggingTracking{logger, ts}
 
 	findCargoHandler := httptransport.NewServer(
 		ctx,
