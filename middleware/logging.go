@@ -31,6 +31,18 @@ func (mw LoggingBooking) BookNewCargo(origin location.UNLocode, destination loca
 	return
 }
 
+// ChangeDestination logs the change destination request.
+func (mw LoggingBooking) ChangeDestination(id cargo.TrackingID, l location.UNLocode) (err error) {
+	err = mw.Service.ChangeDestination(id, l)
+	_ = mw.Logger.Log(
+		"method", "change_destination",
+		"err", err,
+		"tracking_id", id,
+		"destination", l,
+	)
+	return
+}
+
 // LoggingTracking adds logging to the tracking service.
 type LoggingTracking struct {
 	Logger log.Logger
