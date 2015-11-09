@@ -106,7 +106,7 @@ func main() {
 		ctx,
 		middleware.MakeFindCargoEndpoint(ts),
 		middleware.DecodeFindCargoRequest,
-		middleware.EncodeResponse,
+		middleware.EncodeFindCargoResponse,
 	)
 
 	// Create handler for the handling endpoint used for registering incidents.

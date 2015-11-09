@@ -54,7 +54,8 @@ type findCargoRequest struct {
 }
 
 type findCargoResponse struct {
-	Cargo tracking.Cargo `json:"cargo"`
+	Cargo *tracking.Cargo `json:"cargo,omitempty"`
+	Err   string          `json:"error,omitempty"`
 }
 
 // MakeFindCargoEndpoint returns a endpoint to find a cargo.
@@ -64,10 +65,13 @@ func MakeFindCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
 
 		c, err := ts.Track(req.ID)
 		if err != nil {
+			if err == cargo.ErrUnknown {
+				return findCargoResponse{Err: err.Error()}, nil
+			}
 			return nil, err
 		}
 
-		return findCargoResponse{Cargo: c}, nil
+		return findCargoResponse{Cargo: &c}, nil
 	}
 }
 
@@ -81,6 +85,18 @@ func DecodeFindCargoRequest(r *http.Request) (interface{}, error) {
 	}
 
 	return findCargoRequest{ID: id}, nil
+}
+
+// EncodeFindCargoResponse encodes a response to JSON.
+func EncodeFindCargoResponse(w http.ResponseWriter, response interface{}) error {
+	resp := response.(findCargoResponse)
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if resp.Err == cargo.ErrUnknown.Error() {
+		w.WriteHeader(http.StatusNotFound)
+	}
+
+	return json.NewEncoder(w).Encode(resp)
 }
 
 // Book cargo
