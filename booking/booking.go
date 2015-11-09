@@ -66,7 +66,9 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDea
 
 	c := cargo.New(id, rs)
 
-	s.cargoRepository.Store(*c)
+	if err := s.cargoRepository.Store(*c); err != nil {
+		return "", err
+	}
 
 	return c.TrackingID, nil
 }
