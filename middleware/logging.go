@@ -11,14 +11,14 @@ import (
 	"github.com/marcusolsson/goddd/tracking"
 )
 
-// LoggingBooking adds logging to the booking service.
-type LoggingBooking struct {
+// LoggingBookingService adds logging to the booking service.
+type LoggingBookingService struct {
 	Logger log.Logger
 	booking.Service
 }
 
 // BookNewCargo logs the booking request.
-func (mw LoggingBooking) BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (id cargo.TrackingID, err error) {
+func (mw LoggingBookingService) BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (id cargo.TrackingID, err error) {
 	id, err = mw.Service.BookNewCargo(origin, destination, arrivalDeadline)
 	_ = mw.Logger.Log(
 		"method", "book",
@@ -32,7 +32,7 @@ func (mw LoggingBooking) BookNewCargo(origin location.UNLocode, destination loca
 }
 
 // ChangeDestination logs the change destination request.
-func (mw LoggingBooking) ChangeDestination(id cargo.TrackingID, l location.UNLocode) (err error) {
+func (mw LoggingBookingService) ChangeDestination(id cargo.TrackingID, l location.UNLocode) (err error) {
 	err = mw.Service.ChangeDestination(id, l)
 	_ = mw.Logger.Log(
 		"method", "change_destination",
@@ -43,14 +43,14 @@ func (mw LoggingBooking) ChangeDestination(id cargo.TrackingID, l location.UNLoc
 	return
 }
 
-// LoggingTracking adds logging to the tracking service.
-type LoggingTracking struct {
+// LoggingTrackingService adds logging to the tracking service.
+type LoggingTrackingService struct {
 	Logger log.Logger
 	tracking.Service
 }
 
 // Track logs the track request.
-func (mw LoggingTracking) Track(id string) (c tracking.Cargo, err error) {
+func (mw LoggingTrackingService) Track(id string) (c tracking.Cargo, err error) {
 	c, err = mw.Service.Track(id)
 	_ = mw.Logger.Log(
 		"method", "track",

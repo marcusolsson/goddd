@@ -53,8 +53,8 @@ func (s proxyRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecifica
 	return itineraries
 }
 
-// ProxyingMiddleware returns a middleware for proxying the routing service.
-func ProxyingMiddleware(proxyURL string, ctx context.Context) RoutingServiceMiddleware {
+// ProxyingRoutingMiddleware returns a middleware for proxying the routing service.
+func ProxyingRoutingMiddleware(proxyURL string, ctx context.Context) RoutingServiceMiddleware {
 	return func(next routing.Service) routing.Service {
 		var e endpoint.Endpoint
 		e = makeFetchRoutesEndpoint(ctx, proxyURL)

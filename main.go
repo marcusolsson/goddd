@@ -54,12 +54,12 @@ func main() {
 
 	// Configure the routing service which will serve as a proxy.
 	var rs routing.Service
-	rs = middleware.ProxyingMiddleware(routingServiceURL(), ctx)(rs)
+	rs = middleware.ProxyingRoutingMiddleware(routingServiceURL(), ctx)(rs)
 
 	// Create handlers for all booking endpoints.
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
-	bs = middleware.LoggingBooking{logger, bs}
+	bs = middleware.LoggingBookingService{logger, bs}
 
 	bookCargoHandler := httptransport.NewServer(
 		ctx,
@@ -100,7 +100,7 @@ func main() {
 
 	var ts tracking.Service
 	ts = tracking.NewService(cargos, handlingEvents)
-	ts = middleware.LoggingTracking{logger, ts}
+	ts = middleware.LoggingTrackingService{logger, ts}
 
 	findCargoHandler := httptransport.NewServer(
 		ctx,
