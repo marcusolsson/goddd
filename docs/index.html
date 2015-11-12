@@ -1,0 +1,283 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><title>API Documentation</title><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"><style>@import url('https://fonts.googleapis.com/css?family=Roboto:400,700|Inconsolata|Raleway:200');.hljs-comment,.hljs-title{color:#8e908c}.hljs-variable,.hljs-attribute,.hljs-tag,.hljs-regexp,.ruby .hljs-constant,.xml .hljs-tag .hljs-title,.xml .hljs-pi,.xml .hljs-doctype,.html .hljs-doctype,.css .hljs-id,.css .hljs-class,.css .hljs-pseudo{color:#c82829}.hljs-number,.hljs-preprocessor,.hljs-pragma,.hljs-built_in,.hljs-literal,.hljs-params,.hljs-constant{color:#f5871f}.ruby .hljs-class .hljs-title,.css .hljs-rules .hljs-attribute{color:#eab700}.hljs-string,.hljs-value,.hljs-inheritance,.hljs-header,.ruby .hljs-symbol,.xml .hljs-cdata{color:#718c00}.css .hljs-hexcolor{color:#3e999f}.hljs-function,.python .hljs-decorator,.python .hljs-title,.ruby .hljs-function .hljs-title,.ruby .hljs-title .hljs-keyword,.perl .hljs-sub,.javascript .hljs-title,.coffeescript .hljs-title{color:#4271ae}.hljs-keyword,.javascript .hljs-function{color:#8959a8}.hljs{display:block;background:white;color:#4d4d4c;padding:.5em}.coffeescript .javascript,.javascript .xml,.tex .hljs-formula,.xml .javascript,.xml .vbscript,.xml .css,.xml .hljs-cdata{opacity:.5}body{color:black;background:white;font-family:'Roboto',Helvetica,sans-serif;font-size:14px;line-height:1.42}header{border-bottom:1px solid #f2f2f2;margin-bottom:12px}h1,h2,h3,h4,h5{color:black;margin:12px 0}h1 .permalink,h2 .permalink,h3 .permalink,h4 .permalink,h5 .permalink{margin-left:6px;opacity:0;transition:opacity .25s ease}h1:hover .permalink,h2:hover .permalink,h3:hover .permalink,h4:hover .permalink,h5:hover .permalink{opacity:1}h1{font-family:'Raleway',Helvetica,sans-serif;font-size:36px;font-weight:500}h2{font-family:'Raleway',Helvetica,sans-serif;font-size:30px;font-weight:500}h3{font-size:100%;text-transform:uppercase}h5{font-size:100%;font-weight:normal}p{margin:0 0 10px}p.choices{line-height:1.6}a{color:#428bca;text-decoration:none}li p{margin:0}dl dt{float:left;width:160px;clear:left;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}dl dd{margin-left:180px}blockquote{color:rgba(0,0,0,0.5);font-size:15.5px;padding:10px 20px;margin:12px 0;border-left:5px solid #e8e8e8}blockquote p:last-child{margin-bottom:0}pre{background-color:#f5f5f5;padding:12px;border:1px solid #cfcfcf;border-radius:6px;overflow:auto}pre code{background-color:transparent;padding:0;border:none}code{color:#444;background-color:#f5f5f5;font-family:'Inconsolata',monospace;padding:1px 4px;border:1px solid #cfcfcf;border-radius:3px}ul,ol{padding-left:2em}table{border-collapse:collapse;border-spacing:0;margin-bottom:12px}table tr:nth-child(2n){background-color:#fafafa}table th,table td{padding:6px 12px;border:1px solid #d9d9d9}.note,.warning{padding:.3em 1em;margin:1em 0;border-radius:2px;font-size:90%}.note h1,.warning h1,.note h2,.warning h2,.note h3,.warning h3,.note h4,.warning h4,.note h5,.warning h5,.note h6,.warning h6{font-family:'Raleway',Helvetica,sans-serif;font-size:135%;font-weight:500}.note p,.warning p{margin:.5em 0}.note{color:black;background-color:#f0f6fb;border-left:4px solid #428bca}.note h1,.note h2,.note h3,.note h4,.note h5,.note h6{color:#428bca}.warning{color:black;background-color:#fbf1f0;border-left:4px solid #c9302c}.warning h1,.warning h2,.warning h3,.warning h4,.warning h5,.warning h6{color:#c9302c}nav{position:fixed;top:24px;bottom:0;overflow-y:auto}nav .resource-group{padding:0}nav .resource-group .heading{position:relative}nav .resource-group .heading .chevron{position:absolute;top:12px;right:12px;opacity:.5}nav .resource-group .heading a{display:block;color:black;opacity:.7;border-left:2px solid transparent;margin:0}nav .resource-group .heading a:hover{border-left:2px solid black}nav ul{list-style-type:none;padding-left:0}nav ul a{display:block;font-size:13px;color:rgba(0,0,0,0.7);padding:8px 12px;border-top:1px solid #d9d9d9;border-left:2px solid transparent;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}nav ul a:hover{border-left:2px solid black}nav ul>li{margin:0}nav ul>li:first-child{margin-top:-12px}nav ul>li:last-child{margin-bottom:-12px}nav ul ul a{padding-left:24px}nav ul ul li{margin:0}nav ul ul li:first-child{margin-top:0}nav ul ul li:last-child{margin-bottom:0}nav>div>div>ul>li:first-child>a{border-top:none}.preload *{transition:none !important}.pull-left{float:left}.pull-right{float:right}.badge{display:inline-block;float:right;min-width:10px;min-height:14px;padding:3px 7px;font-size:12px;color:#000;background-color:#f2f2f2;border-radius:10px;margin-top:-2px;margin-bottom:-2px}.badge.get{color:#70bbe1;background-color:#d9edf7}.badge.head{color:#70bbe1;background-color:#d9edf7}.badge.options{color:#70bbe1;background-color:#d9edf7}.badge.put{color:#f0db70;background-color:#fcf8e3}.badge.patch{color:#f0db70;background-color:#fcf8e3}.badge.post{color:#93cd7c;background-color:#dff0d8}.badge.delete{color:#ce8383;background-color:#f2dede}.collapse-button{float:right}.collapse-button .close{display:none;color:#428bca;cursor:pointer}.collapse-button .open{color:#428bca;cursor:pointer}.collapse-button.show .close{display:inline}.collapse-button.show .open{display:none}.collapse-content{max-height:0;overflow:hidden;transition:max-height .3s ease-in-out}nav{width:220px}.container{max-width:940px;margin-left:auto;margin-right:auto}.container .row .content{margin-left:244px;width:696px}.container .row:after{content:'';display:block;clear:both}.container-fluid nav{width:22%}.container-fluid .row .content{margin-left:24%;width:76%}@media (max-width:1200px){nav{width:200px}.container{max-width:840px}.container .row .content{margin-left:224px;width:606px}}@media (max-width:992px){nav{width:170px}.container{max-width:720px}.container .row .content{margin-left:194px;width:526px}}@media (max-width:768px){nav{display:none}.container{width:95%;max-width:none}.container .row .content,.container-fluid .row .content{margin-left:auto;margin-right:auto;width:95%}}.back-to-top{position:fixed;z-index:1;bottom:0;right:24px;padding:4px 8px;color:rgba(0,0,0,0.5);background-color:#f2f2f2;text-decoration:none !important;border-top:1px solid #d9d9d9;border-left:1px solid #d9d9d9;border-right:1px solid #d9d9d9;border-top-left-radius:3px;border-top-right-radius:3px}.resource-group{padding:12px;margin-bottom:12px;background-color:white;border:1px solid #d9d9d9;border-radius:6px}.resource-group h2.group-heading,.resource-group .heading a{padding:12px;margin:-12px -12px 12px -12px;background-color:#f2f2f2;border-bottom:1px solid #d9d9d9;border-top-left-radius:6px;border-top-right-radius:6px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}nav .resource-group .heading a{margin-bottom:0}nav .resource-group .collapse-content{padding:0}.action{margin-bottom:12px;padding:12px 12px 0 12px;overflow:hidden;border:1px solid transparent;border-radius:6px}.action h4.action-heading{padding:12px;margin:-12px -12px 12px -12px;border-bottom:1px solid transparent;border-top-left-radius:6px;border-top-right-radius:6px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}.action h4.action-heading .name{float:right;font-weight:normal}.action h4.action-heading .method{padding:6px 12px;margin-right:12px;border-radius:3px}.action h4.action-heading .method.get{color:#fff;background-color:#337ab7}.action h4.action-heading .method.head{color:#fff;background-color:#337ab7}.action h4.action-heading .method.options{color:#fff;background-color:#337ab7}.action h4.action-heading .method.put{color:#fff;background-color:#ed9c28}.action h4.action-heading .method.patch{color:#fff;background-color:#ed9c28}.action h4.action-heading .method.post{color:#fff;background-color:#5cb85c}.action h4.action-heading .method.delete{color:#fff;background-color:#d9534f}.action h4.action-heading code{color:#444;background-color:#f5f5f5;border-color:#cfcfcf;font-weight:normal}.action dl.inner{padding-bottom:2px}.action .title{border-bottom:1px solid white;margin:0 -12px -1px -12px;padding:12px}.action.get{border-color:#bce8f1}.action.get h4.action-heading{color:#337ab7;background:#d9edf7;border-bottom-color:#bce8f1}.action.head{border-color:#bce8f1}.action.head h4.action-heading{color:#337ab7;background:#d9edf7;border-bottom-color:#bce8f1}.action.options{border-color:#bce8f1}.action.options h4.action-heading{color:#337ab7;background:#d9edf7;border-bottom-color:#bce8f1}.action.post{border-color:#d6e9c6}.action.post h4.action-heading{color:#5cb85c;background:#dff0d8;border-bottom-color:#d6e9c6}.action.put{border-color:#faebcc}.action.put h4.action-heading{color:#ed9c28;background:#fcf8e3;border-bottom-color:#faebcc}.action.patch{border-color:#faebcc}.action.patch h4.action-heading{color:#ed9c28;background:#fcf8e3;border-bottom-color:#faebcc}.action.delete{border-color:#ebccd1}.action.delete h4.action-heading{color:#d9534f;background:#f2dede;border-bottom-color:#ebccd1}</style></head><body class="preload"><a href="#top" class="text-muted back-to-top"><i class="fa fa-toggle-up"></i>&nbsp;Back to top</a><div class="container"><div class="row"><nav><div class="resource-group"><div class="heading"><div class="chevron"><i class="open fa fa-angle-down"></i></div><a href="#booking">Booking</a></div><div class="collapse-content"><ul><li><a href="#booking-cargo">Cargo</a><ul><li><a href="#booking-cargo-post"><span class="badge post"><i class="fa fa-plus"></i></span>book cargo</a></li><li><a href="#booking-cargo-get"><span class="badge get"><i class="fa fa-arrow-down"></i></span>list booked cargos</a></li><li><a href="#booking-cargo-post-1"><span class="badge post"><i class="fa fa-plus"></i></span>assign to route</a></li><li><a href="#booking-cargo-post-2"><span class="badge post"><i class="fa fa-plus"></i></span>change destination</a></li><li><a href="#booking-cargo-get-1"><span class="badge get"><i class="fa fa-arrow-down"></i></span>request routes</a></li></ul></li><li><a href="#booking-locations-get"><span class="badge get"><i class="fa fa-arrow-down"></i></span>list registered locations</a></li></ul></div></div><div class="resource-group"><div class="heading"><div class="chevron"><i class="open fa fa-angle-down"></i></div><a href="#tracking">Tracking</a></div><div class="collapse-content"><ul><li><a href="#tracking-track-cargo-get"><span class="badge get"><i class="fa fa-arrow-down"></i></span>track cargo</a></li></ul></div></div><div class="resource-group"><div class="heading"><div class="chevron"><i class="open fa fa-angle-down"></i></div><a href="#handling">Handling</a></div><div class="collapse-content"><ul><li><a href="#handling-incidents-post"><span class="badge post"><i class="fa fa-plus"></i></span>register incident</a></li></ul></div></div></nav><div class="content"><header><h1 id="top">API Documentation</h1></header><section id="booking" class="resource-group"><h2 class="group-heading">Booking<a href="#booking" class="permalink">&para;</a></h2><p>Used by persons with administrative permissions to book an order.</p>
+<div id="booking-cargo" class="resource"><h3 class="resource-heading">Cargo<a href="#booking-cargo" class="permalink">&para;</a></h3><div id="booking-cargo-post" class="action post"><h4 class="action-heading"><div class="name">book cargo</div><a href="#booking-cargo-post" class="method post">POST</a><code class="uri">/cargos</code></h4><p>Books a cargo.</p>
+<div class="title"><strong>Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>origin</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<p>name of the origin</p>
+</dd></dl></div><div class="title"><strong>Request</strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/x-www-form-urlencoded</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>origin=SESTO</code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong></div></div><div id="booking-cargo-get" class="action get"><h4 class="action-heading"><div class="name">list booked cargos</div><a href="#booking-cargo-get" class="method get">GET</a><code class="uri">/cargos</code></h4><p>Lists all booked cargos.</p>
+<div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">cargos</span>": <span class="hljs-value">[
+    {
+      "<span class="hljs-attribute">arrivalDeadline</span>": <span class="hljs-value"><span class="hljs-string">"0001-01-01T00:00:00Z"</span></span>,
+      "<span class="hljs-attribute">destination</span>": <span class="hljs-value"><span class="hljs-string">"CNHKG"</span></span>,
+      "<span class="hljs-attribute">misrouted</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">origin</span>": <span class="hljs-value"><span class="hljs-string">"SESTO"</span></span>,
+      "<span class="hljs-attribute">routed</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">trackingId</span>": <span class="hljs-value"><span class="hljs-string">"ABC123"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">arrivalDeadline</span>": <span class="hljs-value"><span class="hljs-string">"0001-01-01T00:00:00Z"</span></span>,
+      "<span class="hljs-attribute">destination</span>": <span class="hljs-value"><span class="hljs-string">"SESTO"</span></span>,
+      "<span class="hljs-attribute">misrouted</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">origin</span>": <span class="hljs-value"><span class="hljs-string">"AUMEL"</span></span>,
+      "<span class="hljs-attribute">routed</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+      "<span class="hljs-attribute">trackingId</span>": <span class="hljs-value"><span class="hljs-string">"FTL456"</span>
+    </span>}
+  ]
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div><div id="booking-cargo-post-1" class="action post"><h4 class="action-heading"><div class="name">assign to route</div><a href="#booking-cargo-post-1" class="method post">POST</a><code class="uri">/cargos/{id}/assign_to_route</code></h4><p>Assigns given route to the cargo.</p>
+<div class="title"><strong>Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>id</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<p>ID of a cargo.</p>
+</dd></dl></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong></div></div><div id="booking-cargo-post-2" class="action post"><h4 class="action-heading"><div class="name">change destination</div><a href="#booking-cargo-post-2" class="method post">POST</a><code class="uri">/cargos/{id}/change_destination</code></h4><p>Changes destination of the cargo. This might result in a misrouted cargo.</p>
+<div class="title"><strong>Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>id</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<p>ID of a cargo.</p>
+</dd></dl></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong></div></div><div id="booking-cargo-get-1" class="action get"><h4 class="action-heading"><div class="name">request routes</div><a href="#booking-cargo-get-1" class="method get">GET</a><code class="uri">/cargos/{id}/request_routes</code></h4><p>Requests routes based on current specification. Uses an external routing service provided by the routing package.</p>
+<div class="title"><strong>Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>id</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<p>ID of a cargo.</p>
+</dd></dl></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">routes</span>": <span class="hljs-value">[
+    {
+      "<span class="hljs-attribute">legs</span>": <span class="hljs-value">[
+        {
+          "<span class="hljs-attribute">voyageNumber</span>": <span class="hljs-value"><span class="hljs-string">"0301S"</span></span>,
+          "<span class="hljs-attribute">from</span>": <span class="hljs-value"><span class="hljs-string">"SESTO"</span></span>,
+          "<span class="hljs-attribute">to</span>": <span class="hljs-value"><span class="hljs-string">"FIHEL"</span></span>,
+          "<span class="hljs-attribute">loadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-14T14:10:29.173391809Z"</span></span>,
+          "<span class="hljs-attribute">unloadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-15T21:55:29.173391809Z"</span>
+        </span>},
+        {
+          "<span class="hljs-attribute">voyageNumber</span>": <span class="hljs-value"><span class="hljs-string">"0100S"</span></span>,
+          "<span class="hljs-attribute">from</span>": <span class="hljs-value"><span class="hljs-string">"FIHEL"</span></span>,
+          "<span class="hljs-attribute">to</span>": <span class="hljs-value"><span class="hljs-string">"CNHKG"</span></span>,
+          "<span class="hljs-attribute">loadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-18T02:19:29.173391809Z"</span></span>,
+          "<span class="hljs-attribute">unloadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-19T04:11:29.173391809Z"</span>
+        </span>}
+      ]
+    </span>},
+    {
+      "<span class="hljs-attribute">legs</span>": <span class="hljs-value">[
+        {
+          "<span class="hljs-attribute">voyageNumber</span>": <span class="hljs-value"><span class="hljs-string">"0400S"</span></span>,
+          "<span class="hljs-attribute">from</span>": <span class="hljs-value"><span class="hljs-string">"SESTO"</span></span>,
+          "<span class="hljs-attribute">to</span>": <span class="hljs-value"><span class="hljs-string">"JNTKO"</span></span>,
+          "<span class="hljs-attribute">loadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-14T06:22:29.173415471Z"</span></span>,
+          "<span class="hljs-attribute">unloadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-15T10:22:29.173415471Z"</span>
+        </span>},
+        {
+          "<span class="hljs-attribute">voyageNumber</span>": <span class="hljs-value"><span class="hljs-string">"0200T"</span></span>,
+          "<span class="hljs-attribute">from</span>": <span class="hljs-value"><span class="hljs-string">"JNTKO"</span></span>,
+          "<span class="hljs-attribute">to</span>": <span class="hljs-value"><span class="hljs-string">"CNHKG"</span></span>,
+          "<span class="hljs-attribute">loadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-17T10:45:29.173415471Z"</span></span>,
+          "<span class="hljs-attribute">unloadTime</span>": <span class="hljs-value"><span class="hljs-string">"2015-11-18T11:48:29.173415471Z"</span>
+        </span>}
+      ]
+    </span>}
+  ]
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div></div><div id="booking-locations" class="resource"><h3 class="resource-heading">Locations<a href="#booking-locations" class="permalink">&para;</a></h3><div id="booking-locations-get" class="action get"><h4 class="action-heading"><div class="name">list registered locations</div><a href="#booking-locations-get" class="method get">GET</a><code class="uri">/locations</code></h4><p>Lists all registered locations.</p>
+<div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">locations</span>": <span class="hljs-value">[
+    {
+      "<span class="hljs-attribute">locode</span>": <span class="hljs-value"><span class="hljs-string">"CNHKG"</span></span>,
+      "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"Hongkong"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">locode</span>": <span class="hljs-value"><span class="hljs-string">"JNTKO"</span></span>,
+      "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"Tokyo"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">locode</span>": <span class="hljs-value"><span class="hljs-string">"NLRTM"</span></span>,
+      "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"Rotterdam"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">locode</span>": <span class="hljs-value"><span class="hljs-string">"DEHAM"</span></span>,
+      "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"Hamburg"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">locode</span>": <span class="hljs-value"><span class="hljs-string">"SESTO"</span></span>,
+      "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"Stockholm"</span>
+    </span>},
+    {
+      "<span class="hljs-attribute">locode</span>": <span class="hljs-value"><span class="hljs-string">"AUMEL"</span></span>,
+      "<span class="hljs-attribute">name</span>": <span class="hljs-value"><span class="hljs-string">"Melbourne"</span>
+    </span>}
+  ]
+</span>}</code></pre><div style="height: 1px;"></div></div></div></div></div></section><section id="tracking" class="resource-group"><h2 class="group-heading">Tracking<a href="#tracking" class="permalink">&para;</a></h2><p>Provided to our customer to see the status of their cargo.</p>
+<div id="tracking-track-cargo" class="resource"><h3 class="resource-heading">track cargo<a href="#tracking-track-cargo" class="permalink">&para;</a></h3><div id="tracking-track-cargo-get" class="action get"><h4 class="action-heading"><div class="name">track cargo</div><a href="#tracking-track-cargo-get" class="method get">GET</a><code class="uri">/cargos/{id}</code></h4><p>Returns the cargo’s tracking information.</p>
+<div class="title"><strong>Parameters</strong><div class="collapse-button show"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><dl class="inner"><dt>id</dt><dd><code>string</code>&nbsp;<span class="required">(required)</span>&nbsp;<p>ID of a cargo.</p>
+</dd></dl></div><div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div><h5>Body</h5><pre><code>{
+  "<span class="hljs-attribute">cargo</span>": <span class="hljs-value">{
+    "<span class="hljs-attribute">trackingId</span>": <span class="hljs-value"><span class="hljs-string">"ABC123"</span></span>,
+    "<span class="hljs-attribute">statusText</span>": <span class="hljs-value"><span class="hljs-string">"Not received"</span></span>,
+    "<span class="hljs-attribute">origin</span>": <span class="hljs-value"><span class="hljs-string">"SESTO"</span></span>,
+    "<span class="hljs-attribute">destination</span>": <span class="hljs-value"><span class="hljs-string">"CNHKG"</span></span>,
+    "<span class="hljs-attribute">eta</span>": <span class="hljs-value"><span class="hljs-string">"0001-01-01T00:00:00Z"</span></span>,
+    "<span class="hljs-attribute">nextExpectedActivity</span>": <span class="hljs-value"><span class="hljs-string">"There are currently no expected activities for this cargo."</span></span>,
+    "<span class="hljs-attribute">misrouted</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+    "<span class="hljs-attribute">routed</span>": <span class="hljs-value"><span class="hljs-literal">false</span></span>,
+    "<span class="hljs-attribute">arrivalDeadline</span>": <span class="hljs-value"><span class="hljs-string">"0001-01-01T00:00:00Z"</span></span>,
+    "<span class="hljs-attribute">events</span>": <span class="hljs-value"><span class="hljs-literal">null</span>
+  </span>}
+</span>}</code></pre><div style="height: 1px;"></div></div></div><div class="title"><strong>Response&nbsp;&nbsp;<code>404</code></strong><div class="collapse-button"><span class="close">Hide</span><span class="open">Show</span></div></div><div class="collapse-content"><div class="inner"><h5>Headers</h5><pre><code><span class="hljs-attribute">Content-Type</span>: <span class="hljs-string">application/json</span></code></pre><div style="height: 1px;"></div></div></div></div></div></section><section id="handling" class="resource-group"><h2 class="group-heading">Handling<a href="#handling" class="permalink">&para;</a></h2><p>Allows the staff at each location to register handling events along the route.</p>
+<div id="handling-incidents" class="resource"><h3 class="resource-heading">Incidents<a href="#handling-incidents" class="permalink">&para;</a></h3><div id="handling-incidents-post" class="action post"><h4 class="action-heading"><div class="name">register incident</div><a href="#handling-incidents-post" class="method post">POST</a><code class="uri">/incidents</code></h4><p>Registers handling events along the route.</p>
+<div class="title"><strong>Response&nbsp;&nbsp;<code>200</code></strong></div></div></div></section></div></div></div><p style="text-align: center;" class="text-muted">Generated by&nbsp;<a href="https://github.com/danielgtaylor/aglio" class="aglio">aglio</a>&nbsp;on 12 Nov 2015</p><script>/* eslint-env browser */
+/* eslint quotes: [2, "single"] */
+'use strict';
+
+/*
+  Determine if a string ends with another string.
+*/
+function endsWith(str, suffix) {
+    return str.indexOf(suffix, str.length - suffix.length) !== -1;
+}
+
+/*
+  Get an array [width, height] of the window.
+*/
+function getWindowDimensions() {
+  var w = window,
+      d = document,
+      e = d.documentElement,
+      g = d.body,
+      x = w.innerWidth || e.clientWidth || g.clientWidth,
+      y = w.innerHeight || e.clientHeight || g.clientHeight;
+
+  return [x, y];
+}
+
+/*
+  Collapse or show a request/response example.
+*/
+function toggleCollapseButton(event) {
+    var button = event.target.parentNode;
+    var content = button.parentNode.nextSibling;
+    var inner = content.children[0];
+
+    if (button.className.indexOf('collapse-button') === -1) {
+      // Clicked without hitting the right element?
+      return;
+    }
+
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+        // Currently showing, so let's hide it
+        button.className = 'collapse-button';
+        content.style.maxHeight = '0px';
+    } else {
+        // Currently hidden, so let's show it
+        button.className = 'collapse-button show';
+        content.style.maxHeight = inner.offsetHeight + 12 + 'px';
+    }
+}
+
+/*
+  Collapse or show a navigation menu. It will not be hidden unless it
+  is currently selected or `force` has been passed.
+*/
+function toggleCollapseNav(event, force) {
+    var heading = event.target.parentNode;
+    var content = heading.nextSibling;
+    var inner = content.children[0];
+
+    if (heading.className.indexOf('heading') === -1) {
+      // Clicked without hitting the right element?
+      return;
+    }
+
+    if (content.style.maxHeight && content.style.maxHeight !== '0px') {
+      // Currently showing, so let's hide it, but only if this nav item
+      // is already selected. This prevents newly selected items from
+      // collapsing in an annoying fashion.
+      if (force || window.location.hash && endsWith(event.target.href, window.location.hash)) {
+        content.style.maxHeight = '0px';
+      }
+    } else {
+      // Currently hidden, so let's show it
+      content.style.maxHeight = inner.offsetHeight + 12 + 'px';
+    }
+}
+
+/*
+  Refresh the page after a live update from the server. This only
+  works in live preview mode (using the `--server` parameter).
+*/
+function refresh(body) {
+    document.querySelector('body').className = 'preload';
+    document.body.innerHTML = body;
+
+    // Re-initialize the page
+    init();
+    autoCollapse();
+
+    document.querySelector('body').className = '';
+}
+
+/*
+  Determine which navigation items should be auto-collapsed to show as many
+  as possible on the screen, based on the current window height. This also
+  collapses them.
+*/
+function autoCollapse() {
+  var windowHeight = getWindowDimensions()[1];
+  var itemsHeight = 64; /* Account for some padding */
+  var itemsArray = Array.prototype.slice.call(
+    document.querySelectorAll('nav .resource-group .heading'));
+
+  // Get the total height of the navigation items
+  itemsArray.forEach(function (item) {
+    itemsHeight += item.parentNode.offsetHeight;
+  });
+
+  // Should we auto-collapse any nav items? Try to find the smallest item
+  // that can be collapsed to show all items on the screen. If not possible,
+  // then collapse the largest item and do it again. First, sort the items
+  // by height from smallest to largest.
+  var sortedItems = itemsArray.sort(function (a, b) {
+    return a.parentNode.offsetHeight - b.parentNode.offsetHeight;
+  });
+
+  while (sortedItems.length && itemsHeight > windowHeight) {
+    for (var i = 0; i < sortedItems.length; i++) {
+      // Will collapsing this item help?
+      var itemHeight = sortedItems[i].nextSibling.offsetHeight;
+      if ((itemsHeight - itemHeight <= windowHeight) || i === sortedItems.length - 1) {
+        // It will, so let's collapse it, remove its content height from
+        // our total and then remove it from our list of candidates
+        // that can be collapsed.
+        itemsHeight -= itemHeight;
+        toggleCollapseNav({target: sortedItems[i].children[0]}, true);
+        sortedItems.splice(i, 1);
+        break;
+      }
+    }
+  }
+}
+
+/*
+  Initialize the interactive functionality of the page.
+*/
+function init() {
+    var i;
+
+    // Make collapse buttons clickable
+    var buttons = document.querySelectorAll('.collapse-button');
+    for (i = 0; i < buttons.length; i++) {
+        buttons[i].onclick = toggleCollapseButton;
+
+        // Show by default? Then toggle now.
+        if (buttons[i].className.indexOf('show') !== -1) {
+            toggleCollapseButton({target: buttons[i].children[0]});
+        }
+    }
+
+    // Make nav items clickable to collapse/expand their content.
+    var navItems = document.querySelectorAll('nav .resource-group .heading');
+    for (i = 0; i < navItems.length; i++) {
+        navItems[i].onclick = toggleCollapseNav;
+
+        // Show all by default
+        toggleCollapseNav({target: navItems[i].children[0]});
+    }
+}
+
+// Initial call to set up buttons
+init();
+
+window.onload = function () {
+    autoCollapse();
+    // Remove the `preload` class to enable animations
+    document.querySelector('body').className = '';
+};
+</script></body></html>
+[48;5;235m[38;5;214m>> Line 6:[39m[49m parameter 'origin' not specified in 'Cargo' its '/cargos' URI template (warning code 8)
