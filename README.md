@@ -40,4 +40,4 @@ Also, if you want to learn more about Domain Driven Design, I encourage you to t
 
 ## REST API
 
-[API documentation](http://dddsample-go.herokuapp.com/docs)
+[API documentation](http://dddsample-go.herokuapp.com/docs/)
