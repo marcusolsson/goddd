@@ -132,6 +132,9 @@ func main() {
 	r.Handle("/locations", listLocationsHandler).Methods("GET")
 	r.Handle("/incidents", registerIncidentHandler).Methods("POST")
 
+	r.Handle("/", http.RedirectHandler("/docs/", http.StatusMovedPermanently))
+	r.Handle("/docs/", http.StripPrefix("/docs/", http.FileServer(http.Dir("docs"))))
+
 	http.Handle("/", accessControl(r))
 
 	addr := ":" + port()
