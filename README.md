@@ -4,9 +4,7 @@
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/marcusolsson/goddd)
 [![License MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](LICENSE)
 
-This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net/) to idiomatic Go.
-
-This project aims to:
+This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net/) to idiomatic Go. This project aims to:
 
 - Demonstrate how the tactical design patterns from Domain Driven Design may be implemented in Go. 
 - Serve as an example of a modern production-ready enterprise application.
