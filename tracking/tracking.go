@@ -45,10 +45,24 @@ type Cargo struct {
 	Destination          string    `json:"destination"`
 	ETA                  time.Time `json:"eta"`
 	NextExpectedActivity string    `json:"nextExpectedActivity"`
-	Misrouted            bool      `json:"misrouted"`
-	Routed               bool      `json:"routed"`
 	ArrivalDeadline      time.Time `json:"arrivalDeadline"`
 	Events               []Event   `json:"events"`
+
+	// TODO: These are not relevant for the tracking use case, but since
+	// booking is using track for booking details. Find a cleaner way of doing
+	// this.
+	Legs      []Leg `json:"legs,omitempty"`
+	Misrouted bool  `json:"misrouted"`
+	Routed    bool  `json:"routed"`
+}
+
+// Leg is a read model for booking views.
+type Leg struct {
+	VoyageNumber string    `json:"voyageNumber"`
+	From         string    `json:"from"`
+	To           string    `json:"to"`
+	LoadTime     time.Time `json:"loadTime"`
+	UnloadTime   time.Time `json:"unloadTime"`
 }
 
 // Event is a read model for tracking views.
@@ -64,10 +78,27 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
 		Destination:          string(c.RouteSpecification.Destination),
 		ETA:                  c.Delivery.ETA,
 		NextExpectedActivity: nextExpectedActivity(c),
+		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
+		Routed:               !c.Itinerary.IsEmpty(),
 		ArrivalDeadline:      c.RouteSpecification.ArrivalDeadline,
+		Legs:                 assembleLegs(c),
 		StatusText:           assembleStatusText(c),
 		Events:               assembleEvents(c, her),
 	}
+}
+
+func assembleLegs(c cargo.Cargo) []Leg {
+	var legs []Leg
+	for _, l := range c.Itinerary.Legs {
+		legs = append(legs, Leg{
+			VoyageNumber: string(l.VoyageNumber),
+			From:         string(l.LoadLocation),
+			To:           string(l.UnloadLocation),
+			LoadTime:     l.LoadTime,
+			UnloadTime:   l.UnloadTime,
+		})
+	}
+	return legs
 }
 
 func nextExpectedActivity(c cargo.Cargo) string {
