@@ -38,5 +38,5 @@ Also, if you want to learn more about Domain Driven Design, I encourage you to t
 
 ## REST API
 
-- [Example](http://dddsample-go.herokuapp.com/cargos)
-- [Documentation](http://dddsample-go.herokuapp.com/docs/)
+- [Example](http://dddsample.marcusoncode.se/cargos)
+- [Documentation](http://dddsample.marcusoncode.se/docs/)

@@ -52,9 +52,11 @@ func main() {
 	ctx := context.Background()
 	logger := log.NewLogfmtLogger(os.Stdout)
 
+	rsurl := routingServiceURL()
+
 	// Configure the routing service which will serve as a proxy.
 	var rs routing.Service
-	rs = middleware.ProxyingRoutingMiddleware(routingServiceURL(), ctx)(rs)
+	rs = middleware.ProxyingRoutingMiddleware(rsurl, ctx)(rs)
 
 	// Create handlers for all booking endpoints.
 	var bs booking.Service
@@ -140,6 +142,7 @@ func main() {
 	addr := ":" + port()
 
 	_ = logger.Log("msg", "HTTP", "addr", addr)
+	_ = logger.Log("msg", "routingservice", "url", rsurl)
 	_ = logger.Log("err", http.ListenAndServe(addr, nil))
 }
 
