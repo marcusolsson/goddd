@@ -1,6 +1,8 @@
 language: go
 go: 1.5.2
-sudo: false
+sudo: required
+services: 
+- docker
 install:
 - go get github.com/GeertJohan/fgt
 - go get github.com/golang/lint/golint
@@ -9,4 +11,5 @@ script:
 - fgt golint ./...
 - godep go test -v ./...
 after_success:
-- godep go build -o goddd
+- CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o goddd .
+- docker build -t goddd .
