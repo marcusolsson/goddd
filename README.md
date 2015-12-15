@@ -33,6 +33,19 @@ go run main.go
 
 If you only want to try it out, this is enough. If you are looking for full functionality, you will need to have a [routing service](https://github.com/marcusolsson/pathfinder) running and start the application with `ROUTINGSERVICE_URL` (default: `http://localhost:7878`).
 
+## Try it!
+
+```
+# Check out the sample cargos
+curl -XGET 'localhost:8080/cargos'
+
+# Book new cargo
+curl -XPOST 'localhost:8080/cargos?origin=SESTO&destination=FIHEL&arrivalDeadline=1450214254'
+
+# Request possible routes for sample cargo ABC123
+curl -XGET 'localhost:8080/cargos/ABC123/request_routes'
+```
+
 ## REST API
 
 - [Example](http://dddsample.marcusoncode.se/cargos)
