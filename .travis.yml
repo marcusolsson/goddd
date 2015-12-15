@@ -1,15 +1,22 @@
 language: go
 go: 1.5.2
 sudo: required
+
 services: 
-- docker
+  - docker
+
 install:
-- go get github.com/GeertJohan/fgt
-- go get github.com/golang/lint/golint
-- go get -v -u github.com/kr/godep
+  - go get github.com/GeertJohan/fgt
+  - go get github.com/golang/lint/golint
+  - go get -v -u github.com/kr/godep
+  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
 script:
-- fgt golint ./...
-- godep go test -v ./...
-- CGO_ENABLED=0 GOOS=linux godep go build -a -installsuffix cgo -o goddd .
+  - fgt golint ./...
+  - godep go test -v ./...
+  - CGO_ENABLED=0 GOOS=linux godep go build -a -installsuffix cgo -o goddd .
+
 after_success:
-- docker build -t goddd .
+  - docker build -t $DOCKER_IMAGE_NAME .
+  - if [ ! -z "$TRAVIS_TAG" ]; then docker tag $DOCKER_IMAGE_NAME:latest $DOCKER_IMAGE_NAME:$TRAVIS_TAG; fi && docker push $DOCKER_IMAGE_NAME 
+  - docker push $DOCKER_IMAGE_NAME
