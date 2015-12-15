@@ -23,6 +23,22 @@ The original application is written in Java and much thought has been given to t
 
 I started out by first rewriting the original application, as is, in Go. The result was hardly idiomatic Go and I have since tried to refactor towards something that is true to the Go way. This means that you will still find oddities due to the application's Java heritage. If you do, please let me know so that we can weed out the remaining Java.
 
+## Running the application
+
+Start the application on port 8080 (or by setting the `PORT` environment variable).
+
+```
+go run main.go
+```
+
+If you only want to try it out, this is enough. If you are looking for full functionality, you will need to have a [routing service](https://github.com/marcusolsson/pathfinder) running.
+
+Tell `goddd` where to find the routing service using the `ROUTINGSERVICE_URL` environment variable (default: `http://localhost:7878`).
+
+## REST API
+
+- [Example](http://dddsample.marcusoncode.se/cargos)
+- [Documentation](http://dddsample.marcusoncode.se/docs/)
 
 ## Additional resources
 
@@ -36,7 +52,3 @@ To accompany this application, there is also an AngularJS-application to demonst
 
 Also, if you want to learn more about Domain Driven Design, I encourage you to take a look at the [Domain Driven Design](http://www.amazon.com/Domain-Driven-Design-Tackling-Complexity-Software/dp/0321125215) book by Eric Evans.
 
-## REST API
-
-- [Example](http://dddsample.marcusoncode.se/cargos)
-- [Documentation](http://dddsample.marcusoncode.se/docs/)
