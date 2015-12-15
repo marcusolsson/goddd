@@ -25,15 +25,13 @@ I started out by first rewriting the original application, as is, in Go. The res
 
 ## Running the application
 
-Start the application on port 8080 (or by setting the `PORT` environment variable).
+Start the application on port 8080 (or whatever the `PORT` variable is set to).
 
 ```
 go run main.go
 ```
 
-If you only want to try it out, this is enough. If you are looking for full functionality, you will need to have a [routing service](https://github.com/marcusolsson/pathfinder) running.
-
-Tell `goddd` where to find the routing service using the `ROUTINGSERVICE_URL` environment variable (default: `http://localhost:7878`).
+If you only want to try it out, this is enough. If you are looking for full functionality, you will need to have a [routing service](https://github.com/marcusolsson/pathfinder) running and start the application with `ROUTINGSERVICE_URL` (default: `http://localhost:7878`).
 
 ## REST API
 
