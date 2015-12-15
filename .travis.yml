@@ -10,6 +10,6 @@ install:
 script:
 - fgt golint ./...
 - godep go test -v ./...
-after_success:
 - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o goddd .
+after_success:
 - docker build -t goddd .
