@@ -1,3 +1,4 @@
+// Package cargo contains the heart of the domain model.
 package cargo
 
 import (

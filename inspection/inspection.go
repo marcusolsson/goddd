@@ -1,3 +1,4 @@
+// Package inspection provides means to inspect cargos.
 package inspection
 
 import "github.com/marcusolsson/goddd/cargo"

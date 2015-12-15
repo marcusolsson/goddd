@@ -1,3 +1,4 @@
+// Package location provides the Location aggregate.
 package location
 
 import "errors"

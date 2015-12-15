@@ -1,3 +1,4 @@
+// Package repository provides implementations of all the domain repositories.
 package repository
 
 import (

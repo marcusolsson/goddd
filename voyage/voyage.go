@@ -1,3 +1,4 @@
+// Package voyage provides the Voyage aggregate.
 package voyage
 
 import (

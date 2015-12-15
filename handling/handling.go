@@ -1,3 +1,5 @@
+// Package handling provides the use-case for registering incidents. Used by
+// views facing the people handling the cargo along its route.
 package handling
 
 import (
