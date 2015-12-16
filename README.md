@@ -33,6 +33,22 @@ go run main.go
 
 If you only want to try it out, this is enough. If you are looking for full functionality, you will need to have a [routing service](https://github.com/marcusolsson/pathfinder) running and start the application with `ROUTINGSERVICE_URL` (default: `http://localhost:7878`).
 
+### Docker
+
+You can also run the application using Docker.
+
+```
+# Start routing service
+docker run --name some-pathfinder marcusolsson/pathfinder
+
+# Start application
+docker run --name some-goddd \
+  --link some-pathfinder:pathfinder \
+  -p 8080:8080 \
+  -e ROUTINGSERVICE_URL=http://pathfinder:8080 \
+  marcusolsson/goddd
+```
+
 ## Try it!
 
 ```
