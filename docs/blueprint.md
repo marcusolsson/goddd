@@ -6,17 +6,6 @@ Used by persons with administrative permissions to book an order.
 ## book cargo [POST]
 Books a cargo.
 
-+ Parameters
-
-	+ origin - name of the origin
-
-+ Request (application/x-www-form-urlencoded)
-
-
-	+ Body
-
-			origin=SESTO
-
 + Response 200
 
 ## list booked cargos [GET]
