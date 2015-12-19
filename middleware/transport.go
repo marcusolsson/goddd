@@ -156,7 +156,7 @@ func DecodeBookCargoRequest(r *http.Request) (interface{}, error) {
 		arrivalDeadline, _ = strconv.ParseInt(millis, 10, 64)
 	}
 
-	if origin == "" || destination == "" || arrivalDeadline > 0 {
+	if origin == "" || destination == "" || arrivalDeadline == 0 {
 		return nil, errors.New("missing parameters")
 	}
 
