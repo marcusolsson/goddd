@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"golang.org/x/net/context"
@@ -128,21 +129,41 @@ func MakeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
 // DecodeBookCargoRequest returns a decoded request to find a cargo.
 func DecodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var (
-		origin          = getParam(r, "origin")
-		destination     = getParam(r, "destination")
-		arrivalDeadline = getParam(r, "arrival_deadline")
+		origin          string
+		destination     string
+		arrivalDeadline int64
 	)
 
-	if origin == "" || destination == "" || arrivalDeadline == "" {
-		return nil, errors.New("missing parameters")
+	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
+		var data struct {
+			Origin          string `json:"origin"`
+			Destination     string `json:"destination"`
+			ArrivalDeadline int64  `json:"arrival_deadline"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			return nil, err
+		}
+
+		origin = data.Origin
+		destination = data.Destination
+		arrivalDeadline = data.ArrivalDeadline
+	} else {
+		origin = getParam(r, "origin")
+		destination = getParam(r, "destination")
+
+		millis := getParam(r, "arrival_deadline")
+		arrivalDeadline, _ = strconv.ParseInt(millis, 10, 64)
 	}
 
-	millis, _ := strconv.ParseInt(arrivalDeadline, 10, 64)
+	if origin == "" || destination == "" || arrivalDeadline > 0 {
+		return nil, errors.New("missing parameters")
+	}
 
 	return bookCargoRequest{
 		Origin:          location.UNLocode(origin),
 		Destination:     location.UNLocode(destination),
-		ArrivalDeadline: time.Unix(millis/1000, 0),
+		ArrivalDeadline: time.Unix(arrivalDeadline/1000, 0),
 	}, nil
 }
 
@@ -266,7 +287,21 @@ type changeDestinationResponse struct {
 func DecodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	id := mux.Vars(r)["id"]
 
-	destination := getParam(r, "destination")
+	var destination string
+
+	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
+		var data struct {
+			Destination string `json:"destination"`
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			return nil, err
+		}
+
+		destination = data.Destination
+	} else {
+		destination = getParam(r, "destination")
+	}
 
 	if id == "" || destination == "" {
 		return nil, errors.New("missing parameters")
@@ -331,17 +366,44 @@ type registerIncidentResponse struct {
 // incident.
 func DecodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	var (
-		completionTime = getParam(r, "completion_time")
-		trackingID     = getParam(r, "tracking_id")
-		voyageNumber   = getParam(r, "voyage")
-		unLocode       = getParam(r, "location")
-		eventType      = getParam(r, "event_type")
+		completionTime int64
+		trackingID     string
+		voyageNumber   string
+		unLocode       string
+		eventType      string
 	)
 
-	millis, _ := strconv.ParseInt(completionTime, 10, 64)
+	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
+		var data struct {
+			CompletionTime int64
+			TrackingID     string
+			VoyageNumber   string
+			Location       string
+			EventType      string
+		}
+
+		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+			return nil, err
+		}
+		defer r.Body.Close()
+
+		completionTime = data.CompletionTime
+		trackingID = data.TrackingID
+		voyageNumber = data.VoyageNumber
+		unLocode = data.Location
+		eventType = data.EventType
+	} else {
+		trackingID = getParam(r, "tracking_id")
+		voyageNumber = getParam(r, "voyage")
+		unLocode = getParam(r, "location")
+		eventType = getParam(r, "event_type")
+
+		millis := getParam(r, "completion_time")
+		completionTime, _ = strconv.ParseInt(millis, 10, 64)
+	}
 
 	return registerIncidentRequest{
-		CompletionTime: time.Unix(millis/1000, 0),
+		CompletionTime: time.Unix(completionTime/1000, 0),
 		ID:             cargo.TrackingID(trackingID),
 		Voyage:         voyage.Number(voyageNumber),
 		Location:       location.UNLocode(unLocode),
