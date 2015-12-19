@@ -128,9 +128,9 @@ func MakeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
 // DecodeBookCargoRequest returns a decoded request to find a cargo.
 func DecodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var (
-		origin          = r.URL.Query().Get("origin")
-		destination     = r.URL.Query().Get("destination")
-		arrivalDeadline = r.URL.Query().Get("arrival_deadline")
+		origin          = getParam(r, "origin")
+		destination     = getParam(r, "destination")
+		arrivalDeadline = getParam(r, "arrival_deadline")
 	)
 
 	if origin == "" || destination == "" || arrivalDeadline == "" {
@@ -265,7 +265,8 @@ type changeDestinationResponse struct {
 // destination of a cargo.
 func DecodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	id := mux.Vars(r)["id"]
-	destination := r.URL.Query().Get("destination")
+
+	destination := getParam(r, "destination")
 
 	if id == "" || destination == "" {
 		return nil, errors.New("missing parameters")
@@ -330,11 +331,11 @@ type registerIncidentResponse struct {
 // incident.
 func DecodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	var (
-		completionTime = r.URL.Query().Get("completion_time")
-		trackingID     = r.URL.Query().Get("tracking_id")
-		voyageNumber   = r.URL.Query().Get("voyage")
-		unLocode       = r.URL.Query().Get("location")
-		eventType      = r.URL.Query().Get("event_type")
+		completionTime = getParam(r, "completion_time")
+		trackingID     = getParam(r, "tracking_id")
+		voyageNumber   = getParam(r, "voyage")
+		unLocode       = getParam(r, "location")
+		eventType      = getParam(r, "event_type")
 	)
 
 	millis, _ := strconv.ParseInt(completionTime, 10, 64)
@@ -412,4 +413,15 @@ func EncodeFetchRoutesRequest(r *http.Request, request interface{}) error {
 	r.URL.RawQuery = vals.Encode()
 
 	return nil
+}
+
+func getParam(r *http.Request, key string) string {
+	if val := r.FormValue(key); val != "" {
+		return val
+	}
+	if val := r.URL.Query().Get(key); val != "" {
+		return val
+	}
+
+	return ""
 }
