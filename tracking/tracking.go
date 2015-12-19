@@ -39,13 +39,13 @@ func NewService(cargos cargo.Repository, handlingEvents cargo.HandlingEventRepos
 
 // Cargo is a read model for tracking views.
 type Cargo struct {
-	TrackingID           string    `json:"trackingId"`
-	StatusText           string    `json:"statusText"`
+	TrackingID           string    `json:"tracking_id"`
+	StatusText           string    `json:"status_text"`
 	Origin               string    `json:"origin"`
 	Destination          string    `json:"destination"`
 	ETA                  time.Time `json:"eta"`
-	NextExpectedActivity string    `json:"nextExpectedActivity"`
-	ArrivalDeadline      time.Time `json:"arrivalDeadline"`
+	NextExpectedActivity string    `json:"next_expected_activity"`
+	ArrivalDeadline      time.Time `json:"arrival_deadline"`
 	Events               []Event   `json:"events"`
 
 	// TODO: These are not relevant for the tracking use case, but since
@@ -58,11 +58,11 @@ type Cargo struct {
 
 // Leg is a read model for booking views.
 type Leg struct {
-	VoyageNumber string    `json:"voyageNumber"`
+	VoyageNumber string    `json:"voyage_number"`
 	From         string    `json:"from"`
 	To           string    `json:"to"`
-	LoadTime     time.Time `json:"loadTime"`
-	UnloadTime   time.Time `json:"unloadTime"`
+	LoadTime     time.Time `json:"load_time"`
+	UnloadTime   time.Time `json:"unload_time"`
 }
 
 // Event is a read model for tracking views.

@@ -143,22 +143,22 @@ type Location struct {
 
 // Cargo is a read model for booking views.
 type Cargo struct {
-	ArrivalDeadline time.Time `json:"arrivalDeadline"`
+	ArrivalDeadline time.Time `json:"arrival_deadline"`
 	Destination     string    `json:"destination"`
 	Legs            []Leg     `json:"legs,omitempty"`
 	Misrouted       bool      `json:"misrouted"`
 	Origin          string    `json:"origin"`
 	Routed          bool      `json:"routed"`
-	TrackingID      string    `json:"trackingId"`
+	TrackingID      string    `json:"tracking_id"`
 }
 
 // Leg is a read model for booking views.
 type Leg struct {
-	VoyageNumber string    `json:"voyageNumber"`
+	VoyageNumber string    `json:"voyage_number"`
 	From         string    `json:"from"`
 	To           string    `json:"to"`
-	LoadTime     time.Time `json:"loadTime"`
-	UnloadTime   time.Time `json:"unloadTime"`
+	LoadTime     time.Time `json:"load_time"`
+	UnloadTime   time.Time `json:"unload_time"`
 }
 
 func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) Cargo {

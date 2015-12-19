@@ -3,12 +3,12 @@
 # Group Booking 
 Used by persons with administrative permissions to book an order.
 
-## book cargo [/cargos{?origin,destination,arrivalDeadline}]
+## book cargo [/cargos{?origin,destination,arrival_deadline}]
 
 + Parameters
     + origin (required, string) - name of origin
     + destination (required, string) - name of destination
-    + arrivalDeadline (required, string) - deadline of arrival
+    + arrival_deadline (required, string) - deadline of arrival
 
 ### POST
 Books a cargo.
@@ -16,7 +16,7 @@ Books a cargo.
 + Response 200 (application/json)
 
         {
-            "trackingId": "ABC123"
+            "tracking_id": "ABC123"
         }
 
 ## assign to route [/cargos/{id}/assign_to_route]
@@ -32,18 +32,18 @@ Assigns given route to the cargo.
         {
             "legs": [
                 {
-                    "voyageNumber": "0301S",
+                    "voyage_number": "0301S",
                     "from": "SESTO",
                     "to": "FIHEL",
-                    "loadTime": "2015-11-14T14:10:29.173391809Z",
-                    "unloadTime": "2015-11-15T21:55:29.173391809Z"
+                    "load_time": "2015-11-14T14:10:29.173391809Z",
+                    "unload_time": "2015-11-15T21:55:29.173391809Z"
                 },
                 {
-                    "voyageNumber": "0100S",
+                    "voyage_number": "0100S",
                     "from": "FIHEL",
                     "to": "CNHKG",
-                    "loadTime": "2015-11-18T02:19:29.173391809Z",
-                    "unloadTime": "2015-11-19T04:11:29.173391809Z"
+                    "load_time": "2015-11-18T02:19:29.173391809Z",
+                    "unload_time": "2015-11-19T04:11:29.173391809Z"
                 }
             ]
         },
@@ -76,36 +76,36 @@ Requests routes based on current specification. Uses an external routing service
                 {
                     "legs": [
                         {
-                            "voyageNumber": "0301S",
+                            "voyage_number": "0301S",
                             "from": "SESTO",
                             "to": "FIHEL",
-                            "loadTime": "2015-11-14T14:10:29.173391809Z",
-                            "unloadTime": "2015-11-15T21:55:29.173391809Z"
+                            "load_time": "2015-11-14T14:10:29.173391809Z",
+                            "unload_time": "2015-11-15T21:55:29.173391809Z"
                         },
                         {
-                            "voyageNumber": "0100S",
+                            "voyage_number": "0100S",
                             "from": "FIHEL",
                             "to": "CNHKG",
-                            "loadTime": "2015-11-18T02:19:29.173391809Z",
-                            "unloadTime": "2015-11-19T04:11:29.173391809Z"
+                            "load_time": "2015-11-18T02:19:29.173391809Z",
+                            "unload_time": "2015-11-19T04:11:29.173391809Z"
                         }
                     ]
                 },
                 {
                     "legs": [
                         {
-                            "voyageNumber": "0400S",
+                            "voyage_number": "0400S",
                             "from": "SESTO",
                             "to": "JNTKO",
-                            "loadTime": "2015-11-14T06:22:29.173415471Z",
-                            "unloadTime": "2015-11-15T10:22:29.173415471Z"
+                            "load_time": "2015-11-14T06:22:29.173415471Z",
+                            "unload_time": "2015-11-15T10:22:29.173415471Z"
                         },
                         {
-                            "voyageNumber": "0200T",
+                            "voyage_number": "0200T",
                             "from": "JNTKO",
                             "to": "CNHKG",
-                            "loadTime": "2015-11-17T10:45:29.173415471Z",
-                            "unloadTime": "2015-11-18T11:48:29.173415471Z"
+                            "load_time": "2015-11-17T10:45:29.173415471Z",
+                            "unload_time": "2015-11-18T11:48:29.173415471Z"
                         }
                     ]
                 }
@@ -122,20 +122,20 @@ Lists all booked cargos.
         {
             "cargos": [
                 {
-                    "arrivalDeadline": "0001-01-01T00:00:00Z",
+                    "arrival_deadline": "0001-01-01T00:00:00Z",
                     "destination": "CNHKG",
                     "misrouted": false,
                     "origin": "SESTO",
                     "routed": false,
-                    "trackingId": "ABC123"
+                    "tracking_id": "ABC123"
                 },
                 {
-                    "arrivalDeadline": "0001-01-01T00:00:00Z",
+                    "arrival_deadline": "0001-01-01T00:00:00Z",
                     "destination": "SESTO",
                     "misrouted": false,
                     "origin": "AUMEL",
                     "routed": false,
-                    "trackingId": "FTL456"
+                    "tracking_id": "FTL456"
                 }
             ]
         }
@@ -191,13 +191,13 @@ Returns the cargo's tracking information.
 
         {
             "cargo": {
-                "trackingId": "ABC123",
-                "statusText": "Not received",
+                "tracking_id": "ABC123",
+                "status_text": "Not received",
                 "origin": "SESTO",
                 "destination": "CNHKG",
                 "eta": "0001-01-01T00:00:00Z",
-                "nextExpectedActivity": "There are currently no expected activities for this cargo.",
-                "arrivalDeadline": "0001-01-01T00:00:00Z",
+                "next_expected_activity": "There are currently no expected activities for this cargo.",
+                "arrival_deadline": "0001-01-01T00:00:00Z",
                 "events": null,
                 "misrouted": false,
                 "routed": false
@@ -209,14 +209,14 @@ Returns the cargo's tracking information.
 # Group Handling
 Allows the staff at each location to register handling events along the route.
 
-## register incident [/incidents{?completionTime,trackingId,voyage,location,eventType}]
+## register incident [/incidents{?completion_time,tracking_id,voyage,location,event_type}]
 
 + Parameters
-    + completionTime (required, string) - time when incident was completed
-    + trackingId (required, string) - tracking ID of the cargo
+    + completion_time (required, string) - time when incident was completed
+    + tracking_id (required, string) - tracking ID of the cargo
     + voyage (required, string) - voyage number
     + location (required, string) - UN locode of where the incident occurred
-    + eventType (required, string) - type of handling event
+    + event_type (required, string) - type of handling event
 
 ### POST
 Registers handling events along the route.

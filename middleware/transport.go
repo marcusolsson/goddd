@@ -108,7 +108,7 @@ type bookCargoRequest struct {
 }
 
 type bookCargoResponse struct {
-	ID cargo.TrackingID `json:"trackingId"`
+	ID cargo.TrackingID `json:"tracking_id"`
 }
 
 // MakeBookCargoEndpoint returns a endpoint to book a cargo.
@@ -130,7 +130,7 @@ func DecodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var (
 		origin          = r.URL.Query().Get("origin")
 		destination     = r.URL.Query().Get("destination")
-		arrivalDeadline = r.URL.Query().Get("arrivalDeadline")
+		arrivalDeadline = r.URL.Query().Get("arrival_deadline")
 	)
 
 	if origin == "" || destination == "" || arrivalDeadline == "" {
@@ -330,11 +330,11 @@ type registerIncidentResponse struct {
 // incident.
 func DecodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	var (
-		completionTime = r.URL.Query().Get("completionTime")
-		trackingID     = r.URL.Query().Get("trackingId")
+		completionTime = r.URL.Query().Get("completion_time")
+		trackingID     = r.URL.Query().Get("tracking_id")
 		voyageNumber   = r.URL.Query().Get("voyage")
 		unLocode       = r.URL.Query().Get("location")
-		eventType      = r.URL.Query().Get("eventType")
+		eventType      = r.URL.Query().Get("event_type")
 	)
 
 	millis, _ := strconv.ParseInt(completionTime, 10, 64)

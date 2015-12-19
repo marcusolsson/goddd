@@ -16,13 +16,6 @@ type Service interface {
 	FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary
 }
 
-type service struct {
-}
-
-func (s *service) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
-	return nil
-}
-
 // Route is a read model for routing views.
 type Route struct {
 	Legs []Leg `json:"legs"`
@@ -30,9 +23,9 @@ type Route struct {
 
 // Leg is a read model for routing views.
 type Leg struct {
-	VoyageNumber string    `json:"voyageNumber"`
+	VoyageNumber string    `json:"voyage_number"`
 	From         string    `json:"from"`
 	To           string    `json:"to"`
-	LoadTime     time.Time `json:"loadTime"`
-	UnloadTime   time.Time `json:"unloadTime"`
+	LoadTime     time.Time `json:"load_time"`
+	UnloadTime   time.Time `json:"unload_time"`
 }
