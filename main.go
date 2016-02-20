@@ -5,8 +5,6 @@ import (
 	"os"
 
 	"github.com/go-kit/kit/log"
-	httptransport "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
 
 	"github.com/marcusolsson/goddd/booking"
@@ -14,7 +12,6 @@ import (
 	"github.com/marcusolsson/goddd/handling"
 	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/middleware"
 	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/tracking"
@@ -26,7 +23,6 @@ var (
 )
 
 func main() {
-	// Configure repositories.
 	var (
 		cargos         = repository.NewCargo()
 		locations      = repository.NewLocation()
@@ -49,95 +45,36 @@ func main() {
 	// Facilitate testing by adding some cargos.
 	storeTestData(cargos)
 
-	ctx := context.Background()
-	logger := log.NewLogfmtLogger(os.Stdout)
+	var (
+		ctx    = context.Background()
+		logger = log.NewLogfmtLogger(os.Stdout)
+		rsurl  = routingServiceURL()
+	)
 
-	rsurl := routingServiceURL()
-
-	// Configure the routing service which will serve as a proxy.
 	var rs routing.Service
-	rs = middleware.ProxyingRoutingMiddleware(rsurl, ctx)(rs)
+	rs = booking.ProxyingMiddleware(rsurl, ctx)(rs)
 
-	// Create handlers for all booking endpoints.
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
-	bs = middleware.LoggingBookingService{logger, bs}
-
-	bookCargoHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeBookCargoEndpoint(bs),
-		middleware.DecodeBookCargoRequest,
-		middleware.EncodeResponse,
-	)
-	requestRoutesHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeRequestRoutesEndpoint(bs),
-		middleware.DecodeRequestRoutesRequest,
-		middleware.EncodeResponse,
-	)
-	assignToRouteHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeAssignToRouteEndpoint(bs),
-		middleware.DecodeAssignToRouteRequest,
-		middleware.EncodeResponse,
-	)
-	changeDestinationHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeChangeDestinationEndpoint(bs),
-		middleware.DecodeChangeDestinationRequest,
-		middleware.EncodeResponse,
-	)
-	listCargosHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeListCargosEndpoint(bs),
-		middleware.DecodeListCargosRequest,
-		middleware.EncodeResponse,
-	)
-	listLocationsHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeListLocationsEndpoint(bs),
-		middleware.DecodeListLocationsRequest,
-		middleware.EncodeResponse,
-	)
+	bs = booking.NewLoggingService(logger, bs)
 
 	var ts tracking.Service
 	ts = tracking.NewService(cargos, handlingEvents)
-	ts = middleware.LoggingTrackingService{logger, ts}
+	ts = tracking.NewLoggingService(logger, ts)
 
-	findCargoHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeFindCargoEndpoint(ts),
-		middleware.DecodeFindCargoRequest,
-		middleware.EncodeFindCargoResponse,
-	)
-
-	// Create handler for the handling endpoint used for registering incidents.
 	var hs handling.Service
 	hs = handling.NewService(handlingEvents, handlingEventFactory, handlingEventHandler)
+	hs = handling.NewLoggingService(logger, hs)
 
-	registerIncidentHandler := httptransport.NewServer(
-		ctx,
-		middleware.MakeRegisterIncidentEndpoint(hs),
-		middleware.DecodeRegisterIncidentRequest,
-		middleware.EncodeResponse,
-	)
+	mux := http.NewServeMux()
 
-	// Register all handlers and start serving ...
-	r := mux.NewRouter()
+	mux.Handle("/booking/v1/", booking.MakeHandler(ctx, bs))
+	mux.Handle("/tracking/v1/", tracking.MakeHandler(ctx, ts))
+	mux.Handle("/handling/v1/", handling.MakeHandler(ctx, hs))
+	mux.Handle("/", http.RedirectHandler("/docs/", http.StatusMovedPermanently))
+	mux.Handle("/docs/", http.StripPrefix("/docs/", http.FileServer(http.Dir("docs"))))
 
-	r.Handle("/cargos", bookCargoHandler).Methods("POST")
-	r.Handle("/cargos", listCargosHandler).Methods("GET")
-	r.Handle("/cargos/{id}", findCargoHandler).Methods("GET")
-	r.Handle("/cargos/{id}/request_routes", requestRoutesHandler).Methods("GET")
-	r.Handle("/cargos/{id}/assign_to_route", assignToRouteHandler).Methods("POST")
-	r.Handle("/cargos/{id}/change_destination", changeDestinationHandler).Methods("POST")
-	r.Handle("/locations", listLocationsHandler).Methods("GET")
-	r.Handle("/incidents", registerIncidentHandler).Methods("POST")
-
-	r.Handle("/", http.RedirectHandler("/docs/", http.StatusMovedPermanently))
-	r.Handle("/docs/", http.StripPrefix("/docs/", http.FileServer(http.Dir("docs"))))
-
-	http.Handle("/", accessControl(r))
+	http.Handle("/", accessControl(mux))
 
 	addr := ":" + port()
 

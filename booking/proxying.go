@@ -1,4 +1,4 @@
-package middleware
+package booking
 
 import (
 	"net/url"
@@ -14,8 +14,8 @@ import (
 	httptransport "github.com/go-kit/kit/transport/http"
 )
 
-// RoutingServiceMiddleware is a function for chaining routing service middleware.
-type RoutingServiceMiddleware func(routing.Service) routing.Service
+// ServiceMiddleware ...
+type ServiceMiddleware func(routing.Service) routing.Service
 
 type proxyRoutingService struct {
 	context.Context
@@ -53,8 +53,8 @@ func (s proxyRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecifica
 	return itineraries
 }
 
-// ProxyingRoutingMiddleware returns a middleware for proxying the routing service.
-func ProxyingRoutingMiddleware(proxyURL string, ctx context.Context) RoutingServiceMiddleware {
+// ProxyingMiddleware ...
+func ProxyingMiddleware(proxyURL string, ctx context.Context) ServiceMiddleware {
 	return func(next routing.Service) routing.Service {
 		var e endpoint.Endpoint
 		e = makeFetchRoutesEndpoint(ctx, proxyURL)
@@ -73,7 +73,7 @@ func makeFetchRoutesEndpoint(ctx context.Context, instance string) endpoint.Endp
 	}
 	return httptransport.NewClient(
 		"GET", u,
-		EncodeFetchRoutesRequest,
-		DecodeFetchRoutesResponse,
+		encodeFetchRoutesRequest,
+		decodeFetchRoutesResponse,
 	).Endpoint()
 }
