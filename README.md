@@ -69,6 +69,10 @@ curl -XGET 'localhost:8080/cargos/ABC123/request_routes'
 
 ## Additional resources
 
+- [Domain Driven Design in Go: Part 1](http://www.citerus.se/go-ddd)
+- [Domain Driven Design in Go: Part 2](http://www.citerus.se/part-2-domain-driven-design-in-go)
+- Domain Driven Design in Go: Part 3
+
 The original application uses a external routing service to demonstrate the use of _bounded contexts_. For those who are interested, I have ported this service as well:
 
 [pathfinder](https://github.com/marcusolsson/pathfinder)
