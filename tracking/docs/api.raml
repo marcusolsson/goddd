@@ -1,0 +1,17 @@
+#%RAML 0.8
+title: Tracking
+baseUri: http://dddsample.marcusoncode.se/tracking/{version}
+version: v1
+
+/cargos:
+  /{trackingId}:
+    uriParameters:
+      trackingId:
+        description: The tracking id of the cargo
+        type: string
+    get:
+      description: A specific cargo
+      responses:
+        200:
+          body:
+            application/json:

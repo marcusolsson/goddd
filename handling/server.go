@@ -13,12 +13,15 @@ import (
 func MakeHandler(ctx context.Context, hs Service) http.Handler {
 	r := mux.NewRouter()
 
-	r.Handle("/handling/v1/incidents", httptransport.NewServer(
+	registerIncidentHandler := httptransport.NewServer(
 		ctx,
 		makeRegisterIncidentEndpoint(hs),
 		decodeRegisterIncidentRequest,
 		encodeResponse,
-	)).Methods("POST")
+	)
+
+	r.Handle("/handling/v1/incidents", registerIncidentHandler).Methods("POST")
+	r.Handle("/handling/v1/docs", http.StripPrefix("/handling/v1/docs", http.FileServer(http.Dir("handling/docs"))))
 
 	return r
 }

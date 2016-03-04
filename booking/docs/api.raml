@@ -1,0 +1,180 @@
+#%RAML 0.8
+title: Booking
+baseUri: http://dddsample.marcusoncode.se/booking/{version}
+version: v1
+
+/cargos:
+  get:
+    description: All booked cargos
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                  "cargos": [
+                      {
+                          "arrival_deadline": "0001-01-01T00:00:00Z",
+                          "destination": "CNHKG",
+                          "misrouted": false,
+                          "origin": "SESTO",
+                          "routed": false,
+                          "tracking_id": "ABC123"
+                      },
+                      {
+                          "arrival_deadline": "0001-01-01T00:00:00Z",
+                          "destination": "SESTO",
+                          "misrouted": false,
+                          "origin": "AUMEL",
+                          "routed": false,
+                          "tracking_id": "FTL456"
+                      }
+                  ]
+              }
+  post:
+    description: Book a new cargo.
+    body:
+      application/json:
+        example: |
+          {
+              "origin": "SESTO",
+              "destination": "DEHAM",
+              "arrival_deadline": "2016-03-24T23:00:00Z"
+          }
+      
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                  "tracking_id": "ABC123"
+              }
+  /{trackingId}:
+    uriParameters:
+      trackingId:
+        description: The tracking id of the cargo
+        type: string
+    get:
+      description: A specific cargo
+      responses:
+        200:
+          body:
+            application/json:
+    /assign_to_route:
+      post:
+        description: Assign given route to the cargo.
+        body:
+          application/json:
+            example: |
+              {
+                  "legs": [
+                      {
+                          "voyage_number": "0301S",
+                          "from": "SESTO",
+                          "to": "FIHEL",
+                          "load_time": "2015-11-14T14:10:29.173391809Z",
+                          "unload_time": "2015-11-15T21:55:29.173391809Z"
+                      },
+                      {
+                          "voyage_number": "0100S",
+                          "from": "FIHEL",
+                          "to": "CNHKG",
+                          "load_time": "2015-11-18T02:19:29.173391809Z",
+                          "unload_time": "2015-11-19T04:11:29.173391809Z"
+                      }
+                  ]
+              }
+    /change_destination:
+      post:
+        description: Change destination of the cargo. May result in a misrouted cargo.
+        body:
+          application/json:
+            example: |
+              {
+                  "destination": "CNHKG" 
+              }
+    /request_routes:
+      get:
+        description: Requests routes based on current specification. Uses an external routing service provided by the routing package.
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  {
+                      "routes": [
+                          {
+                              "legs": [
+                                  {
+                                      "voyage_number": "0301S",
+                                      "from": "SESTO",
+                                      "to": "FIHEL",
+                                      "load_time": "2015-11-14T14:10:29.173391809Z",
+                                      "unload_time": "2015-11-15T21:55:29.173391809Z"
+                                  },
+                                  {
+                                      "voyage_number": "0100S",
+                                      "from": "FIHEL",
+                                      "to": "CNHKG",
+                                      "load_time": "2015-11-18T02:19:29.173391809Z",
+                                      "unload_time": "2015-11-19T04:11:29.173391809Z"
+                                  }
+                              ]
+                          },
+                          {
+                              "legs": [
+                                  {
+                                      "voyage_number": "0400S",
+                                      "from": "SESTO",
+                                      "to": "JNTKO",
+                                      "load_time": "2015-11-14T06:22:29.173415471Z",
+                                      "unload_time": "2015-11-15T10:22:29.173415471Z"
+                                  },
+                                  {
+                                      "voyage_number": "0200T",
+                                      "from": "JNTKO",
+                                      "to": "CNHKG",
+                                      "load_time": "2015-11-17T10:45:29.173415471Z",
+                                      "unload_time": "2015-11-18T11:48:29.173415471Z"
+                                  }
+                              ]
+                          }
+                      ]
+                  }
+/locations:
+  get:
+    description: All registered locations.
+    responses:
+      200:
+        body:
+          application/json:
+            example: |
+              {
+                  "locations": [
+                      {
+                          "locode": "DEHAM",
+                          "name": "Hamburg"
+                      },
+                      {
+                          "locode": "SESTO",
+                          "name": "Stockholm"
+                      },
+                      {
+                          "locode": "AUMEL",
+                          "name": "Melbourne"
+                      },
+                      {
+                          "locode": "CNHKG",
+                          "name": "Hongkong"
+                      },
+                      {
+                          "locode": "JNTKO",
+                          "name": "Tokyo"
+                      },
+                      {
+                          "locode": "NLRTM",
+                          "name": "Rotterdam"
+                      }
+                  ]
+              }

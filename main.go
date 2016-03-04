@@ -71,8 +71,6 @@ func main() {
 	mux.Handle("/booking/v1/", booking.MakeHandler(ctx, bs))
 	mux.Handle("/tracking/v1/", tracking.MakeHandler(ctx, ts))
 	mux.Handle("/handling/v1/", handling.MakeHandler(ctx, hs))
-	mux.Handle("/", http.RedirectHandler("/docs/", http.StatusMovedPermanently))
-	mux.Handle("/docs/", http.StripPrefix("/docs/", http.FileServer(http.Dir("docs"))))
 
 	http.Handle("/", accessControl(mux))
 

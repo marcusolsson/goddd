@@ -1,0 +1,18 @@
+#%RAML 0.8
+title: Handling
+baseUri: http://dddsample.marcusoncode.se/handling/{version}
+version: v1
+
+/incidents:
+  post:
+    description: Register a handling incident.
+    body:
+      application/json:
+        example: |
+          {
+              "completion_time": "0001-01-01T00:00:00Z",
+              "tracking_id": "ABC123",
+              "voyage": "V100",
+              "location" "CNHKG",
+              "event_type": "Unload"
+          }

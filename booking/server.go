@@ -57,6 +57,7 @@ func MakeHandler(ctx context.Context, bs Service) http.Handler {
 	r.Handle("/booking/v1/cargos/{id}/assign_to_route", assignToRouteHandler).Methods("POST")
 	r.Handle("/booking/v1/cargos/{id}/change_destination", changeDestinationHandler).Methods("POST")
 	r.Handle("/booking/v1/locations", listLocationsHandler).Methods("GET")
+	r.Handle("/booking/v1/docs", http.StripPrefix("/booking/v1/docs", http.FileServer(http.Dir("booking/docs"))))
 
 	return r
 }
