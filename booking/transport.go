@@ -22,9 +22,9 @@ func encodeResponse(w http.ResponseWriter, resp interface{}) error {
 
 func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var body struct {
-		Origin          string `json:"origin"`
-		Destination     string `json:"destination"`
-		ArrivalDeadline int64  `json:"arrival_deadline"`
+		Origin          string    `json:"origin"`
+		Destination     string    `json:"destination"`
+		ArrivalDeadline time.Time `json:"arrival_deadline"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -32,14 +32,14 @@ func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	}
 	defer r.Body.Close()
 
-	if body.Origin == "" || body.Destination == "" || body.ArrivalDeadline == 0 {
+	if body.Origin == "" || body.Destination == "" || body.ArrivalDeadline.IsZero() {
 		return nil, errMissingParameters
 	}
 
 	return bookCargoRequest{
 		Origin:          location.UNLocode(body.Origin),
 		Destination:     location.UNLocode(body.Destination),
-		ArrivalDeadline: time.Unix(body.ArrivalDeadline/1000, 0),
+		ArrivalDeadline: body.ArrivalDeadline,
 	}, nil
 }
 
