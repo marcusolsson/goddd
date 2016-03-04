@@ -3,10 +3,7 @@ package booking
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
 	"net/http"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
@@ -16,73 +13,55 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
+var errMissingParameters = errors.New("missing parameters")
+
 func encodeResponse(w http.ResponseWriter, resp interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	return json.NewEncoder(w).Encode(resp)
 }
 
 func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
-	var (
-		origin          string
-		destination     string
-		arrivalDeadline int64
-	)
-
-	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
-		var data struct {
-			Origin          string `json:"origin"`
-			Destination     string `json:"destination"`
-			ArrivalDeadline int64  `json:"arrival_deadline"`
-		}
-
-		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-			return nil, err
-		}
-
-		origin = data.Origin
-		destination = data.Destination
-		arrivalDeadline = data.ArrivalDeadline
-	} else {
-		origin = getParam(r, "origin")
-		destination = getParam(r, "destination")
-
-		millis := getParam(r, "arrival_deadline")
-		arrivalDeadline, _ = strconv.ParseInt(millis, 10, 64)
+	var body struct {
+		Origin          string `json:"origin"`
+		Destination     string `json:"destination"`
+		ArrivalDeadline int64  `json:"arrival_deadline"`
 	}
 
-	if origin == "" || destination == "" || arrivalDeadline == 0 {
-		return nil, errors.New("missing parameters")
-	}
-
-	return bookCargoRequest{
-		Origin:          location.UNLocode(origin),
-		Destination:     location.UNLocode(destination),
-		ArrivalDeadline: time.Unix(arrivalDeadline/1000, 0),
-	}, nil
-}
-
-func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-
-	id := vars["id"]
-	if id == "" {
-		return nil, errors.New("missing parameters")
-	}
-
-	return requestRoutesRequest{ID: cargo.TrackingID(id)}, nil
-}
-
-func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
-	b, err := ioutil.ReadAll(r.Body)
-	if err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return nil, err
 	}
 	defer r.Body.Close()
 
+	if body.Origin == "" || body.Destination == "" || body.ArrivalDeadline == 0 {
+		return nil, errMissingParameters
+	}
+
+	return bookCargoRequest{
+		Origin:          location.UNLocode(body.Origin),
+		Destination:     location.UNLocode(body.Destination),
+		ArrivalDeadline: time.Unix(body.ArrivalDeadline/1000, 0),
+	}, nil
+}
+
+func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
+	id, ok := mux.Vars(r)["id"]
+	if !ok {
+		return nil, errMissingParameters
+	}
+	return requestRoutesRequest{ID: cargo.TrackingID(id)}, nil
+}
+
+func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
+	id, ok := mux.Vars(r)["id"]
+	if !ok {
+		return nil, errMissingParameters
+	}
+
 	var route routing.Route
-	if err := json.Unmarshal(b, &route); err != nil {
+	if err := json.NewDecoder(r.Body).Decode(&route); err != nil {
 		return nil, err
 	}
+	defer r.Body.Close()
 
 	var legs []cargo.Leg
 	for _, l := range route.Legs {
@@ -95,41 +74,34 @@ func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 		})
 	}
 
-	vars := mux.Vars(r)
-	id := vars["id"]
-	if id == "" {
-		return nil, errors.New("missing parameters")
-	}
-
-	return assignToRouteRequest{ID: cargo.TrackingID(id), Itinerary: cargo.Itinerary{Legs: legs}}, nil
+	return assignToRouteRequest{
+		ID:        cargo.TrackingID(id),
+		Itinerary: cargo.Itinerary{Legs: legs},
+	}, nil
 }
 
 func decodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
-	id := mux.Vars(r)["id"]
-
-	var destination string
-
-	if strings.Contains(r.Header.Get("Content-Type"), "application/json") {
-		var data struct {
-			Destination string `json:"destination"`
-		}
-
-		if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
-			return nil, err
-		}
-
-		destination = data.Destination
-	} else {
-		destination = getParam(r, "destination")
+	id, ok := mux.Vars(r)["id"]
+	if !ok {
+		return nil, errMissingParameters
 	}
 
-	if id == "" || destination == "" {
-		return nil, errors.New("missing parameters")
+	var body struct {
+		Destination string `json:"destination"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		return nil, err
+	}
+	defer r.Body.Close()
+
+	if body.Destination == "" {
+		return nil, errMissingParameters
 	}
 
 	return changeDestinationRequest{
 		ID:          cargo.TrackingID(id),
-		Destination: location.UNLocode(destination),
+		Destination: location.UNLocode(body.Destination),
 	}, nil
 }
 
@@ -146,6 +118,8 @@ func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
+
 	return response, nil
 }
 
@@ -158,15 +132,4 @@ func encodeFetchRoutesRequest(r *http.Request, request interface{}) error {
 	r.URL.RawQuery = vals.Encode()
 
 	return nil
-}
-
-func getParam(r *http.Request, key string) string {
-	if val := r.FormValue(key); val != "" {
-		return val
-	}
-	if val := r.URL.Query().Get(key); val != "" {
-		return val
-	}
-
-	return ""
 }
