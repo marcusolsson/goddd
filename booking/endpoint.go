@@ -33,6 +33,31 @@ func makeBookCargoEndpoint(s Service) endpoint.Endpoint {
 	}
 }
 
+type loadCargoRequest struct {
+	ID cargo.TrackingID
+}
+
+type loadCargoResponse struct {
+	Cargo *Cargo `json:"cargo,omitempty"`
+	Err   string `json:"error,omitempty"`
+}
+
+func makeLoadCargoEndpoint(bs Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(loadCargoRequest)
+
+		c, err := bs.LoadCargo(req.ID)
+		if err != nil {
+			if err == cargo.ErrUnknown {
+				return loadCargoResponse{Err: err.Error()}, nil
+			}
+			return nil, err
+		}
+
+		return loadCargoResponse{Cargo: c}, nil
+	}
+}
+
 type requestRoutesRequest struct {
 	ID cargo.TrackingID
 }

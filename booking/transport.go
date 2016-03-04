@@ -43,6 +43,25 @@ func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	}, nil
 }
 
+func decodeLoadCargoRequest(r *http.Request) (interface{}, error) {
+	id, ok := mux.Vars(r)["id"]
+	if !ok {
+		return nil, errors.New("missing parameters")
+	}
+	return loadCargoRequest{ID: cargo.TrackingID(id)}, nil
+}
+
+func encodeLoadCargoResponse(w http.ResponseWriter, response interface{}) error {
+	resp := response.(loadCargoResponse)
+
+	if resp.Err == cargo.ErrUnknown.Error() {
+		w.WriteHeader(http.StatusNotFound)
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	return json.NewEncoder(w).Encode(resp)
+}
+
 func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
 	id, ok := mux.Vars(r)["id"]
 	if !ok {

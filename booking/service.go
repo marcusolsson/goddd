@@ -16,6 +16,9 @@ type Service interface {
 	// routed.
 	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error)
 
+	// LoadCargo returns a read model of a cargo.
+	LoadCargo(trackingID cargo.TrackingID) (*Cargo, error)
+
 	// RequestPossibleRoutesForCargo requests a list of itineraries describing
 	// possible routes for this cargo.
 	RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []cargo.Itinerary
@@ -73,6 +76,14 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDea
 	return c.TrackingID, nil
 }
 
+func (s *service) LoadCargo(trackingID cargo.TrackingID) (*Cargo, error) {
+	c, err := s.cargoRepository.Find(trackingID)
+	if err != nil {
+		return nil, err
+	}
+	return assemble(c, s.handlingEventRepository), nil
+}
+
 func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UNLocode) error {
 	c, err := s.cargoRepository.Find(id)
 	if err != nil {
@@ -109,7 +120,7 @@ func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Iti
 func (s *service) Cargos() []Cargo {
 	var result []Cargo
 	for _, c := range s.cargoRepository.FindAll() {
-		result = append(result, assemble(c, s.handlingEventRepository))
+		result = append(result, *assemble(c, s.handlingEventRepository))
 	}
 	return result
 }
@@ -161,8 +172,8 @@ type Leg struct {
 	UnloadTime   time.Time `json:"unload_time"`
 }
 
-func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
-	return Cargo{
+func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) *Cargo {
+	return &Cargo{
 		TrackingID:      string(c.TrackingID),
 		Origin:          string(c.Origin),
 		Destination:     string(c.RouteSpecification.Destination),

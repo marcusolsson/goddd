@@ -47,13 +47,6 @@ type Cargo struct {
 	NextExpectedActivity string    `json:"next_expected_activity"`
 	ArrivalDeadline      time.Time `json:"arrival_deadline"`
 	Events               []Event   `json:"events"`
-
-	// TODO: These are not relevant for the tracking use case, but since
-	// booking is using track for booking details. Find a cleaner way of doing
-	// this.
-	Legs      []Leg `json:"legs,omitempty"`
-	Misrouted bool  `json:"misrouted"`
-	Routed    bool  `json:"routed"`
 }
 
 // Leg is a read model for booking views.
@@ -78,10 +71,7 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
 		Destination:          string(c.RouteSpecification.Destination),
 		ETA:                  c.Delivery.ETA,
 		NextExpectedActivity: nextExpectedActivity(c),
-		Misrouted:            c.Delivery.RoutingStatus == cargo.Misrouted,
-		Routed:               !c.Itinerary.IsEmpty(),
 		ArrivalDeadline:      c.RouteSpecification.ArrivalDeadline,
-		Legs:                 assembleLegs(c),
 		StatusText:           assembleStatusText(c),
 		Events:               assembleEvents(c, her),
 	}
