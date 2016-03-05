@@ -13,10 +13,6 @@ This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net
 
 This project is intended for inspirational purposes and should **not** be considered a tutorial, guide or best-practice neither how to implement Domain Driven Design nor enterprise applications in Go. Make sure you adapt the code and ideas to the requirements of your own application.
 
-## Application
-
-More information coming soon ...
-
 ## Porting from Java
 
 The original application is written in Java and much thought has been given to the domain model, code organization and is intended to be an example of what you might find in an enterprise system.
@@ -53,19 +49,22 @@ docker run --name some-goddd \
 
 ```
 # Check out the sample cargos
-curl -XGET 'localhost:8080/cargos'
+curl localhost:8080/booking/v1/cargos
 
 # Book new cargo
-curl -XPOST 'localhost:8080/cargos?origin=SESTO&destination=FIHEL&arrivalDeadline=1450214254'
+curl localhost:8080/booking/v1/cargos -d '{"origin": "SESTO", "destination": "FIHEL", "arrival_deadline": "2016-03-21T19:50:24Z"}'
 
 # Request possible routes for sample cargo ABC123
-curl -XGET 'localhost:8080/cargos/ABC123/request_routes'
+curl localhost:8080/booking/v1/cargos/ABC123/request_routes
 ```
 
 ## REST API
 
-- [Example](http://dddsample.marcusoncode.se/cargos)
-- [Documentation](http://dddsample.marcusoncode.se/docs/)
+Each application service is exposed as a API. If you want to try it out for yourself, the documentation is available here:
+
+- [Booking](http://dddsample.marcusoncode.se/booking/v1/docs)
+- [Handling](http://dddsample.marcusoncode.se/handling/v1/docs)
+- [Tracking](http://dddsample.marcusoncode.se/tracking/v1/docs)
 
 ## Additional resources
 
