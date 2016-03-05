@@ -61,6 +61,40 @@ version: v1
         200:
           body:
             application/json:
+              example: |
+                {
+                    "cargo": {
+                        "arrival_deadline": "2016-03-30T22:00:00Z",
+                        "destination": "DEHAM",
+                        "legs": [
+                            {
+                                "voyage_number": "0300A",
+                                "from": "CNHKG",
+                                "to": "SESTO",
+                                "load_time": "2016-03-06T18:12:11.01579612Z",
+                                "unload_time": "2016-03-08T02:13:11.01579612Z"
+                            },
+                            {
+                                "voyage_number": "0400S",
+                                "from": "SESTO",
+                                "to": "FIHEL",
+                                "load_time": "2016-03-10T01:42:11.01579612Z",
+                                "unload_time": "2016-03-11T04:21:11.01579612Z"
+                            },
+                            {
+                                "voyage_number": "0100S",
+                                "from": "FIHEL",
+                                "to": "NLRTM",
+                                "load_time": "2016-03-13T08:42:11.01579612Z",
+                                "unload_time": "2016-03-14T01:38:11.01579612Z"
+                            }
+                        ],
+                        "misrouted": true,
+                        "origin": "CNHKG",
+                        "routed": true,
+                        "tracking_id": "D0909E1C"
+                    }
+                }
     /assign_to_route:
       post:
         description: Assign given route to the cargo.
