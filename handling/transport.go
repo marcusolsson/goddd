@@ -77,7 +77,6 @@ func encodeResponse(w http.ResponseWriter, response interface{}) error {
 		encodeError(w, e.error())
 		return nil
 	}
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	return json.NewEncoder(w).Encode(response)
 }
@@ -93,6 +92,8 @@ func encodeError(w http.ResponseWriter, err error) {
 		w.WriteHeader(http.StatusOK)
 	case cargo.ErrUnknown:
 		w.WriteHeader(http.StatusNotFound)
+	case ErrInvalidArgument:
+		w.WriteHeader(http.StatusBadRequest)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}

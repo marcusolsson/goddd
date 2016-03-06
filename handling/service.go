@@ -3,6 +3,7 @@
 package handling
 
 import (
+	"errors"
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
@@ -10,6 +11,9 @@ import (
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/voyage"
 )
+
+// ErrInvalidArgument is returned when one or more arguments are invalid.
+var ErrInvalidArgument = errors.New("invalid argument")
 
 // EventHandler provides a means of subscribing to registered handling events.
 type EventHandler interface {
@@ -30,12 +34,13 @@ type service struct {
 	handlingEventHandler    EventHandler
 }
 
-func (s *service) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.Number,
-	unLocode location.UNLocode, eventType cargo.HandlingEventType) error {
+func (s *service) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyage voyage.Number,
+	loc location.UNLocode, eventType cargo.HandlingEventType) error {
+	if completionTime.IsZero() || trackingID == "" || voyage == "" || loc == "" || eventType == cargo.NotHandled {
+		return ErrInvalidArgument
+	}
 
-	registrationTime := time.Now()
-
-	e, err := s.handlingEventFactory.CreateHandlingEvent(registrationTime, completionTime, trackingID, voyageNumber, unLocode, eventType)
+	e, err := s.handlingEventFactory.CreateHandlingEvent(time.Now(), completionTime, trackingID, voyage, loc, eventType)
 	if err != nil {
 		return err
 	}

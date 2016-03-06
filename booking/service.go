@@ -3,12 +3,16 @@
 package booking
 
 import (
+	"errors"
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/routing"
 )
+
+// ErrInvalidArgument is returned when one or more arguments are invalid.
+var ErrInvalidArgument = errors.New("invalid argument")
 
 // Service is the interface that provides booking methods.
 type Service interface {
@@ -45,6 +49,10 @@ type service struct {
 }
 
 func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itinerary) error {
+	if id == "" || len(itinerary.Legs) == 0 {
+		return ErrInvalidArgument
+	}
+
 	c, err := s.cargoRepository.Find(id)
 	if err != nil {
 		return err
@@ -60,6 +68,10 @@ func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itiner
 }
 
 func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
+	if origin == "" || destination == "" || arrivalDeadline.IsZero() {
+		return "", ErrInvalidArgument
+	}
+
 	id := cargo.NextTrackingID()
 	rs := cargo.RouteSpecification{
 		Origin:          origin,
@@ -77,14 +89,23 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDea
 }
 
 func (s *service) LoadCargo(trackingID cargo.TrackingID) (*Cargo, error) {
+	if trackingID == "" {
+		return nil, ErrInvalidArgument
+	}
+
 	c, err := s.cargoRepository.Find(trackingID)
 	if err != nil {
 		return nil, err
 	}
+
 	return assemble(c, s.handlingEventRepository), nil
 }
 
 func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UNLocode) error {
+	if id == "" || destination == "" {
+		return ErrInvalidArgument
+	}
+
 	c, err := s.cargoRepository.Find(id)
 	if err != nil {
 		return err
@@ -109,6 +130,10 @@ func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UN
 }
 
 func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary {
+	if id == "" {
+		return nil
+	}
+
 	c, err := s.cargoRepository.Find(id)
 	if err != nil {
 		return []cargo.Itinerary{}

@@ -22,27 +22,27 @@ func MakeHandler(ctx context.Context, ts Service, logger kitlog.Logger) http.Han
 		kithttp.ServerErrorEncoder(encodeError),
 	}
 
-	findCargoHandler := kithttp.NewServer(
+	trackCargoHandler := kithttp.NewServer(
 		ctx,
-		makeFindCargoEndpoint(ts),
-		decodeFindCargoRequest,
+		makeTrackCargoEndpoint(ts),
+		decodeTrackCargoRequest,
 		encodeResponse,
 		opts...,
 	)
 
-	r.Handle("/tracking/v1/cargos/{id}", findCargoHandler).Methods("GET")
+	r.Handle("/tracking/v1/cargos/{id}", trackCargoHandler).Methods("GET")
 	r.Handle("/tracking/v1/docs", http.StripPrefix("/tracking/v1/docs", http.FileServer(http.Dir("tracking/docs"))))
 
 	return r
 }
 
-func decodeFindCargoRequest(r *http.Request) (interface{}, error) {
+func decodeTrackCargoRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
-		return nil, errors.New("missing parameters")
+		return nil, errors.New("bad route")
 	}
-	return findCargoRequest{ID: id}, nil
+	return trackCargoRequest{ID: id}, nil
 }
 
 func encodeResponse(w http.ResponseWriter, response interface{}) error {
@@ -50,7 +50,6 @@ func encodeResponse(w http.ResponseWriter, response interface{}) error {
 		encodeError(w, e.error())
 		return nil
 	}
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	return json.NewEncoder(w).Encode(response)
 }
@@ -66,6 +65,8 @@ func encodeError(w http.ResponseWriter, err error) {
 		w.WriteHeader(http.StatusOK)
 	case cargo.ErrUnknown:
 		w.WriteHeader(http.StatusNotFound)
+	case ErrInvalidArgument:
+		w.WriteHeader(http.StatusBadRequest)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}

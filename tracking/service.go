@@ -3,12 +3,16 @@
 package tracking
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
 
 	"github.com/marcusolsson/goddd/cargo"
 )
+
+// ErrInvalidArgument is returned when one or more arguments are invalid.
+var ErrInvalidArgument = errors.New("invalid argument")
 
 // Service is the interface that provides the basic Track method.
 type Service interface {
@@ -22,6 +26,9 @@ type service struct {
 }
 
 func (s *service) Track(id string) (Cargo, error) {
+	if id == "" {
+		return Cargo{}, ErrInvalidArgument
+	}
 	c, err := s.cargos.Find(cargo.TrackingID(id))
 	if err != nil {
 		return Cargo{}, err

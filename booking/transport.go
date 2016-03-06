@@ -88,7 +88,7 @@ func MakeHandler(ctx context.Context, bs Service, logger kitlog.Logger) http.Han
 	return r
 }
 
-var errMissingParameters = errors.New("missing parameters")
+var errBadRoute = errors.New("bad route")
 
 func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var body struct {
@@ -99,10 +99,6 @@ func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return nil, err
-	}
-
-	if body.Origin == "" || body.Destination == "" || body.ArrivalDeadline.IsZero() {
-		return nil, errMissingParameters
 	}
 
 	return bookCargoRequest{
@@ -116,7 +112,7 @@ func decodeLoadCargoRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
-		return nil, errMissingParameters
+		return nil, errBadRoute
 	}
 	return loadCargoRequest{ID: cargo.TrackingID(id)}, nil
 }
@@ -125,7 +121,7 @@ func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
-		return nil, errMissingParameters
+		return nil, errBadRoute
 	}
 	return requestRoutesRequest{ID: cargo.TrackingID(id)}, nil
 }
@@ -134,7 +130,7 @@ func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
-		return nil, errMissingParameters
+		return nil, errBadRoute
 	}
 
 	var route routing.Route
@@ -163,7 +159,7 @@ func decodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	vars := mux.Vars(r)
 	id, ok := vars["id"]
 	if !ok {
-		return nil, errMissingParameters
+		return nil, errBadRoute
 	}
 
 	var body struct {
@@ -172,10 +168,6 @@ func decodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return nil, err
-	}
-
-	if body.Destination == "" {
-		return nil, errMissingParameters
 	}
 
 	return changeDestinationRequest{
@@ -197,7 +189,6 @@ func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
-
 	return response, nil
 }
 
@@ -217,7 +208,6 @@ func encodeResponse(w http.ResponseWriter, response interface{}) error {
 		encodeError(w, e.error())
 		return nil
 	}
-
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	return json.NewEncoder(w).Encode(response)
 }
@@ -233,6 +223,8 @@ func encodeError(w http.ResponseWriter, err error) {
 		w.WriteHeader(http.StatusOK)
 	case cargo.ErrUnknown:
 		w.WriteHeader(http.StatusNotFound)
+	case ErrInvalidArgument:
+		w.WriteHeader(http.StatusBadRequest)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}

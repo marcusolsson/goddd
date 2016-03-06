@@ -49,7 +49,7 @@ func TestTrackTrackCargo(t *testing.T) {
 		t.Errorf("Content-Type = %q; want = %q", content, "application/json; charset=utf-8")
 	}
 
-	var response findCargoResponse
+	var response trackCargoResponse
 	if err := json.NewDecoder(rec.Body).Decode(&response); err != nil {
 		t.Error(err)
 	}

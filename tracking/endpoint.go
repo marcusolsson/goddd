@@ -5,21 +5,21 @@ import (
 	"golang.org/x/net/context"
 )
 
-type findCargoRequest struct {
+type trackCargoRequest struct {
 	ID string
 }
 
-type findCargoResponse struct {
+type trackCargoResponse struct {
 	Cargo *Cargo `json:"cargo,omitempty"`
 	Err   error  `json:"error,omitempty"`
 }
 
-func (r findCargoResponse) error() error { return r.Err }
+func (r trackCargoResponse) error() error { return r.Err }
 
-func makeFindCargoEndpoint(ts Service) endpoint.Endpoint {
+func makeTrackCargoEndpoint(ts Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(findCargoRequest)
+		req := request.(trackCargoRequest)
 		c, err := ts.Track(req.ID)
-		return findCargoResponse{Cargo: &c, Err: err}, nil
+		return trackCargoResponse{Cargo: &c, Err: err}, nil
 	}
 }
