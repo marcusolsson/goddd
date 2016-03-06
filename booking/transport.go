@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	httptransport "github.com/go-kit/kit/transport/http"
+	kitlog "github.com/go-kit/kit/log"
+	kithttp "github.com/go-kit/kit/transport/http"
 	"golang.org/x/net/context"
 
 	"github.com/gorilla/mux"
@@ -17,48 +18,60 @@ import (
 )
 
 // MakeHandler ...
-func MakeHandler(ctx context.Context, bs Service) http.Handler {
-	bookCargoHandler := httptransport.NewServer(
+func MakeHandler(ctx context.Context, bs Service, logger kitlog.Logger) http.Handler {
+	opts := []kithttp.ServerOption{
+		kithttp.ServerErrorLogger(logger),
+		kithttp.ServerErrorEncoder(encodeError),
+	}
+
+	bookCargoHandler := kithttp.NewServer(
 		ctx,
 		makeBookCargoEndpoint(bs),
 		decodeBookCargoRequest,
 		encodeResponse,
+		opts...,
 	)
-	loadCargoHandler := httptransport.NewServer(
+	loadCargoHandler := kithttp.NewServer(
 		ctx,
 		makeLoadCargoEndpoint(bs),
 		decodeLoadCargoRequest,
 		encodeResponse,
+		opts...,
 	)
-	requestRoutesHandler := httptransport.NewServer(
+	requestRoutesHandler := kithttp.NewServer(
 		ctx,
 		makeRequestRoutesEndpoint(bs),
 		decodeRequestRoutesRequest,
 		encodeResponse,
+		opts...,
 	)
-	assignToRouteHandler := httptransport.NewServer(
+	assignToRouteHandler := kithttp.NewServer(
 		ctx,
 		makeAssignToRouteEndpoint(bs),
 		decodeAssignToRouteRequest,
 		encodeResponse,
+		opts...,
 	)
-	changeDestinationHandler := httptransport.NewServer(
+	changeDestinationHandler := kithttp.NewServer(
 		ctx,
 		makeChangeDestinationEndpoint(bs),
 		decodeChangeDestinationRequest,
 		encodeResponse,
+		opts...,
 	)
-	listCargosHandler := httptransport.NewServer(
+	listCargosHandler := kithttp.NewServer(
 		ctx,
 		makeListCargosEndpoint(bs),
 		decodeListCargosRequest,
 		encodeResponse,
+		opts...,
 	)
-	listLocationsHandler := httptransport.NewServer(
+	listLocationsHandler := kithttp.NewServer(
 		ctx,
 		makeListLocationsEndpoint(bs),
 		decodeListLocationsRequest,
 		encodeResponse,
+		opts...,
 	)
 
 	r := mux.NewRouter()
@@ -87,7 +100,6 @@ func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return nil, err
 	}
-	defer r.Body.Close()
 
 	if body.Origin == "" || body.Destination == "" || body.ArrivalDeadline.IsZero() {
 		return nil, errMissingParameters
@@ -101,15 +113,17 @@ func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 }
 
 func decodeLoadCargoRequest(r *http.Request) (interface{}, error) {
-	id, ok := mux.Vars(r)["id"]
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
 	if !ok {
-		return nil, errors.New("missing parameters")
+		return nil, errMissingParameters
 	}
 	return loadCargoRequest{ID: cargo.TrackingID(id)}, nil
 }
 
 func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
-	id, ok := mux.Vars(r)["id"]
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
 	if !ok {
 		return nil, errMissingParameters
 	}
@@ -117,7 +131,8 @@ func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
 }
 
 func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
-	id, ok := mux.Vars(r)["id"]
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
 	if !ok {
 		return nil, errMissingParameters
 	}
@@ -126,7 +141,6 @@ func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 	if err := json.NewDecoder(r.Body).Decode(&route); err != nil {
 		return nil, err
 	}
-	defer r.Body.Close()
 
 	var legs []cargo.Leg
 	for _, l := range route.Legs {
@@ -146,7 +160,8 @@ func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 }
 
 func decodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
-	id, ok := mux.Vars(r)["id"]
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
 	if !ok {
 		return nil, errMissingParameters
 	}
@@ -158,7 +173,6 @@ func decodeChangeDestinationRequest(r *http.Request) (interface{}, error) {
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return nil, err
 	}
-	defer r.Body.Close()
 
 	if body.Destination == "" {
 		return nil, errMissingParameters
@@ -183,7 +197,6 @@ func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
 	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
 
 	return response, nil
 }

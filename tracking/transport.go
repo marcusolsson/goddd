@@ -7,20 +7,27 @@ import (
 
 	"golang.org/x/net/context"
 
-	httptransport "github.com/go-kit/kit/transport/http"
+	kitlog "github.com/go-kit/kit/log"
+	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"github.com/marcusolsson/goddd/cargo"
 )
 
 // MakeHandler ...
-func MakeHandler(ctx context.Context, ts Service) http.Handler {
+func MakeHandler(ctx context.Context, ts Service, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
-	findCargoHandler := httptransport.NewServer(
+	opts := []kithttp.ServerOption{
+		kithttp.ServerErrorLogger(logger),
+		kithttp.ServerErrorEncoder(encodeError),
+	}
+
+	findCargoHandler := kithttp.NewServer(
 		ctx,
 		makeFindCargoEndpoint(ts),
 		decodeFindCargoRequest,
-		encodeFindCargoResponse,
+		encodeResponse,
+		opts...,
 	)
 
 	r.Handle("/tracking/v1/cargos/{id}", findCargoHandler).Methods("GET")
@@ -30,14 +37,15 @@ func MakeHandler(ctx context.Context, ts Service) http.Handler {
 }
 
 func decodeFindCargoRequest(r *http.Request) (interface{}, error) {
-	id, ok := mux.Vars(r)["id"]
+	vars := mux.Vars(r)
+	id, ok := vars["id"]
 	if !ok {
 		return nil, errors.New("missing parameters")
 	}
 	return findCargoRequest{ID: id}, nil
 }
 
-func encodeFindCargoResponse(w http.ResponseWriter, response interface{}) error {
+func encodeResponse(w http.ResponseWriter, response interface{}) error {
 	if e, ok := response.(errorer); ok && e.error() != nil {
 		encodeError(w, e.error())
 		return nil

@@ -7,7 +7,8 @@ import (
 
 	"golang.org/x/net/context"
 
-	httptransport "github.com/go-kit/kit/transport/http"
+	kitlog "github.com/go-kit/kit/log"
+	kithttp "github.com/go-kit/kit/transport/http"
 
 	"github.com/gorilla/mux"
 	"github.com/marcusolsson/goddd/cargo"
@@ -16,14 +17,20 @@ import (
 )
 
 // MakeHandler ...
-func MakeHandler(ctx context.Context, hs Service) http.Handler {
+func MakeHandler(ctx context.Context, hs Service, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
-	registerIncidentHandler := httptransport.NewServer(
+	opts := []kithttp.ServerOption{
+		kithttp.ServerErrorLogger(logger),
+		kithttp.ServerErrorEncoder(encodeError),
+	}
+
+	registerIncidentHandler := kithttp.NewServer(
 		ctx,
 		makeRegisterIncidentEndpoint(hs),
 		decodeRegisterIncidentRequest,
 		encodeResponse,
+		opts...,
 	)
 
 	r.Handle("/handling/v1/incidents", registerIncidentHandler).Methods("POST")

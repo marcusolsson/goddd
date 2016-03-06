@@ -11,7 +11,7 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 	"golang.org/x/net/context"
 
-	httptransport "github.com/go-kit/kit/transport/http"
+	kithttp "github.com/go-kit/kit/transport/http"
 )
 
 // ServiceMiddleware ...
@@ -71,7 +71,7 @@ func makeFetchRoutesEndpoint(ctx context.Context, instance string) endpoint.Endp
 	if u.Path == "" {
 		u.Path = "/paths"
 	}
-	return httptransport.NewClient(
+	return kithttp.NewClient(
 		"GET", u,
 		encodeFetchRoutesRequest,
 		decodeFetchRoutesResponse,

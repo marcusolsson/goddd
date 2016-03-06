@@ -55,7 +55,6 @@ func (r *locationRepository) Find(locode location.UNLocode) (location.Location, 
 	if l, ok := r.locations[locode]; ok {
 		return l, nil
 	}
-
 	return location.Location{}, location.ErrUnknown
 }
 

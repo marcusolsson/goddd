@@ -1,8 +1,11 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/go-kit/kit/log"
 	"golang.org/x/net/context"
@@ -45,10 +48,13 @@ func main() {
 	// Facilitate testing by adding some cargos.
 	storeTestData(cargos)
 
+	var logger log.Logger
+	logger = log.NewLogfmtLogger(os.Stderr)
+	logger = log.NewContext(logger).With("ts", log.DefaultTimestampUTC)
+
 	var (
-		ctx    = context.Background()
-		logger = log.NewLogfmtLogger(os.Stdout)
-		rsurl  = routingServiceURL()
+		ctx   = context.Background()
+		rsurl = routingServiceURL()
 	)
 
 	var rs routing.Service
@@ -56,29 +62,40 @@ func main() {
 
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
-	bs = booking.NewLoggingService(logger, bs)
+	bs = booking.NewLoggingService(log.NewContext(logger).With("component", "booking"), bs)
 
 	var ts tracking.Service
 	ts = tracking.NewService(cargos, handlingEvents)
-	ts = tracking.NewLoggingService(logger, ts)
+	ts = tracking.NewLoggingService(log.NewContext(logger).With("component", "tracking"), ts)
 
 	var hs handling.Service
 	hs = handling.NewService(handlingEvents, handlingEventFactory, handlingEventHandler)
-	hs = handling.NewLoggingService(logger, hs)
+	hs = handling.NewLoggingService(log.NewContext(logger).With("component", "handling"), hs)
+
+	httpLogger := log.NewContext(logger).With("component", "http")
 
 	mux := http.NewServeMux()
 
-	mux.Handle("/booking/v1/", booking.MakeHandler(ctx, bs))
-	mux.Handle("/tracking/v1/", tracking.MakeHandler(ctx, ts))
-	mux.Handle("/handling/v1/", handling.MakeHandler(ctx, hs))
+	mux.Handle("/booking/v1/", booking.MakeHandler(ctx, bs, httpLogger))
+	mux.Handle("/tracking/v1/", tracking.MakeHandler(ctx, ts, httpLogger))
+	mux.Handle("/handling/v1/", handling.MakeHandler(ctx, hs, httpLogger))
 
 	http.Handle("/", accessControl(mux))
 
 	addr := ":" + port()
 
-	_ = logger.Log("msg", "HTTP", "addr", addr)
-	_ = logger.Log("msg", "routingservice", "url", rsurl)
-	_ = logger.Log("err", http.ListenAndServe(addr, nil))
+	errs := make(chan error, 2)
+	go func() {
+		logger.Log("transport", "http", "address", addr, "msg", "listening")
+		errs <- http.ListenAndServe(addr, nil)
+	}()
+	go func() {
+		c := make(chan os.Signal)
+		signal.Notify(c, syscall.SIGINT)
+		errs <- fmt.Errorf("%s", <-c)
+	}()
+
+	logger.Log("terminated", <-errs)
 }
 
 func accessControl(h http.Handler) http.Handler {
