@@ -34,11 +34,11 @@ func MakeHandler(ctx context.Context, hs Service) http.Handler {
 
 func decodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	var body struct {
-		CompletionTime int64
-		TrackingID     string
-		VoyageNumber   string
-		Location       string
-		EventType      string
+		CompletionTime time.Time `json:"completion_time"`
+		TrackingID     string    `json:"tracking_id"`
+		VoyageNumber   string    `json:"voyage"`
+		Location       string    `json:"location"`
+		EventType      string    `json:"event_type"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
@@ -46,7 +46,7 @@ func decodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	}
 
 	return registerIncidentRequest{
-		CompletionTime: time.Unix(body.CompletionTime/1000, 0),
+		CompletionTime: body.CompletionTime,
 		ID:             cargo.TrackingID(body.TrackingID),
 		Voyage:         voyage.Number(body.VoyageNumber),
 		Location:       location.UNLocode(body.Location),

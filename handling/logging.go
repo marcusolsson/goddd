@@ -11,7 +11,7 @@ import (
 )
 
 type loggingService struct {
-	Logger log.Logger
+	logger log.Logger
 	Service
 }
 
@@ -22,14 +22,17 @@ func NewLoggingService(logger log.Logger, s Service) Service {
 
 func (s *loggingService) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyageNumber voyage.Number,
 	unLocode location.UNLocode, eventType cargo.HandlingEventType) (err error) {
-	err = s.Service.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType)
-	_ = s.Logger.Log(
-		"method", "register_incident",
-		"err", err,
-		"event_type", eventType,
-		"location", unLocode,
-		"voyage_number", voyageNumber,
-		"tracking_id", trackingID,
-	)
-	return
+	defer func(begin time.Time) {
+		s.logger.Log(
+			"method", "register_incident",
+			"tracking_id", trackingID,
+			"location", unLocode,
+			"voyage", voyageNumber,
+			"event_type", eventType,
+			"completion_time", completionTime,
+			"took", time.Since(begin),
+			"err", err,
+		)
+	}(time.Now())
+	return s.Service.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType)
 }
