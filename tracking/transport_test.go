@@ -2,11 +2,14 @@ package tracking
 
 import (
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/go-kit/kit/log"
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/repository"
@@ -29,7 +32,9 @@ func TestTrackTrackCargo(t *testing.T) {
 
 	ctx := context.Background()
 
-	h := MakeHandler(ctx, service)
+	logger := log.NewLogfmtLogger(ioutil.Discard)
+
+	h := MakeHandler(ctx, service, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/TEST", nil)
 	rec := httptest.NewRecorder()
@@ -80,7 +85,9 @@ func TestTrackUnknownCargo(t *testing.T) {
 
 	ctx := context.Background()
 
-	h := MakeHandler(ctx, service)
+	logger := log.NewLogfmtLogger(ioutil.Discard)
+
+	h := MakeHandler(ctx, service, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/not_found", nil)
 	rec := httptest.NewRecorder()
