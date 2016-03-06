@@ -2,31 +2,37 @@
 package repository
 
 import (
+	"sync"
+
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
 type cargoRepository struct {
+	mtx    sync.RWMutex
 	cargos map[cargo.TrackingID]cargo.Cargo
 }
 
 func (r *cargoRepository) Store(c cargo.Cargo) error {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
 	r.cargos[c.TrackingID] = c
-
 	return nil
 }
 
 func (r *cargoRepository) Find(trackingID cargo.TrackingID) (cargo.Cargo, error) {
-
+	r.mtx.RLock()
+	defer r.mtx.RUnlock()
 	if val, ok := r.cargos[trackingID]; ok {
 		return val, nil
 	}
-
 	return cargo.Cargo{}, cargo.ErrUnknown
 }
 
 func (r *cargoRepository) FindAll() []cargo.Cargo {
+	r.mtx.RLock()
+	defer r.mtx.RUnlock()
 	c := make([]cargo.Cargo, 0, len(r.cargos))
 	for _, val := range r.cargos {
 		c = append(c, val)
@@ -109,10 +115,13 @@ func NewVoyage() voyage.Repository {
 }
 
 type handlingEventRepository struct {
+	mtx    sync.RWMutex
 	events map[cargo.TrackingID][]cargo.HandlingEvent
 }
 
 func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
+	r.mtx.Lock()
+	defer r.mtx.Unlock()
 	// Make array if it's the first event with this tracking ID.
 	if _, ok := r.events[e.TrackingID]; !ok {
 		r.events[e.TrackingID] = make([]cargo.HandlingEvent, 0)
@@ -121,6 +130,8 @@ func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
 }
 
 func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
+	r.mtx.RLock()
+	defer r.mtx.RUnlock()
 	return cargo.HandlingHistory{HandlingEvents: r.events[trackingID]}
 }
 
