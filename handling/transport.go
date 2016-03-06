@@ -32,11 +32,6 @@ func MakeHandler(ctx context.Context, hs Service) http.Handler {
 	return r
 }
 
-func encodeResponse(w http.ResponseWriter, resp interface{}) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	return json.NewEncoder(w).Encode(resp)
-}
-
 func decodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	var body struct {
 		CompletionTime int64
@@ -49,7 +44,6 @@ func decodeRegisterIncidentRequest(r *http.Request) (interface{}, error) {
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		return nil, err
 	}
-	defer r.Body.Close()
 
 	return registerIncidentRequest{
 		CompletionTime: time.Unix(body.CompletionTime/1000, 0),
@@ -69,4 +63,33 @@ func stringToEventType(s string) cargo.HandlingEventType {
 		cargo.Claim.String():   cargo.Claim,
 	}
 	return types[s]
+}
+
+func encodeResponse(w http.ResponseWriter, response interface{}) error {
+	if e, ok := response.(errorer); ok && e.error() != nil {
+		encodeError(w, e.error())
+		return nil
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	return json.NewEncoder(w).Encode(response)
+}
+
+type errorer interface {
+	error() error
+}
+
+// encode errors from business-logic
+func encodeError(w http.ResponseWriter, err error) {
+	switch err {
+	case nil:
+		w.WriteHeader(http.StatusOK)
+	case cargo.ErrUnknown:
+		w.WriteHeader(http.StatusNotFound)
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"error": err.Error(),
+	})
 }

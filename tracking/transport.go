@@ -38,12 +38,30 @@ func decodeFindCargoRequest(r *http.Request) (interface{}, error) {
 }
 
 func encodeFindCargoResponse(w http.ResponseWriter, response interface{}) error {
-	resp := response.(findCargoResponse)
-
-	if resp.Err == cargo.ErrUnknown.Error() {
-		w.WriteHeader(http.StatusNotFound)
+	if e, ok := response.(errorer); ok && e.error() != nil {
+		encodeError(w, e.error())
+		return nil
 	}
 
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	return json.NewEncoder(w).Encode(resp)
+	return json.NewEncoder(w).Encode(response)
+}
+
+type errorer interface {
+	error() error
+}
+
+// encode errors from business-logic
+func encodeError(w http.ResponseWriter, err error) {
+	switch err {
+	case nil:
+		w.WriteHeader(http.StatusOK)
+	case cargo.ErrUnknown:
+		w.WriteHeader(http.StatusNotFound)
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"error": err.Error(),
+	})
 }

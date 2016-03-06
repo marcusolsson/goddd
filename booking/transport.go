@@ -28,7 +28,7 @@ func MakeHandler(ctx context.Context, bs Service) http.Handler {
 		ctx,
 		makeLoadCargoEndpoint(bs),
 		decodeLoadCargoRequest,
-		encodeLoadCargoResponse,
+		encodeResponse,
 	)
 	requestRoutesHandler := httptransport.NewServer(
 		ctx,
@@ -77,11 +77,6 @@ func MakeHandler(ctx context.Context, bs Service) http.Handler {
 
 var errMissingParameters = errors.New("missing parameters")
 
-func encodeResponse(w http.ResponseWriter, resp interface{}) error {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	return json.NewEncoder(w).Encode(resp)
-}
-
 func decodeBookCargoRequest(r *http.Request) (interface{}, error) {
 	var body struct {
 		Origin          string    `json:"origin"`
@@ -111,17 +106,6 @@ func decodeLoadCargoRequest(r *http.Request) (interface{}, error) {
 		return nil, errors.New("missing parameters")
 	}
 	return loadCargoRequest{ID: cargo.TrackingID(id)}, nil
-}
-
-func encodeLoadCargoResponse(w http.ResponseWriter, response interface{}) error {
-	resp := response.(loadCargoResponse)
-
-	if resp.Err == cargo.ErrUnknown.Error() {
-		w.WriteHeader(http.StatusNotFound)
-	}
-
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	return json.NewEncoder(w).Encode(resp)
 }
 
 func decodeRequestRoutesRequest(r *http.Request) (interface{}, error) {
@@ -213,4 +197,33 @@ func encodeFetchRoutesRequest(r *http.Request, request interface{}) error {
 	r.URL.RawQuery = vals.Encode()
 
 	return nil
+}
+
+func encodeResponse(w http.ResponseWriter, response interface{}) error {
+	if e, ok := response.(errorer); ok && e.error() != nil {
+		encodeError(w, e.error())
+		return nil
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	return json.NewEncoder(w).Encode(response)
+}
+
+type errorer interface {
+	error() error
+}
+
+// encode errors from business-logic
+func encodeError(w http.ResponseWriter, err error) {
+	switch err {
+	case nil:
+		w.WriteHeader(http.StatusOK)
+	case cargo.ErrUnknown:
+		w.WriteHeader(http.StatusNotFound)
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"error": err.Error(),
+	})
 }

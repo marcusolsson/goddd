@@ -17,19 +17,17 @@ type bookCargoRequest struct {
 }
 
 type bookCargoResponse struct {
-	ID cargo.TrackingID `json:"tracking_id"`
+	ID  cargo.TrackingID `json:"tracking_id,omitempty"`
+	Err error            `json:"error,omitempty"`
 }
+
+func (r bookCargoResponse) error() error { return r.Err }
 
 func makeBookCargoEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(bookCargoRequest)
-
 		id, err := s.BookNewCargo(req.Origin, req.Destination, req.ArrivalDeadline)
-		if err != nil {
-			return nil, err
-		}
-
-		return bookCargoResponse{ID: id}, nil
+		return bookCargoResponse{ID: id, Err: err}, nil
 	}
 }
 
@@ -39,22 +37,16 @@ type loadCargoRequest struct {
 
 type loadCargoResponse struct {
 	Cargo *Cargo `json:"cargo,omitempty"`
-	Err   string `json:"error,omitempty"`
+	Err   error  `json:"error,omitempty"`
 }
+
+func (r loadCargoResponse) error() error { return r.Err }
 
 func makeLoadCargoEndpoint(bs Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(loadCargoRequest)
-
 		c, err := bs.LoadCargo(req.ID)
-		if err != nil {
-			if err == cargo.ErrUnknown {
-				return loadCargoResponse{Err: err.Error()}, nil
-			}
-			return nil, err
-		}
-
-		return loadCargoResponse{Cargo: c}, nil
+		return loadCargoResponse{Cargo: c, Err: err}, nil
 	}
 }
 
@@ -63,8 +55,11 @@ type requestRoutesRequest struct {
 }
 
 type requestRoutesResponse struct {
-	Routes []routing.Route `json:"routes"`
+	Routes []routing.Route `json:"routes,omitempty"`
+	Err    error           `json:"error,omitempty"`
 }
+
+func (r requestRoutesResponse) error() error { return r.Err }
 
 func makeRequestRoutesEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
@@ -87,7 +82,7 @@ func makeRequestRoutesEndpoint(s Service) endpoint.Endpoint {
 			result = append(result, routing.Route{Legs: legs})
 		}
 
-		return requestRoutesResponse{Routes: result}, nil
+		return requestRoutesResponse{Routes: result, Err: nil}, nil
 	}
 }
 
@@ -97,17 +92,16 @@ type assignToRouteRequest struct {
 }
 
 type assignToRouteResponse struct {
+	Err error `json:"error,omitempty"`
 }
+
+func (r assignToRouteResponse) error() error { return r.Err }
 
 func makeAssignToRouteEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(assignToRouteRequest)
-
-		if err := s.AssignCargoToRoute(req.ID, req.Itinerary); err != nil {
-			return nil, err
-		}
-
-		return assignToRouteResponse{}, nil
+		err := s.AssignCargoToRoute(req.ID, req.Itinerary)
+		return assignToRouteResponse{Err: err}, nil
 	}
 }
 
@@ -117,29 +111,32 @@ type changeDestinationRequest struct {
 }
 
 type changeDestinationResponse struct {
+	Err error `json:"error,omitempty"`
 }
+
+func (r changeDestinationResponse) error() error { return r.Err }
 
 func makeChangeDestinationEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(changeDestinationRequest)
-
-		if err := s.ChangeDestination(req.ID, req.Destination); err != nil {
-			return nil, err
-		}
-
-		return changeDestinationResponse{}, nil
+		err := s.ChangeDestination(req.ID, req.Destination)
+		return changeDestinationResponse{Err: err}, nil
 	}
 }
 
 type listCargosRequest struct{}
 
 type listCargosResponse struct {
-	Cargos []Cargo `json:"cargos"`
+	Cargos []Cargo `json:"cargos,omitempty"`
+	Err    error   `json:"error,omitempty"`
 }
 
-func makeListCargosEndpoint(bs Service) endpoint.Endpoint {
+func (r listCargosResponse) error() error { return r.Err }
+
+func makeListCargosEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		return listCargosResponse{Cargos: bs.Cargos()}, nil
+		_ = request.(listCargosRequest)
+		return listCargosResponse{Cargos: s.Cargos(), Err: nil}, nil
 	}
 }
 
@@ -147,13 +144,14 @@ type listLocationsRequest struct {
 }
 
 type listLocationsResponse struct {
-	Locations []Location `json:"locations"`
+	Locations []Location `json:"locations,omitempty"`
+	Err       error      `json:"error,omitempty"`
 }
 
-func makeListLocationsEndpoint(bs Service) endpoint.Endpoint {
+func makeListLocationsEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		_ = request.(listLocationsRequest)
-		return listLocationsResponse{Locations: bs.Locations()}, nil
+		return listLocationsResponse{Locations: s.Locations(), Err: nil}, nil
 	}
 }
 
