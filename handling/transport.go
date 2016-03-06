@@ -5,10 +5,32 @@ import (
 	"net/http"
 	"time"
 
+	"golang.org/x/net/context"
+
+	httptransport "github.com/go-kit/kit/transport/http"
+
+	"github.com/gorilla/mux"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/voyage"
 )
+
+// MakeHandler ...
+func MakeHandler(ctx context.Context, hs Service) http.Handler {
+	r := mux.NewRouter()
+
+	registerIncidentHandler := httptransport.NewServer(
+		ctx,
+		makeRegisterIncidentEndpoint(hs),
+		decodeRegisterIncidentRequest,
+		encodeResponse,
+	)
+
+	r.Handle("/handling/v1/incidents", registerIncidentHandler).Methods("POST")
+	r.Handle("/handling/v1/docs", http.StripPrefix("/handling/v1/docs", http.FileServer(http.Dir("handling/docs"))))
+
+	return r
+}
 
 func encodeResponse(w http.ResponseWriter, resp interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
