@@ -36,7 +36,7 @@ type service struct {
 
 func (s *service) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyage voyage.Number,
 	loc location.UNLocode, eventType cargo.HandlingEventType) error {
-	if completionTime.IsZero() || trackingID == "" || voyage == "" || loc == "" || eventType == cargo.NotHandled {
+	if completionTime.IsZero() || trackingID == "" || loc == "" || eventType == cargo.NotHandled {
 		return ErrInvalidArgument
 	}
 
