@@ -6,14 +6,11 @@ services:
   - docker
 
 install:
-  - go get github.com/GeertJohan/fgt
-  - go get github.com/golang/lint/golint
   - go get -v -u github.com/kr/godep
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 script:
-  - fgt golint ./...
-  - godep go test -v ./...
+  - godep go test -v $(go list ./... | grep -v /vendor/)
   - CGO_ENABLED=0 GOOS=linux godep go build -a -installsuffix cgo -o goddd .
 
 after_success:
