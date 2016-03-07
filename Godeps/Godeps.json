@@ -1,39 +1,50 @@
 {
 	"ImportPath": "github.com/marcusolsson/goddd",
 	"GoVersion": "go1.5",
+	"Packages": [
+		"./..."
+	],
 	"Deps": [
 		{
 			"ImportPath": "code.google.com/p/go-uuid/uuid",
-			"Comment": "null-12",
-			"Rev": "7dda39b2e7d5e265014674c5af696ba4186679e9"
+			"Comment": "null-15",
+			"Rev": "'35bc42037350f0078e3c974c6ea690f1926603ab'"
 		},
 		{
 			"ImportPath": "github.com/afex/hystrix-go/hystrix",
 			"Rev": "fbe18f9a5a3bb3f74497d82695b19ad907a56e0f"
 		},
 		{
+			"ImportPath": "github.com/afex/hystrix-go/hystrix/metric_collector",
+			"Rev": "fbe18f9a5a3bb3f74497d82695b19ad907a56e0f"
+		},
+		{
+			"ImportPath": "github.com/afex/hystrix-go/hystrix/rolling",
+			"Rev": "fbe18f9a5a3bb3f74497d82695b19ad907a56e0f"
+		},
+		{
 			"ImportPath": "github.com/go-kit/kit/circuitbreaker",
-			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
+			"Rev": "12b51051246657007b9296e0b289fb00dd3ab0a7"
 		},
 		{
 			"ImportPath": "github.com/go-kit/kit/endpoint",
-			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
+			"Rev": "12b51051246657007b9296e0b289fb00dd3ab0a7"
 		},
 		{
 			"ImportPath": "github.com/go-kit/kit/log",
-			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
+			"Rev": "12b51051246657007b9296e0b289fb00dd3ab0a7"
 		},
 		{
 			"ImportPath": "github.com/go-kit/kit/transport/http",
-			"Rev": "069a0f8cf7ee45345296db0b153a0b9c7decb6b3"
+			"Rev": "12b51051246657007b9296e0b289fb00dd3ab0a7"
 		},
 		{
 			"ImportPath": "github.com/gorilla/context",
-			"Rev": "14f550f51af52180c2eefed15e5fd18d63c0a64a"
+			"Rev": "1c83b3eabd45b6d76072b66b746c20815fb2872d"
 		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
-			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
+			"Rev": "ad4d7a5882b961e07e2626045eb995c022ac6664"
 		},
 		{
 			"ImportPath": "github.com/sony/gobreaker",
@@ -48,8 +59,16 @@
 			"Rev": "01256db42e5106196a3473ec1620727a383500e8"
 		},
 		{
+			"ImportPath": "golang.org/x/net/context/ctxhttp",
+			"Rev": "01256db42e5106196a3473ec1620727a383500e8"
+		},
+		{
+			"ImportPath": "gopkg.in/check.v1",
+			"Rev": "4f90aeace3a26ad7021961c297b22c42160c7b25"
+		},
+		{
 			"ImportPath": "gopkg.in/logfmt.v0",
-			"Rev": "c50dc9aa845e681529d8e49d3dc11ec0195aacac"
+			"Rev": "ffc984a0eaff44e46e1f42d6e0a65b665587a938"
 		},
 		{
 			"ImportPath": "gopkg.in/stack.v1",
