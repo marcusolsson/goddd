@@ -20,11 +20,11 @@ type stubEventHandler struct {
 	handledEvents []interface{}
 }
 
-func (h *stubEventHandler) CargoWasMisdirected(c cargo.Cargo) {
+func (h *stubEventHandler) CargoWasMisdirected(c *cargo.Cargo) {
 	h.handledEvents = append(h.handledEvents, c)
 }
 
-func (h *stubEventHandler) CargoHasArrived(c cargo.Cargo) {
+func (h *stubEventHandler) CargoHasArrived(c *cargo.Cargo) {
 	h.handledEvents = append(h.handledEvents, c)
 }
 
@@ -50,7 +50,7 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 		{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}})
 
-	cargoRepository.Store(*misdirectedCargo)
+	cargoRepository.Store(misdirectedCargo)
 
 	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Receive, location.SESTO)
 	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Load, location.SESTO)
@@ -92,7 +92,7 @@ func (s *S) TestInspectUnloadedCargo(c *C) {
 		{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}})
 
-	cargoRepository.Store(*unloadedCargo)
+	cargoRepository.Store(unloadedCargo)
 
 	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Receive, location.SESTO)
 	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Load, location.SESTO)

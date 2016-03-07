@@ -21,7 +21,7 @@ type Service interface {
 	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error)
 
 	// LoadCargo returns a read model of a cargo.
-	LoadCargo(trackingID cargo.TrackingID) (*Cargo, error)
+	LoadCargo(trackingID cargo.TrackingID) (Cargo, error)
 
 	// RequestPossibleRoutesForCargo requests a list of itineraries describing
 	// possible routes for this cargo.
@@ -81,21 +81,21 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDea
 
 	c := cargo.New(id, rs)
 
-	if err := s.cargoRepository.Store(*c); err != nil {
+	if err := s.cargoRepository.Store(c); err != nil {
 		return "", err
 	}
 
 	return c.TrackingID, nil
 }
 
-func (s *service) LoadCargo(trackingID cargo.TrackingID) (*Cargo, error) {
+func (s *service) LoadCargo(trackingID cargo.TrackingID) (Cargo, error) {
 	if trackingID == "" {
-		return nil, ErrInvalidArgument
+		return Cargo{}, ErrInvalidArgument
 	}
 
 	c, err := s.cargoRepository.Find(trackingID)
 	if err != nil {
-		return nil, err
+		return Cargo{}, err
 	}
 
 	return assemble(c, s.handlingEventRepository), nil
@@ -145,7 +145,7 @@ func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Iti
 func (s *service) Cargos() []Cargo {
 	var result []Cargo
 	for _, c := range s.cargoRepository.FindAll() {
-		result = append(result, *assemble(c, s.handlingEventRepository))
+		result = append(result, assemble(c, s.handlingEventRepository))
 	}
 	return result
 }
@@ -197,8 +197,8 @@ type Leg struct {
 	UnloadTime   time.Time `json:"unload_time"`
 }
 
-func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) *Cargo {
-	return &Cargo{
+func assemble(c *cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
+	return Cargo{
 		TrackingID:      string(c.TrackingID),
 		Origin:          string(c.Origin),
 		Destination:     string(c.RouteSpecification.Destination),
@@ -209,7 +209,7 @@ func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) *Cargo {
 	}
 }
 
-func assembleLegs(c cargo.Cargo) []Leg {
+func assembleLegs(c *cargo.Cargo) []Leg {
 	var legs []Leg
 	for _, l := range c.Itinerary.Legs {
 		legs = append(legs, Leg{

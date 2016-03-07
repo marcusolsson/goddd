@@ -33,7 +33,7 @@ func (s *loggingService) BookNewCargo(origin location.UNLocode, destination loca
 	return s.Service.BookNewCargo(origin, destination, arrivalDeadline)
 }
 
-func (s *loggingService) LoadCargo(id cargo.TrackingID) (c *Cargo, err error) {
+func (s *loggingService) LoadCargo(id cargo.TrackingID) (c Cargo, err error) {
 	defer func(begin time.Time) {
 		s.logger.Log(
 			"method", "load",

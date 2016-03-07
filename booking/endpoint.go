@@ -46,7 +46,7 @@ func makeLoadCargoEndpoint(bs Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(loadCargoRequest)
 		c, err := bs.LoadCargo(req.ID)
-		return loadCargoResponse{Cargo: c, Err: err}, nil
+		return loadCargoResponse{Cargo: &c, Err: err}, nil
 	}
 }
 

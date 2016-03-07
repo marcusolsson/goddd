@@ -53,7 +53,7 @@ func (s *S) TestRegisterHandlingEvent(c *C) {
 		eventType      = cargo.Load
 	)
 
-	cargoRepository.Store(*cargo.New(trackingID, cargo.RouteSpecification{}))
+	cargoRepository.Store(cargo.New(trackingID, cargo.RouteSpecification{}))
 
 	var err error
 

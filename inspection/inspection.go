@@ -5,8 +5,8 @@ import "github.com/marcusolsson/goddd/cargo"
 
 // EventHandler provides means of subscribing to inspection events.
 type EventHandler interface {
-	CargoWasMisdirected(cargo.Cargo)
-	CargoHasArrived(cargo.Cargo)
+	CargoWasMisdirected(*cargo.Cargo)
+	CargoHasArrived(*cargo.Cargo)
 }
 
 // Service provides cargo inspection operations.

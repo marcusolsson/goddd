@@ -10,17 +10,17 @@ import (
 type fakeCargos struct {
 }
 
-func (r *fakeCargos) Store(cargo cargo.Cargo) error {
+func (r *fakeCargos) Store(cargo *cargo.Cargo) error {
 	return nil
 }
-func (r *fakeCargos) Find(trackingID cargo.TrackingID) (cargo.Cargo, error) {
-	return *cargo.New("FTL456", cargo.RouteSpecification{
+func (r *fakeCargos) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
+	return cargo.New("FTL456", cargo.RouteSpecification{
 		Origin:      location.AUMEL,
 		Destination: location.SESTO,
 	}), nil
 }
-func (r *fakeCargos) FindAll() []cargo.Cargo {
-	return []cargo.Cargo{}
+func (r *fakeCargos) FindAll() []*cargo.Cargo {
+	return []*cargo.Cargo{}
 }
 
 type fakeHandlingEvents struct {

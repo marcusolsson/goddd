@@ -288,8 +288,8 @@ func (h *stubHandlingEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 type stubCargoEventHandler struct {
 }
 
-func (h *stubCargoEventHandler) CargoWasMisdirected(c cargo.Cargo) {
+func (h *stubCargoEventHandler) CargoWasMisdirected(c *cargo.Cargo) {
 }
 
-func (h *stubCargoEventHandler) CargoHasArrived(c cargo.Cargo) {
+func (h *stubCargoEventHandler) CargoHasArrived(c *cargo.Cargo) {
 }

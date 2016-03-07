@@ -71,7 +71,7 @@ type Event struct {
 	Expected    bool   `json:"expected"`
 }
 
-func assemble(c cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
+func assemble(c *cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
 	return Cargo{
 		TrackingID:           string(c.TrackingID),
 		Origin:               string(c.Origin),
@@ -98,7 +98,7 @@ func assembleLegs(c cargo.Cargo) []Leg {
 	return legs
 }
 
-func nextExpectedActivity(c cargo.Cargo) string {
+func nextExpectedActivity(c *cargo.Cargo) string {
 	a := c.Delivery.NextExpectedActivity
 	prefix := "Next expected activity is to"
 
@@ -114,7 +114,7 @@ func nextExpectedActivity(c cargo.Cargo) string {
 	return fmt.Sprintf("%s %s cargo in %s.", prefix, strings.ToLower(a.Type.String()), a.Location)
 }
 
-func assembleStatusText(c cargo.Cargo) string {
+func assembleStatusText(c *cargo.Cargo) string {
 	switch c.Delivery.TransportStatus {
 	case cargo.NotReceived:
 		return "Not received"
@@ -129,7 +129,7 @@ func assembleStatusText(c cargo.Cargo) string {
 	}
 }
 
-func assembleEvents(c cargo.Cargo, r cargo.HandlingEventRepository) []Event {
+func assembleEvents(c *cargo.Cargo, r cargo.HandlingEventRepository) []Event {
 	h := r.QueryHandlingHistory(c.TrackingID)
 
 	var events []Event

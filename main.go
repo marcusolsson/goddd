@@ -135,14 +135,14 @@ func storeTestData(r cargo.Repository) {
 		Destination:     location.SESTO,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 7),
 	})
-	_ = r.Store(*test1)
+	_ = r.Store(test1)
 
 	test2 := cargo.New("ABC123", cargo.RouteSpecification{
 		Origin:          location.SESTO,
 		Destination:     location.CNHKG,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 14),
 	})
-	_ = r.Store(*test2)
+	_ = r.Store(test2)
 }
 
 type serializedLogger struct {

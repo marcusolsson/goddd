@@ -40,5 +40,5 @@ var ErrUnknown = errors.New("unknown voyage")
 
 // Repository provides access a voyage store.
 type Repository interface {
-	Find(Number) (Voyage, error)
+	Find(Number) (*Voyage, error)
 }

@@ -56,9 +56,9 @@ func New(id TrackingID, rs RouteSpecification) *Cargo {
 
 // Repository provides access a cargo store.
 type Repository interface {
-	Store(cargo Cargo) error
-	Find(trackingID TrackingID) (Cargo, error)
-	FindAll() []Cargo
+	Store(cargo *Cargo) error
+	Find(trackingID TrackingID) (*Cargo, error)
+	FindAll() []*Cargo
 }
 
 // ErrUnknown is used when a cargo could not be found.

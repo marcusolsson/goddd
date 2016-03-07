@@ -28,7 +28,7 @@ func TestTrackTrackCargo(t *testing.T) {
 		Destination:     "FIHEL",
 		ArrivalDeadline: time.Date(2005, 12, 4, 0, 0, 0, 0, time.UTC),
 	})
-	cargos.Store(*c)
+	cargos.Store(c)
 
 	ctx := context.Background()
 

@@ -132,7 +132,7 @@ func (s *S) TestChangeCargoDestination(c *C) {
 
 	var err error
 
-	err = cargoRepository.Store(*c1)
+	err = cargoRepository.Store(c1)
 	c.Assert(err, IsNil)
 
 	c.Check(bookingService.ChangeDestination(c1.TrackingID, "no_such_unlocode"), Not(IsNil))

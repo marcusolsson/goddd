@@ -11,29 +11,29 @@ import (
 
 type cargoRepository struct {
 	mtx    sync.RWMutex
-	cargos map[cargo.TrackingID]cargo.Cargo
+	cargos map[cargo.TrackingID]*cargo.Cargo
 }
 
-func (r *cargoRepository) Store(c cargo.Cargo) error {
+func (r *cargoRepository) Store(c *cargo.Cargo) error {
 	r.mtx.Lock()
 	defer r.mtx.Unlock()
 	r.cargos[c.TrackingID] = c
 	return nil
 }
 
-func (r *cargoRepository) Find(trackingID cargo.TrackingID) (cargo.Cargo, error) {
+func (r *cargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
 	if val, ok := r.cargos[trackingID]; ok {
 		return val, nil
 	}
-	return cargo.Cargo{}, cargo.ErrUnknown
+	return nil, cargo.ErrUnknown
 }
 
-func (r *cargoRepository) FindAll() []cargo.Cargo {
+func (r *cargoRepository) FindAll() []*cargo.Cargo {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	c := make([]cargo.Cargo, 0, len(r.cargos))
+	c := make([]*cargo.Cargo, 0, len(r.cargos))
 	for _, val := range r.cargos {
 		c = append(c, val)
 	}
@@ -43,7 +43,7 @@ func (r *cargoRepository) FindAll() []cargo.Cargo {
 // NewCargo returns a new instance of a in-memory cargo repository.
 func NewCargo() cargo.Repository {
 	return &cargoRepository{
-		cargos: make(map[cargo.TrackingID]cargo.Cargo),
+		cargos: make(map[cargo.TrackingID]*cargo.Cargo),
 	}
 }
 
@@ -83,32 +83,32 @@ func NewLocation() location.Repository {
 }
 
 type voyageRepository struct {
-	voyages map[voyage.Number]voyage.Voyage
+	voyages map[voyage.Number]*voyage.Voyage
 }
 
-func (r *voyageRepository) Find(voyageNumber voyage.Number) (voyage.Voyage, error) {
+func (r *voyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage, error) {
 	if v, ok := r.voyages[voyageNumber]; ok {
 		return v, nil
 	}
 
-	return voyage.Voyage{}, voyage.ErrUnknown
+	return nil, voyage.ErrUnknown
 }
 
 // NewVoyage returns a new instance of a in-memory voyage repository.
 func NewVoyage() voyage.Repository {
 	r := &voyageRepository{
-		voyages: make(map[voyage.Number]voyage.Voyage),
+		voyages: make(map[voyage.Number]*voyage.Voyage),
 	}
 
-	r.voyages[voyage.V100.Number] = *voyage.V100
-	r.voyages[voyage.V300.Number] = *voyage.V300
-	r.voyages[voyage.V400.Number] = *voyage.V400
+	r.voyages[voyage.V100.Number] = voyage.V100
+	r.voyages[voyage.V300.Number] = voyage.V300
+	r.voyages[voyage.V400.Number] = voyage.V400
 
-	r.voyages[voyage.V0100S.Number] = *voyage.V0100S
-	r.voyages[voyage.V0200T.Number] = *voyage.V0200T
-	r.voyages[voyage.V0300A.Number] = *voyage.V0300A
-	r.voyages[voyage.V0301S.Number] = *voyage.V0301S
-	r.voyages[voyage.V0400S.Number] = *voyage.V0400S
+	r.voyages[voyage.V0100S.Number] = voyage.V0100S
+	r.voyages[voyage.V0200T.Number] = voyage.V0200T
+	r.voyages[voyage.V0300A.Number] = voyage.V0300A
+	r.voyages[voyage.V0301S.Number] = voyage.V0301S
+	r.voyages[voyage.V0400S.Number] = voyage.V0400S
 
 	return r
 }
