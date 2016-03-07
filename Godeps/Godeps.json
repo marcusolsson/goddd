@@ -1,15 +1,7 @@
 {
 	"ImportPath": "github.com/marcusolsson/goddd",
 	"GoVersion": "go1.5",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
-		{
-			"ImportPath": "code.google.com/p/go-uuid/uuid",
-			"Comment": "null-15",
-			"Rev": "'35bc42037350f0078e3c974c6ea690f1926603ab'"
-		},
 		{
 			"ImportPath": "github.com/afex/hystrix-go/hystrix",
 			"Rev": "fbe18f9a5a3bb3f74497d82695b19ad907a56e0f"
@@ -45,6 +37,11 @@
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Rev": "ad4d7a5882b961e07e2626045eb995c022ac6664"
+		},
+		{
+			"ImportPath": "github.com/pborman/uuid",
+			"Comment": "v1.0-11-gc55201b",
+			"Rev": "c55201b036063326c5b1b89ccfe45a184973d073"
 		},
 		{
 			"ImportPath": "github.com/sony/gobreaker",
