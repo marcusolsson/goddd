@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/go-kit/kit/log"
 	"golang.org/x/net/context"
@@ -20,12 +22,28 @@ import (
 	"github.com/marcusolsson/goddd/tracking"
 )
 
-var (
+const (
 	defaultPort              = "8080"
 	defaultRoutingServiceURL = "http://localhost:7878"
 )
 
 func main() {
+	var (
+		addr  = envString("PORT", defaultPort)
+		rsurl = envString("ROUTINGSERVICE_URL", defaultRoutingServiceURL)
+
+		httpAddr          = flag.String("http.addr", ":"+addr, "HTTP listen address")
+		routingServiceURL = flag.String("service.routing", rsurl, "routing service URL")
+
+		ctx = context.Background()
+	)
+
+	flag.Parse()
+
+	var logger log.Logger
+	logger = log.NewLogfmtLogger(os.Stderr)
+	logger = log.NewContext(logger).With("ts", log.DefaultTimestampUTC)
+
 	var (
 		cargos         = repository.NewCargo()
 		locations      = repository.NewLocation()
@@ -48,17 +66,8 @@ func main() {
 	// Facilitate testing by adding some cargos.
 	storeTestData(cargos)
 
-	var logger log.Logger
-	logger = log.NewLogfmtLogger(os.Stderr)
-	logger = log.NewContext(logger).With("ts", log.DefaultTimestampUTC)
-
-	var (
-		ctx   = context.Background()
-		rsurl = routingServiceURL()
-	)
-
 	var rs routing.Service
-	rs = booking.ProxyingMiddleware(rsurl, ctx)(rs)
+	rs = booking.ProxyingMiddleware(*routingServiceURL, ctx)(rs)
 
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
@@ -82,12 +91,10 @@ func main() {
 
 	http.Handle("/", accessControl(mux))
 
-	addr := ":" + port()
-
 	errs := make(chan error, 2)
 	go func() {
-		logger.Log("transport", "http", "address", addr, "msg", "listening")
-		errs <- http.ListenAndServe(addr, nil)
+		logger.Log("transport", "http", "address", *httpAddr, "msg", "listening")
+		errs <- http.ListenAndServe(*httpAddr, nil)
 	}()
 	go func() {
 		c := make(chan os.Signal)
@@ -112,32 +119,26 @@ func accessControl(h http.Handler) http.Handler {
 	})
 }
 
-func port() string {
-	port := os.Getenv("PORT")
-	if port == "" {
-		return defaultPort
+func envString(env, fallback string) string {
+	e := os.Getenv(env)
+	if e == "" {
+		return fallback
 	}
-	return port
-}
-
-func routingServiceURL() string {
-	url := os.Getenv("ROUTINGSERVICE_URL")
-	if url == "" {
-		return defaultRoutingServiceURL
-	}
-	return url
+	return e
 }
 
 func storeTestData(r cargo.Repository) {
 	test1 := cargo.New("FTL456", cargo.RouteSpecification{
-		Origin:      location.AUMEL,
-		Destination: location.SESTO,
+		Origin:          location.AUMEL,
+		Destination:     location.SESTO,
+		ArrivalDeadline: time.Now().AddDate(0, 0, 7),
 	})
 	_ = r.Store(*test1)
 
 	test2 := cargo.New("ABC123", cargo.RouteSpecification{
-		Origin:      location.SESTO,
-		Destination: location.CNHKG,
+		Origin:          location.SESTO,
+		Destination:     location.CNHKG,
+		ArrivalDeadline: time.Now().AddDate(0, 0, 14),
 	})
 	_ = r.Store(*test2)
 }

@@ -17,7 +17,7 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-// MakeHandler ...
+// MakeHandler returns a handler for the booking service.
 func MakeHandler(ctx context.Context, bs Service, logger kitlog.Logger) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorLogger(logger),

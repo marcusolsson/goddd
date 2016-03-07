@@ -13,7 +13,7 @@ import (
 	"github.com/marcusolsson/goddd/cargo"
 )
 
-// MakeHandler ...
+// MakeHandler returns a handler for the tracking service.
 func MakeHandler(ctx context.Context, ts Service, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 

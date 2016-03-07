@@ -16,7 +16,7 @@ import (
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-// MakeHandler ...
+// MakeHandler returns a handler for the handling service.
 func MakeHandler(ctx context.Context, hs Service, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
