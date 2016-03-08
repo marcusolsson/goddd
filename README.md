@@ -45,6 +45,12 @@ docker run --name some-goddd \
   marcusolsson/goddd
 ```
 
+... or if you're using Docker Compose:
+
+```
+docker-compose up
+```
+
 ## Try it!
 
 ```
