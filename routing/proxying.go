@@ -1,29 +1,28 @@
-package booking
+package routing
 
 import (
+	"encoding/json"
+	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/go-kit/kit/circuitbreaker"
 	"github.com/go-kit/kit/endpoint"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/voyage"
 	"golang.org/x/net/context"
 
 	kithttp "github.com/go-kit/kit/transport/http"
 )
 
-// ServiceMiddleware ...
-type ServiceMiddleware func(routing.Service) routing.Service
-
-type proxyRoutingService struct {
+type proxyService struct {
 	context.Context
 	FetchRoutesEndpoint endpoint.Endpoint
-	routing.Service
+	Service
 }
 
-func (s proxyRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
+func (s proxyService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
 	response, err := s.FetchRoutesEndpoint(s.Context, fetchRoutesRequest{
 		From: string(rs.Origin),
 		To:   string(rs.Destination),
@@ -53,14 +52,34 @@ func (s proxyRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecifica
 	return itineraries
 }
 
-// ProxyingMiddleware ...
-func ProxyingMiddleware(proxyURL string, ctx context.Context) ServiceMiddleware {
-	return func(next routing.Service) routing.Service {
+// ServiceMiddleware ...
+type ServiceMiddleware func(Service) Service
+
+// NewProxyingMiddleware ...
+func NewProxyingMiddleware(proxyURL string, ctx context.Context) ServiceMiddleware {
+	return func(next Service) Service {
 		var e endpoint.Endpoint
 		e = makeFetchRoutesEndpoint(ctx, proxyURL)
 		e = circuitbreaker.Hystrix("fetch-routes")(e)
-		return proxyRoutingService{ctx, e, next}
+		return proxyService{ctx, e, next}
 	}
+}
+
+type fetchRoutesRequest struct {
+	From string
+	To   string
+}
+
+type fetchRoutesResponse struct {
+	Paths []struct {
+		Edges []struct {
+			Origin      string    `json:"origin"`
+			Destination string    `json:"destination"`
+			Voyage      string    `json:"voyage"`
+			Departure   time.Time `json:"departure"`
+			Arrival     time.Time `json:"arrival"`
+		} `json:"edges"`
+	} `json:"paths"`
 }
 
 func makeFetchRoutesEndpoint(ctx context.Context, instance string) endpoint.Endpoint {
@@ -76,4 +95,23 @@ func makeFetchRoutesEndpoint(ctx context.Context, instance string) endpoint.Endp
 		encodeFetchRoutesRequest,
 		decodeFetchRoutesResponse,
 	).Endpoint()
+}
+
+func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
+	var response fetchRoutesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
+		return nil, err
+	}
+	return response, nil
+}
+
+func encodeFetchRoutesRequest(r *http.Request, request interface{}) error {
+	req := request.(fetchRoutesRequest)
+
+	vals := r.URL.Query()
+	vals.Add("from", req.From)
+	vals.Add("to", req.To)
+	r.URL.RawQuery = vals.Encode()
+
+	return nil
 }

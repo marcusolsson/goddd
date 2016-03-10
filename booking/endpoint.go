@@ -6,7 +6,6 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/routing"
 	"golang.org/x/net/context"
 )
 
@@ -55,8 +54,8 @@ type requestRoutesRequest struct {
 }
 
 type requestRoutesResponse struct {
-	Routes []routing.Route `json:"routes,omitempty"`
-	Err    error           `json:"error,omitempty"`
+	Routes []Route `json:"routes,omitempty"`
+	Err    error   `json:"error,omitempty"`
 }
 
 func (r requestRoutesResponse) error() error { return r.Err }
@@ -64,25 +63,8 @@ func (r requestRoutesResponse) error() error { return r.Err }
 func makeRequestRoutesEndpoint(s Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		req := request.(requestRoutesRequest)
-
-		itineraries := s.RequestPossibleRoutesForCargo(req.ID)
-
-		result := []routing.Route{}
-		for _, itin := range itineraries {
-			var legs []routing.Leg
-			for _, leg := range itin.Legs {
-				legs = append(legs, routing.Leg{
-					VoyageNumber: string(leg.VoyageNumber),
-					From:         string(leg.LoadLocation),
-					To:           string(leg.UnloadLocation),
-					LoadTime:     leg.LoadTime,
-					UnloadTime:   leg.UnloadTime,
-				})
-			}
-			result = append(result, routing.Route{Legs: legs})
-		}
-
-		return requestRoutesResponse{Routes: result, Err: nil}, nil
+		itin := s.RequestPossibleRoutesForCargo(req.ID)
+		return requestRoutesResponse{Routes: itin, Err: nil}, nil
 	}
 }
 
@@ -153,21 +135,4 @@ func makeListLocationsEndpoint(s Service) endpoint.Endpoint {
 		_ = request.(listLocationsRequest)
 		return listLocationsResponse{Locations: s.Locations(), Err: nil}, nil
 	}
-}
-
-type fetchRoutesRequest struct {
-	From string
-	To   string
-}
-
-type fetchRoutesResponse struct {
-	Paths []struct {
-		Edges []struct {
-			Origin      string    `json:"origin"`
-			Destination string    `json:"destination"`
-			Voyage      string    `json:"voyage"`
-			Departure   time.Time `json:"departure"`
-			Arrival     time.Time `json:"arrival"`
-		} `json:"edges"`
-	} `json:"paths"`
 }

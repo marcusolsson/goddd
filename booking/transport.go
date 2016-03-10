@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
@@ -133,7 +132,7 @@ func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 		return nil, errBadRoute
 	}
 
-	var route routing.Route
+	var route Route
 	if err := json.NewDecoder(r.Body).Decode(&route); err != nil {
 		return nil, err
 	}
@@ -182,25 +181,6 @@ func decodeListCargosRequest(r *http.Request) (interface{}, error) {
 
 func decodeListLocationsRequest(r *http.Request) (interface{}, error) {
 	return listLocationsRequest{}, nil
-}
-
-func decodeFetchRoutesResponse(resp *http.Response) (interface{}, error) {
-	var response fetchRoutesResponse
-	if err := json.NewDecoder(resp.Body).Decode(&response); err != nil {
-		return nil, err
-	}
-	return response, nil
-}
-
-func encodeFetchRoutesRequest(r *http.Request, request interface{}) error {
-	req := request.(fetchRoutesRequest)
-
-	vals := r.URL.Query()
-	vals.Add("from", req.From)
-	vals.Add("to", req.To)
-	r.URL.RawQuery = vals.Encode()
-
-	return nil
 }
 
 func encodeResponse(w http.ResponseWriter, response interface{}) error {

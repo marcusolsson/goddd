@@ -25,7 +25,7 @@ type Service interface {
 
 	// RequestPossibleRoutesForCargo requests a list of itineraries describing
 	// possible routes for this cargo.
-	RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []cargo.Itinerary
+	RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []Route
 
 	// AssignCargoToRoute assigns a cargo to the route specified by the
 	// itinerary.
@@ -129,17 +129,19 @@ func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UN
 	return nil
 }
 
-func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary {
+func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []Route {
 	if id == "" {
 		return nil
 	}
 
 	c, err := s.cargoRepository.Find(id)
 	if err != nil {
-		return []cargo.Itinerary{}
+		return []Route{}
 	}
 
-	return s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
+	it := s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
+
+	return assembleRoutes(it)
 }
 
 func (s *service) Cargos() []Cargo {
@@ -197,6 +199,11 @@ type Leg struct {
 	UnloadTime   time.Time `json:"unload_time"`
 }
 
+// Route is a read model for routing views.
+type Route struct {
+	Legs []Leg `json:"legs"`
+}
+
 func assemble(c *cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
 	return Cargo{
 		TrackingID:      string(c.TrackingID),
@@ -221,4 +228,22 @@ func assembleLegs(c *cargo.Cargo) []Leg {
 		})
 	}
 	return legs
+}
+
+func assembleRoutes(itineraries []cargo.Itinerary) []Route {
+	var result []Route
+	for _, itin := range itineraries {
+		var legs []Leg
+		for _, leg := range itin.Legs {
+			legs = append(legs, Leg{
+				VoyageNumber: string(leg.VoyageNumber),
+				From:         string(leg.LoadLocation),
+				To:           string(leg.UnloadLocation),
+				LoadTime:     leg.LoadTime,
+				UnloadTime:   leg.UnloadTime,
+			})
+		}
+		result = append(result, Route{Legs: legs})
+	}
+	return result
 }

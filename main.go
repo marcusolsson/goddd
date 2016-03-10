@@ -69,7 +69,7 @@ func main() {
 	storeTestData(cargos)
 
 	var rs routing.Service
-	rs = booking.ProxyingMiddleware(*routingServiceURL, ctx)(rs)
+	rs = routing.NewProxyingMiddleware(*routingServiceURL, ctx)(rs)
 
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
