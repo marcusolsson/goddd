@@ -13,7 +13,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
 )
 
 // MakeHandler returns a handler for the booking service.
@@ -132,25 +131,14 @@ func decodeAssignToRouteRequest(r *http.Request) (interface{}, error) {
 		return nil, errBadRoute
 	}
 
-	var route Route
-	if err := json.NewDecoder(r.Body).Decode(&route); err != nil {
+	var itinerary cargo.Itinerary
+	if err := json.NewDecoder(r.Body).Decode(&itinerary); err != nil {
 		return nil, err
-	}
-
-	var legs []cargo.Leg
-	for _, l := range route.Legs {
-		legs = append(legs, cargo.Leg{
-			VoyageNumber:   voyage.Number(l.VoyageNumber),
-			LoadLocation:   location.UNLocode(l.From),
-			UnloadLocation: location.UNLocode(l.To),
-			LoadTime:       l.LoadTime,
-			UnloadTime:     l.UnloadTime,
-		})
 	}
 
 	return assignToRouteRequest{
 		ID:        cargo.TrackingID(id),
-		Itinerary: cargo.Itinerary{Legs: legs},
+		Itinerary: itinerary,
 	}, nil
 }
 

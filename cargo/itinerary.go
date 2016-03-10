@@ -9,11 +9,11 @@ import (
 
 // Leg describes the transportation between two locations on a voyage.
 type Leg struct {
-	VoyageNumber   voyage.Number
-	LoadLocation   location.UNLocode
-	UnloadLocation location.UNLocode
-	LoadTime       time.Time
-	UnloadTime     time.Time
+	VoyageNumber   voyage.Number     `json:"voyage_number"`
+	LoadLocation   location.UNLocode `json:"from"`
+	UnloadLocation location.UNLocode `json:"to"`
+	LoadTime       time.Time         `json:"load_time"`
+	UnloadTime     time.Time         `json:"unload_time"`
 }
 
 // NewLeg creates a new itinerary leg.
@@ -30,7 +30,7 @@ func NewLeg(voyageNumber voyage.Number, loadLocation, unloadLocation location.UN
 // Itinerary specifies steps required to transport a cargo from its origin to
 // destination.
 type Itinerary struct {
-	Legs []Leg
+	Legs []Leg `json:"legs"`
 }
 
 // InitialDepartureLocation returns the start of the itinerary.

@@ -54,8 +54,8 @@ type requestRoutesRequest struct {
 }
 
 type requestRoutesResponse struct {
-	Routes []Route `json:"routes,omitempty"`
-	Err    error   `json:"error,omitempty"`
+	Routes []cargo.Itinerary `json:"routes,omitempty"`
+	Err    error             `json:"error,omitempty"`
 }
 
 func (r requestRoutesResponse) error() error { return r.Err }

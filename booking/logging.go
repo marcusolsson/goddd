@@ -45,7 +45,7 @@ func (s *loggingService) LoadCargo(id cargo.TrackingID) (c Cargo, err error) {
 	return s.Service.LoadCargo(id)
 }
 
-func (s *loggingService) RequestPossibleRoutesForCargo(id cargo.TrackingID) []Route {
+func (s *loggingService) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary {
 	defer func(begin time.Time) {
 		s.logger.Log(
 			"method", "request_routes",
