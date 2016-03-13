@@ -1,0 +1,93 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/afex/hystrix-go/hystrix",
+			"repository": "https://github.com/afex/hystrix-go",
+			"revision": "9351b724be3950ef0ca82c53f817dcd33947e95e",
+			"branch": "master",
+			"path": "/hystrix"
+		},
+		{
+			"importpath": "github.com/beorn7/perks/quantile",
+			"repository": "https://github.com/beorn7/perks",
+			"revision": "3ac7bf7a47d159a033b107610db8a1b6575507a4",
+			"branch": "master",
+			"path": "/quantile"
+		},
+		{
+			"importpath": "github.com/codahale/hdrhistogram",
+			"repository": "https://github.com/codahale/hdrhistogram",
+			"revision": "e88be87d51429689cef99043a54150d733265cd7",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-kit/kit",
+			"repository": "https://github.com/go-kit/kit",
+			"revision": "6b1a2a95b9202194b6c8f67a6209a3232a05c4b3",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/go-kit/kit/metrics",
+			"repository": "https://github.com/go-kit/kit",
+			"revision": "6b1a2a95b9202194b6c8f67a6209a3232a05c4b3",
+			"branch": "master",
+			"path": "/metrics"
+		},
+		{
+			"importpath": "github.com/golang/protobuf/proto",
+			"repository": "https://github.com/golang/protobuf",
+			"revision": "0fd8c908d872c921af513ef5091964bbd2e0d904",
+			"branch": "master",
+			"path": "/proto"
+		},
+		{
+			"importpath": "github.com/matttproud/golang_protobuf_extensions/pbutil",
+			"repository": "https://github.com/matttproud/golang_protobuf_extensions",
+			"revision": "d0c3fe89de86839aecf2e0579c40ba3bb336a453",
+			"branch": "master",
+			"path": "/pbutil"
+		},
+		{
+			"importpath": "github.com/prometheus/client_golang/prometheus",
+			"repository": "https://github.com/prometheus/client_golang",
+			"revision": "18acf9993a863f4c4b40612e19cdd243e7c86831",
+			"branch": "master",
+			"path": "/prometheus"
+		},
+		{
+			"importpath": "github.com/prometheus/client_model/go",
+			"repository": "https://github.com/prometheus/client_model",
+			"revision": "fa8ad6fec33561be4280a8f0514318c79d7f6cb6",
+			"branch": "master",
+			"path": "/go"
+		},
+		{
+			"importpath": "github.com/prometheus/common/expfmt",
+			"repository": "https://github.com/prometheus/common",
+			"revision": "e8eabff8812b05acf522b45fdcd725a785188e37",
+			"branch": "master",
+			"path": "/expfmt"
+		},
+		{
+			"importpath": "github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg",
+			"repository": "https://github.com/prometheus/common",
+			"revision": "e8eabff8812b05acf522b45fdcd725a785188e37",
+			"branch": "master",
+			"path": "/internal/bitbucket.org/ww/goautoneg"
+		},
+		{
+			"importpath": "github.com/prometheus/common/model",
+			"repository": "https://github.com/prometheus/common",
+			"revision": "e8eabff8812b05acf522b45fdcd725a785188e37",
+			"branch": "master",
+			"path": "/model"
+		},
+		{
+			"importpath": "github.com/prometheus/procfs",
+			"repository": "https://github.com/prometheus/procfs",
+			"revision": "406e5b7bfd8201a36e2bb5f7bdae0b03380c2ce8",
+			"branch": "master"
+		}
+	]
+}

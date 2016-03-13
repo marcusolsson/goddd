@@ -1,17 +1,18 @@
 language: go
-go: 1.5.2
+go: 
+  - 1.5.3
+  - 1.6
 sudo: required
 
 services: 
   - docker
 
 install:
-  - go get -v -u github.com/kr/godep
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 script:
-  - godep go test -v $(go list ./... | grep -v /vendor/)
-  - CGO_ENABLED=0 GOOS=linux godep go build -a -installsuffix cgo -o goddd .
+  - go test -race -v $(go list ./... | grep -v /vendor/)
+  - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o goddd .
 
 after_success:
   - docker build -t $DOCKER_IMAGE_NAME .
