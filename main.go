@@ -10,8 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/go-kit/kit/log"
 	"golang.org/x/net/context"
+
+	"github.com/go-kit/kit/log"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
 
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/cargo"
@@ -74,14 +76,17 @@ func main() {
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
 	bs = booking.NewLoggingService(log.NewContext(logger).With("component", "booking"), bs)
+	bs = booking.NewInstrumentingService(bs)
 
 	var ts tracking.Service
 	ts = tracking.NewService(cargos, handlingEvents)
 	ts = tracking.NewLoggingService(log.NewContext(logger).With("component", "tracking"), ts)
+	ts = tracking.NewInstrumentingService(ts)
 
 	var hs handling.Service
 	hs = handling.NewService(handlingEvents, handlingEventFactory, handlingEventHandler)
 	hs = handling.NewLoggingService(log.NewContext(logger).With("component", "handling"), hs)
+	hs = handling.NewInstrumentingService(hs)
 
 	httpLogger := log.NewContext(logger).With("component", "http")
 
@@ -92,6 +97,7 @@ func main() {
 	mux.Handle("/handling/v1/", handling.MakeHandler(ctx, hs, httpLogger))
 
 	http.Handle("/", accessControl(mux))
+	http.Handle("/metrics", stdprometheus.Handler())
 
 	errs := make(chan error, 2)
 	go func() {

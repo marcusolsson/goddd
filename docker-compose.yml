@@ -1,13 +1,19 @@
 goddd:
     image: marcusolsson/goddd
     ports:
-        - 8080:8080
-    environment:
-        ROUTINGSERVICE_URL: http://pathfinder:8080
-    links:
-        - pathfinder
+        - 8080
 
 pathfinder:
     image: marcusolsson/pathfinder
     ports:
         - 8080
+
+prometheus:
+    image: prom/prometheus
+    ports:
+        - 9090
+
+grafana:
+    image: grafana/grafana
+    ports:
+        - 3000
