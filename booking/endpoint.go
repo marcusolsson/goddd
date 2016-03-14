@@ -4,9 +4,10 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
+	"golang.org/x/net/context"
+
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
-	"golang.org/x/net/context"
 )
 
 type bookCargoRequest struct {

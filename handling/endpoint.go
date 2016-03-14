@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/endpoint"
+	"golang.org/x/net/context"
+
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/voyage"
-	"golang.org/x/net/context"
 )
 
 type registerIncidentRequest struct {

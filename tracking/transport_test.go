@@ -10,10 +10,10 @@ import (
 	"time"
 
 	"github.com/go-kit/kit/log"
+	"golang.org/x/net/context"
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/repository"
-	"golang.org/x/net/context"
 )
 
 func TestTrackTrackCargo(t *testing.T) {

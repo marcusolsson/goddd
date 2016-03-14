@@ -1,8 +1,9 @@
 package cargo
 
 import (
-	"github.com/marcusolsson/goddd/location"
 	. "gopkg.in/check.v1"
+
+	"github.com/marcusolsson/goddd/location"
 )
 
 func (s *S) TestCreateEmptyItinerary(c *C) {

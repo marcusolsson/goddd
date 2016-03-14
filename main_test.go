@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	. "gopkg.in/check.v1"
+
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
@@ -11,8 +13,6 @@ import (
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/voyage"
-
-	. "gopkg.in/check.v1"
 )
 
 func Test(t *testing.T) { TestingT(t) }
