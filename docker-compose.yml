@@ -11,9 +11,3 @@ pathfinder:
     image: marcusolsson/pathfinder
     ports:
         - 8080
-
-appdash:
-    image: rebder/appdash
-    ports:
-        - 8699:8699 
-        - 8700:8700
