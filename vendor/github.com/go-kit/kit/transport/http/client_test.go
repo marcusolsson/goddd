@@ -21,8 +21,8 @@ type TestResponse struct {
 func TestHTTPClient(t *testing.T) {
 	var (
 		testbody = "testbody"
-		encode   = func(*http.Request, interface{}) error { return nil }
-		decode   = func(r *http.Response) (interface{}, error) {
+		encode   = func(context.Context, *http.Request, interface{}) error { return nil }
+		decode   = func(_ context.Context, r *http.Response) (interface{}, error) {
 			buffer := make([]byte, len(testbody))
 			r.Body.Read(buffer)
 			return TestResponse{r.Body, string(buffer)}, nil
@@ -85,8 +85,8 @@ func TestHTTPClient(t *testing.T) {
 func TestHTTPClientBufferedStream(t *testing.T) {
 	var (
 		testbody = "testbody"
-		encode   = func(*http.Request, interface{}) error { return nil }
-		decode   = func(r *http.Response) (interface{}, error) {
+		encode   = func(context.Context, *http.Request, interface{}) error { return nil }
+		decode   = func(_ context.Context, r *http.Response) (interface{}, error) {
 			return TestResponse{r.Body, ""}, nil
 		}
 	)
@@ -119,7 +119,7 @@ func TestHTTPClientBufferedStream(t *testing.T) {
 	b := make([]byte, len(testbody))
 	_, err = response.Body.Read(b)
 	if want, have := io.EOF, err; have != want {
-		t.Fatal("want %q, have %q", want, have)
+		t.Fatalf("want %q, have %q", want, have)
 	}
 	if want, have := testbody, string(b); want != have {
 		t.Errorf("want %q, have %q", want, have)

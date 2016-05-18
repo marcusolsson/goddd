@@ -2,16 +2,15 @@ package zipkin
 
 import (
 	"encoding/binary"
+	"fmt"
+	"math"
 	"net"
 	"strconv"
 	"time"
 
-	"github.com/go-kit/kit/tracing/zipkin/_thrift/gen-go/zipkincore"
-)
+	"golang.org/x/net/context"
 
-var (
-	// SpanContextKey represents the Span in the request context.
-	SpanContextKey = "Zipkin-Span"
+	"github.com/go-kit/kit/tracing/zipkin/_thrift/gen-go/zipkincore"
 )
 
 // A Span is a named collection of annotations. It represents meaningful
@@ -28,6 +27,10 @@ type Span struct {
 
 	annotations       []annotation
 	binaryAnnotations []binaryAnnotation
+
+	debug      bool
+	sampled    bool
+	runSampler bool
 }
 
 // NewSpan returns a new Span, which can be annotated and collected by a
@@ -40,6 +43,7 @@ func NewSpan(hostport, serviceName, methodName string, traceID, spanID, parentSp
 		traceID:      traceID,
 		spanID:       spanID,
 		parentSpanID: parentSpanID,
+		runSampler:   true,
 	}
 }
 
@@ -51,19 +55,28 @@ func makeEndpoint(hostport, serviceName string) *zipkincore.Endpoint {
 	if err != nil {
 		return nil
 	}
-	addrs, err := net.LookupIP(host)
-	if err != nil {
-		return nil
-	}
-	if len(addrs) <= 0 {
-		return nil
-	}
 	portInt, err := strconv.ParseInt(port, 10, 16)
 	if err != nil {
 		return nil
 	}
+	addrs, err := net.LookupIP(host)
+	if err != nil {
+		return nil
+	}
+	// we need the first IPv4 address.
+	var addr net.IP
+	for i := range addrs {
+		addr = addrs[i].To4()
+		if addr != nil {
+			break
+		}
+	}
+	if addr == nil {
+		// none of the returned addresses is IPv4.
+		return nil
+	}
 	endpoint := zipkincore.NewEndpoint()
-	binary.LittleEndian.PutUint32(addrs[0], (uint32)(endpoint.Ipv4))
+	endpoint.Ipv4 = (int32)(binary.BigEndian.Uint32(addr))
 	endpoint.Port = int16(portInt)
 	endpoint.ServiceName = serviceName
 	return endpoint
@@ -89,22 +102,114 @@ func (s *Span) SpanID() int64 { return s.spanID }
 // It may be zero.
 func (s *Span) ParentSpanID() int64 { return s.parentSpanID }
 
-// Annotate annotates the span with the given value.
-func (s *Span) Annotate(value string) {
-	s.AnnotateDuration(value, 0)
+// Sample forces sampling of this span.
+func (s *Span) Sample() {
+	s.sampled = true
 }
 
-// AnnotateBinary annotates the span with a key and a byte value.
-func (s *Span) AnnotateBinary(key string, value []byte) {
+// SetDebug forces debug mode on this span.
+func (s *Span) SetDebug() {
+	s.debug = true
+}
+
+// Annotate annotates the span with the given value.
+func (s *Span) Annotate(value string) {
+	s.annotations = append(s.annotations, annotation{
+		timestamp: time.Now(),
+		value:     value,
+		host:      s.host,
+	})
+}
+
+// AnnotateBinary annotates the span with a key and a value that will be []byte
+// encoded.
+func (s *Span) AnnotateBinary(key string, value interface{}) {
+	var a zipkincore.AnnotationType
+	var b []byte
+	// We are not using zipkincore.AnnotationType_I16 for types that could fit
+	// as reporting on it seems to be broken on the zipkin web interface
+	// (however, we can properly extract the number from zipkin storage
+	// directly). int64 has issues with negative numbers but seems ok for
+	// positive numbers needing more than 32 bit.
+	switch v := value.(type) {
+	case bool:
+		a = zipkincore.AnnotationType_BOOL
+		b = []byte("\x00")
+		if v {
+			b = []byte("\x01")
+		}
+	case []byte:
+		a = zipkincore.AnnotationType_BYTES
+		b = v
+	case byte:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 4)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case int8:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 4)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case int16:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 4)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case uint16:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 4)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case int32:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 4)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case uint32:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 4)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case int64:
+		a = zipkincore.AnnotationType_I64
+		b = make([]byte, 8)
+		binary.BigEndian.PutUint64(b, uint64(v))
+	case int:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 8)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case uint:
+		a = zipkincore.AnnotationType_I32
+		b = make([]byte, 8)
+		binary.BigEndian.PutUint32(b, uint32(v))
+	case uint64:
+		a = zipkincore.AnnotationType_I64
+		b = make([]byte, 8)
+		binary.BigEndian.PutUint64(b, uint64(v))
+	case float32:
+		a = zipkincore.AnnotationType_DOUBLE
+		b = make([]byte, 8)
+		bits := math.Float64bits(float64(v))
+		binary.BigEndian.PutUint64(b, bits)
+	case float64:
+		a = zipkincore.AnnotationType_DOUBLE
+		b = make([]byte, 8)
+		bits := math.Float64bits(v)
+		binary.BigEndian.PutUint64(b, bits)
+	case string:
+		a = zipkincore.AnnotationType_STRING
+		b = []byte(v)
+	default:
+		// we have no handler for type's value, but let's get a string
+		// representation of it.
+		a = zipkincore.AnnotationType_STRING
+		b = []byte(fmt.Sprintf("%+v", value))
+	}
 	s.binaryAnnotations = append(s.binaryAnnotations, binaryAnnotation{
 		key:            key,
-		value:          value,
-		annotationType: zipkincore.AnnotationType_BYTES,
+		value:          b,
+		annotationType: a,
 		host:           s.host,
 	})
 }
 
 // AnnotateString annotates the span with a key and a string value.
+// Deprecated: use AnnotateBinary instead.
 func (s *Span) AnnotateString(key, value string) {
 	s.binaryAnnotations = append(s.binaryAnnotations, binaryAnnotation{
 		key:            key,
@@ -114,14 +219,80 @@ func (s *Span) AnnotateString(key, value string) {
 	})
 }
 
-// AnnotateDuration annotates the span with the given value and duration.
-func (s *Span) AnnotateDuration(value string, duration time.Duration) {
-	s.annotations = append(s.annotations, annotation{
-		timestamp: time.Now(),
-		value:     value,
-		duration:  duration,
-		host:      s.host,
-	})
+// SpanOption sets an optional parameter for Spans.
+type SpanOption func(s *Span)
+
+// ServerAddr will create a ServerAddr annotation with its own zipkin Endpoint
+// when used with NewChildSpan. This is typically used when the NewChildSpan is
+// used to annotate non Zipkin aware resources like databases and caches.
+func ServerAddr(hostport, serviceName string) SpanOption {
+	return func(s *Span) {
+		e := makeEndpoint(hostport, serviceName)
+		if e != nil {
+			host := s.host
+			s.host = e                            // set temporary Endpoint
+			s.AnnotateBinary(ServerAddress, true) // use
+			s.host = host                         // reset
+		}
+	}
+}
+
+// Host will update the default zipkin Endpoint of the Span it is used with.
+func Host(hostport, serviceName string) SpanOption {
+	return func(s *Span) {
+		e := makeEndpoint(hostport, serviceName)
+		if e != nil {
+			s.host = e // update
+		}
+	}
+}
+
+// Debug will set the Span to debug mode forcing Samplers to pass the Span.
+func Debug(debug bool) SpanOption {
+	return func(s *Span) {
+		s.debug = debug
+	}
+}
+
+// CollectFunc will collect the span created with NewChildSpan.
+type CollectFunc func()
+
+// NewChildSpan returns a new child Span of a parent Span extracted from the
+// passed context. It can be used to annotate resources like databases, caches,
+// etc. and treat them as if they are a regular service. For tracing client
+// endpoints use AnnotateClient instead.
+func NewChildSpan(ctx context.Context, collector Collector, methodName string, options ...SpanOption) (*Span, CollectFunc) {
+	span, ok := FromContext(ctx)
+	if !ok {
+		return nil, func() {}
+	}
+	childSpan := &Span{
+		host:         span.host,
+		methodName:   methodName,
+		traceID:      span.traceID,
+		spanID:       newID(),
+		parentSpanID: span.spanID,
+		debug:        span.debug,
+		sampled:      span.sampled,
+		runSampler:   span.runSampler,
+	}
+	childSpan.Annotate(ClientSend)
+	for _, option := range options {
+		option(childSpan)
+	}
+	collectFunc := func() {
+		if childSpan != nil {
+			childSpan.Annotate(ClientReceive)
+			collector.Collect(childSpan)
+			childSpan = nil
+		}
+	}
+	return childSpan, collectFunc
+}
+
+// IsSampled returns if the span is set to be sampled.
+func (s *Span) IsSampled() bool {
+	return s.sampled
 }
 
 // Encode creates a Thrift Span from the gokit Span.
@@ -132,7 +303,7 @@ func (s *Span) Encode() *zipkincore.Span {
 		TraceId: s.traceID,
 		Name:    s.methodName,
 		Id:      s.spanID,
-		Debug:   true, // TODO
+		Debug:   s.debug,
 	}
 
 	if s.parentSpanID != 0 {
@@ -146,11 +317,6 @@ func (s *Span) Encode() *zipkincore.Span {
 			Timestamp: a.timestamp.UnixNano() / 1e3,
 			Value:     a.value,
 			Host:      a.host,
-		}
-
-		if a.duration > 0 {
-			zs.Annotations[i].Duration = new(int32)
-			*(zs.Annotations[i].Duration) = int32(a.duration / time.Microsecond)
 		}
 	}
 
@@ -170,7 +336,6 @@ func (s *Span) Encode() *zipkincore.Span {
 type annotation struct {
 	timestamp time.Time
 	value     string
-	duration  time.Duration // optional
 	host      *zipkincore.Endpoint
 }
 
