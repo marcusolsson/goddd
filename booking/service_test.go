@@ -20,9 +20,9 @@ var _ = Suite(&S{})
 func (s *S) TestBookNewCargo(c *C) {
 
 	var (
-		cargoRepository    = repository.NewCargo()
-		locationRepository = repository.NewLocation()
-		handlingEvents     = repository.NewHandlingEvent()
+		cargoRepository    = repository.NewInMemcargo()
+		locationRepository = repository.NewInMemLocation()
+		handlingEvents     = repository.NewInMemHandlingEvent()
 	)
 
 	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, nil)
@@ -63,9 +63,9 @@ func (s *stubRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecifica
 func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
 	var (
-		cargoRepository    = repository.NewCargo()
-		locationRepository = repository.NewLocation()
-		handlingEvents     = repository.NewHandlingEvent()
+		cargoRepository    = repository.NewInMemcargo()
+		locationRepository = repository.NewInMemLocation()
+		handlingEvents     = repository.NewInMemHandlingEvent()
 		routingService     = &stubRoutingService{}
 	)
 
@@ -87,9 +87,9 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
 func (s *S) TestAssignCargoToRoute(c *C) {
 	var (
-		cargoRepository    = repository.NewCargo()
-		locationRepository = repository.NewLocation()
-		handlingEvents     = repository.NewHandlingEvent()
+		cargoRepository    = repository.NewInMemcargo()
+		locationRepository = repository.NewInMemLocation()
+		handlingEvents     = repository.NewInMemHandlingEvent()
 		routingService     = &stubRoutingService{}
 	)
 
@@ -115,9 +115,9 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 
 func (s *S) TestChangeCargoDestination(c *C) {
 	var (
-		cargoRepository    = repository.NewCargo()
-		locationRepository = repository.NewLocation()
-		handlingEvents     = repository.NewHandlingEvent()
+		cargoRepository    = repository.NewInMemcargo()
+		locationRepository = repository.NewInMemLocation()
+		handlingEvents     = repository.NewInMemHandlingEvent()
 		routingService     = &stubRoutingService{}
 	)
 

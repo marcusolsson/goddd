@@ -31,8 +31,8 @@ func (h *stubEventHandler) CargoHasArrived(c *cargo.Cargo) {
 
 func (s *S) TestInspectMisdirectedCargo(c *C) {
 	var (
-		cargoRepository         = repository.NewCargo()
-		handlingEventRepository = repository.NewHandlingEvent()
+		cargoRepository         = repository.NewInMemcargo()
+		handlingEventRepository = repository.NewInMemHandlingEvent()
 		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
 	)
 
@@ -69,8 +69,8 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 func (s *S) TestInspectUnloadedCargo(c *C) {
 
 	var (
-		cargoRepository         = repository.NewCargo()
-		handlingEventRepository = repository.NewHandlingEvent()
+		cargoRepository         = repository.NewInMemcargo()
+		handlingEventRepository = repository.NewInMemHandlingEvent()
 		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
 
 		inspectionService = &service{

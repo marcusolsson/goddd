@@ -4,7 +4,6 @@
 		{
 			"importpath": "github.com/afex/hystrix-go/hystrix",
 			"repository": "https://github.com/afex/hystrix-go",
-			"vcs": "",
 			"revision": "9351b724be3950ef0ca82c53f817dcd33947e95e",
 			"branch": "master",
 			"path": "/hystrix"
@@ -12,7 +11,6 @@
 		{
 			"importpath": "github.com/beorn7/perks/quantile",
 			"repository": "https://github.com/beorn7/perks",
-			"vcs": "",
 			"revision": "3ac7bf7a47d159a033b107610db8a1b6575507a4",
 			"branch": "master",
 			"path": "/quantile"
@@ -20,37 +18,30 @@
 		{
 			"importpath": "github.com/codahale/hdrhistogram",
 			"repository": "https://github.com/codahale/hdrhistogram",
-			"vcs": "",
 			"revision": "e88be87d51429689cef99043a54150d733265cd7",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/go-kit/kit",
 			"repository": "https://github.com/go-kit/kit",
-			"vcs": "git",
 			"revision": "4479f0122fd25f40d8b429ce76e193b6e2319ff4",
 			"branch": "master"
 		},
 		{
 			"importpath": "github.com/go-logfmt/logfmt",
 			"repository": "https://github.com/go-logfmt/logfmt",
-			"vcs": "git",
 			"revision": "538518f3a61c040f3d15f05decfffef6bd0302bc",
-			"branch": "master",
-			"notests": true
+			"branch": "master"
 		},
 		{
 			"importpath": "github.com/go-stack/stack",
 			"repository": "https://github.com/go-stack/stack",
-			"vcs": "git",
 			"revision": "100eb0c0a9c5b306ca2fb4f165df21d80ada4b82",
-			"branch": "master",
-			"notests": true
+			"branch": "master"
 		},
 		{
 			"importpath": "github.com/golang/protobuf/proto",
 			"repository": "https://github.com/golang/protobuf",
-			"vcs": "",
 			"revision": "0fd8c908d872c921af513ef5091964bbd2e0d904",
 			"branch": "master",
 			"path": "/proto"
@@ -58,15 +49,12 @@
 		{
 			"importpath": "github.com/kr/logfmt",
 			"repository": "https://github.com/kr/logfmt",
-			"vcs": "git",
 			"revision": "b84e30acd515aadc4b783ad4ff83aff3299bdfe0",
-			"branch": "master",
-			"notests": true
+			"branch": "master"
 		},
 		{
 			"importpath": "github.com/matttproud/golang_protobuf_extensions/pbutil",
 			"repository": "https://github.com/matttproud/golang_protobuf_extensions",
-			"vcs": "",
 			"revision": "d0c3fe89de86839aecf2e0579c40ba3bb336a453",
 			"branch": "master",
 			"path": "/pbutil"
@@ -74,7 +62,6 @@
 		{
 			"importpath": "github.com/prometheus/client_golang/prometheus",
 			"repository": "https://github.com/prometheus/client_golang",
-			"vcs": "",
 			"revision": "18acf9993a863f4c4b40612e19cdd243e7c86831",
 			"branch": "master",
 			"path": "/prometheus"
@@ -82,7 +69,6 @@
 		{
 			"importpath": "github.com/prometheus/client_model/go",
 			"repository": "https://github.com/prometheus/client_model",
-			"vcs": "",
 			"revision": "fa8ad6fec33561be4280a8f0514318c79d7f6cb6",
 			"branch": "master",
 			"path": "/go"
@@ -90,7 +76,6 @@
 		{
 			"importpath": "github.com/prometheus/common/expfmt",
 			"repository": "https://github.com/prometheus/common",
-			"vcs": "",
 			"revision": "e8eabff8812b05acf522b45fdcd725a785188e37",
 			"branch": "master",
 			"path": "/expfmt"
@@ -98,7 +83,6 @@
 		{
 			"importpath": "github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg",
 			"repository": "https://github.com/prometheus/common",
-			"vcs": "",
 			"revision": "e8eabff8812b05acf522b45fdcd725a785188e37",
 			"branch": "master",
 			"path": "/internal/bitbucket.org/ww/goautoneg"
@@ -106,7 +90,6 @@
 		{
 			"importpath": "github.com/prometheus/common/model",
 			"repository": "https://github.com/prometheus/common",
-			"vcs": "",
 			"revision": "e8eabff8812b05acf522b45fdcd725a785188e37",
 			"branch": "master",
 			"path": "/model"
@@ -114,17 +97,26 @@
 		{
 			"importpath": "github.com/prometheus/procfs",
 			"repository": "https://github.com/prometheus/procfs",
-			"vcs": "",
 			"revision": "406e5b7bfd8201a36e2bb5f7bdae0b03380c2ce8",
 			"branch": "master"
 		},
 		{
 			"importpath": "gopkg.in/check.v1",
 			"repository": "https://gopkg.in/check.v1",
-			"vcs": "git",
 			"revision": "4f90aeace3a26ad7021961c297b22c42160c7b25",
-			"branch": "v1",
-			"notests": true
+			"branch": "v1"
+		},
+		{
+			"importpath": "gopkg.in/mgo.v2",
+			"repository": "https://gopkg.in/mgo.v2",
+			"revision": "b6e2fa371e64216a45e61072a96d4e3859f169da",
+			"branch": "v2"
+		},
+		{
+			"importpath": "gopkg.in/tomb.v2",
+			"repository": "https://gopkg.in/tomb.v2",
+			"revision": "14b3d72120e8d10ea6e6b7f87f7175734b1faab8",
+			"branch": "v2"
 		}
 	]
 }

@@ -1,3 +1,5 @@
+// +build integration
+
 package main
 
 import (
@@ -5,6 +7,7 @@ import (
 	"time"
 
 	. "gopkg.in/check.v1"
+	"gopkg.in/mgo.v2"
 
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/cargo"
@@ -21,39 +24,44 @@ type S struct{}
 
 var _ = Suite(&S{})
 
-var (
-	cargoRepository         = repository.NewCargo()
-	locationRepository      = repository.NewLocation()
-	voyageRepository        = repository.NewVoyage()
-	handlingEventRepository = repository.NewHandlingEvent()
-)
+func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
+	dbname := "dddsample_test"
 
-var (
-	handlingEventFactory = cargo.HandlingEventFactory{
+	var err error
+
+	session, err := mgo.Dial("127.0.0.1")
+	if err != nil {
+		panic(err)
+	}
+	defer session.Close()
+
+	session.SetMode(mgo.Monotonic, true)
+
+	session.DB(dbname).DropDatabase()
+
+	var (
+		cargoRepository         = repository.NewMongoCargo(dbname, session)
+		locationRepository      = repository.NewMongoLocation(dbname, session)
+		voyageRepository        = repository.NewMongoVoyage(dbname, session)
+		handlingEventRepository = repository.NewMongoHandlingEvent(dbname, session)
+	)
+
+	handlingEventFactory := cargo.HandlingEventFactory{
 		CargoRepository:    cargoRepository,
 		VoyageRepository:   voyageRepository,
 		LocationRepository: locationRepository,
 	}
-)
 
-var (
-	routingService = &stubRoutingService{}
-)
+	routingService := &stubRoutingService{}
 
-var (
-	cargoEventHandler    = &stubCargoEventHandler{}
-	handlingEventHandler = &stubHandlingEventHandler{cargoInspectionService}
-)
+	cargoEventHandler := &stubCargoEventHandler{}
+	cargoInspectionService := inspection.NewService(cargoRepository, handlingEventRepository, cargoEventHandler)
+	handlingEventHandler := &stubHandlingEventHandler{cargoInspectionService}
 
-var (
-	bookingService         = booking.NewService(cargoRepository, locationRepository, handlingEventRepository, routingService)
-	cargoInspectionService = inspection.NewService(cargoRepository, handlingEventRepository, cargoEventHandler)
-	handlingEventService   = handling.NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
-)
-
-func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
-
-	var err error
+	var (
+		bookingService       = booking.NewService(cargoRepository, locationRepository, handlingEventRepository, routingService)
+		handlingEventService = handling.NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
+	)
 
 	var (
 		origin          = location.CNHKG // Hongkong

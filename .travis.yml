@@ -1,17 +1,19 @@
+group: edge
+sudo: required
+
 language: go
 go: 
-  - 1.5.3
   - 1.6
-sudo: required
 
 services: 
   - docker
+  - mongodb
 
 install:
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
 
 script:
-  - go test -race -v $(go list ./... | grep -v /vendor/)
+  - go test -tags=integration -race -v $(go list ./... | grep -v /vendor/)
   - CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o goddd .
 
 after_success:

@@ -10,6 +10,8 @@ import (
 	"syscall"
 	"time"
 
+	"gopkg.in/mgo.v2"
+
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
 
@@ -25,20 +27,28 @@ import (
 	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/tracking"
+	"github.com/marcusolsson/goddd/voyage"
 )
 
 const (
 	defaultPort              = "8080"
 	defaultRoutingServiceURL = "http://localhost:7878"
+	defaultMongoDBURL        = "127.0.0.1"
+	defaultDBName            = "dddsample"
 )
 
 func main() {
 	var (
-		addr  = envString("PORT", defaultPort)
-		rsurl = envString("ROUTINGSERVICE_URL", defaultRoutingServiceURL)
+		addr   = envString("PORT", defaultPort)
+		rsurl  = envString("ROUTINGSERVICE_URL", defaultRoutingServiceURL)
+		dburl  = envString("MONGODB_URL", defaultMongoDBURL)
+		dbname = envString("DB_NAME", defaultDBName)
 
 		httpAddr          = flag.String("http.addr", ":"+addr, "HTTP listen address")
 		routingServiceURL = flag.String("service.routing", rsurl, "routing service URL")
+		mongoDBURL        = flag.String("db.url", dburl, "MongoDB URL")
+		databaseName      = flag.String("db.name", dbname, "MongoDB database name")
+		inmem             = flag.Bool("inmem", false, "use in-memory repositories")
 
 		ctx = context.Background()
 	)
@@ -50,12 +60,33 @@ func main() {
 	logger = &serializedLogger{Logger: logger}
 	logger = log.NewContext(logger).With("ts", log.DefaultTimestampUTC)
 
+	// Setup repositories
 	var (
-		cargos         = repository.NewCargo()
-		locations      = repository.NewLocation()
-		voyages        = repository.NewVoyage()
-		handlingEvents = repository.NewHandlingEvent()
+		cargos         cargo.Repository
+		locations      location.Repository
+		voyages        voyage.Repository
+		handlingEvents cargo.HandlingEventRepository
 	)
+
+	if *inmem {
+		cargos = repository.NewInMemcargo()
+		locations = repository.NewInMemLocation()
+		voyages = repository.NewInMemVoyage()
+		handlingEvents = repository.NewInMemHandlingEvent()
+	} else {
+		session, err := mgo.Dial(*mongoDBURL)
+		if err != nil {
+			panic(err)
+		}
+		defer session.Close()
+
+		session.SetMode(mgo.Monotonic, true)
+
+		cargos = repository.NewMongoCargo(*databaseName, session)
+		locations = repository.NewMongoLocation(*databaseName, session)
+		voyages = repository.NewMongoVoyage(*databaseName, session)
+		handlingEvents = repository.NewMongoHandlingEvent(*databaseName, session)
+	}
 
 	// Configure some questionable dependencies.
 	var (
@@ -181,14 +212,18 @@ func storeTestData(r cargo.Repository) {
 		Destination:     location.SESTO,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 7),
 	})
-	_ = r.Store(test1)
+	if err := r.Store(test1); err != nil {
+		panic(err)
+	}
 
 	test2 := cargo.New("ABC123", cargo.RouteSpecification{
 		Origin:          location.SESTO,
 		Destination:     location.CNHKG,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 14),
 	})
-	_ = r.Store(test2)
+	if err := r.Store(test2); err != nil {
+		panic(err)
+	}
 }
 
 type serializedLogger struct {

@@ -28,10 +28,10 @@ func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 
 func (s *S) TestRegisterHandlingEvent(c *C) {
 	var (
-		cargoRepository         = repository.NewCargo()
-		voyageRepository        = repository.NewVoyage()
-		locationRepository      = repository.NewLocation()
-		handlingEventRepository = repository.NewHandlingEvent()
+		cargoRepository         = repository.NewInMemcargo()
+		voyageRepository        = repository.NewInMemVoyage()
+		locationRepository      = repository.NewInMemLocation()
+		handlingEventRepository = repository.NewInMemHandlingEvent()
 	)
 
 	var (

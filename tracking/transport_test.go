@@ -18,8 +18,8 @@ import (
 
 func TestTrackTrackCargo(t *testing.T) {
 	var (
-		cargos         = repository.NewCargo()
-		handlingEvents = repository.NewHandlingEvent()
+		cargos         = repository.NewInMemcargo()
+		handlingEvents = repository.NewInMemHandlingEvent()
 		service        = NewService(cargos, handlingEvents)
 	)
 
@@ -78,8 +78,8 @@ func TestTrackTrackCargo(t *testing.T) {
 
 func TestTrackUnknownCargo(t *testing.T) {
 	var (
-		cargos         = repository.NewCargo()
-		handlingEvents = repository.NewHandlingEvent()
+		cargos         = repository.NewInMemcargo()
+		handlingEvents = repository.NewInMemHandlingEvent()
 		service        = NewService(cargos, handlingEvents)
 	)
 
