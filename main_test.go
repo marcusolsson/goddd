@@ -40,9 +40,9 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	session.DB(dbname).DropDatabase()
 
 	var (
-		cargoRepository         = repository.NewMongoCargo(dbname, session)
-		locationRepository      = repository.NewMongoLocation(dbname, session)
-		voyageRepository        = repository.NewMongoVoyage(dbname, session)
+		cargoRepository, _      = repository.NewMongoCargo(dbname, session)
+		locationRepository, _   = repository.NewMongoLocation(dbname, session)
+		voyageRepository, _     = repository.NewMongoVoyage(dbname, session)
 		handlingEventRepository = repository.NewMongoHandlingEvent(dbname, session)
 	)
 
