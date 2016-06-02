@@ -82,9 +82,9 @@ func main() {
 
 		session.SetMode(mgo.Monotonic, true)
 
-		cargos = repository.NewMongoCargo(*databaseName, session)
-		locations = repository.NewMongoLocation(*databaseName, session)
-		voyages = repository.NewMongoVoyage(*databaseName, session)
+		cargos, _ = repository.NewMongoCargo(*databaseName, session)
+		locations, _ = repository.NewMongoLocation(*databaseName, session)
+		voyages, _ = repository.NewMongoVoyage(*databaseName, session)
 		handlingEvents = repository.NewMongoHandlingEvent(*databaseName, session)
 	}
 

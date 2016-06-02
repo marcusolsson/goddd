@@ -13,27 +13,15 @@ type mongoCargoRepository struct {
 	session *mgo.Session
 }
 
-func (r *mongoCargoRepository) Store(cargo *cargo.Cargo) (err error) {
+func (r *mongoCargoRepository) Store(cargo *cargo.Cargo) error {
 	sess := r.session.Clone()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
 
-	index := mgo.Index{
-		Key:        []string{"trackingid"},
-		Unique:     true,
-		DropDups:   true,
-		Background: true,
-		Sparse:     true,
-	}
+	_, err := c.Upsert(bson.M{"trackingid": cargo.TrackingID}, bson.M{"$set": cargo})
 
-	if err = c.EnsureIndex(index); err != nil {
-		return
-	}
-
-	_, err = c.Upsert(bson.M{"trackingid": cargo.TrackingID}, bson.M{"$set": cargo})
-
-	return
+	return err
 }
 
 func (r *mongoCargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
@@ -68,11 +56,30 @@ func (r *mongoCargoRepository) FindAll() []*cargo.Cargo {
 }
 
 // NewMongoCargo returns a new instance of a MongoDB cargo repository.
-func NewMongoCargo(db string, session *mgo.Session) cargo.Repository {
-	return &mongoCargoRepository{
+func NewMongoCargo(db string, session *mgo.Session) (cargo.Repository, error) {
+	r := &mongoCargoRepository{
 		db:      db,
 		session: session,
 	}
+
+	index := mgo.Index{
+		Key:        []string{"trackingid"},
+		Unique:     true,
+		DropDups:   true,
+		Background: true,
+		Sparse:     true,
+	}
+
+	sess := r.session.Clone()
+	defer sess.Close()
+
+	c := sess.DB(r.db).C("cargo")
+
+	if err := c.EnsureIndex(index); err != nil {
+		return nil, err
+	}
+
+	return r, nil
 }
 
 type mongoLocationRepository struct {
@@ -111,7 +118,24 @@ func (r *mongoLocationRepository) FindAll() []location.Location {
 	return result
 }
 
-func (r *mongoLocationRepository) store(l location.Location) (err error) {
+func (r *mongoLocationRepository) store(l location.Location) error {
+	sess := r.session.Clone()
+	defer sess.Close()
+
+	c := sess.DB(r.db).C("location")
+
+	_, err := c.Upsert(bson.M{"unlocode": l.UNLocode}, bson.M{"$set": l})
+
+	return err
+}
+
+// NewMongoLocation returns a new instance of a MongoDB location repository.
+func NewMongoLocation(db string, session *mgo.Session) (location.Repository, error) {
+	r := &mongoLocationRepository{
+		db:      db,
+		session: session,
+	}
+
 	sess := r.session.Clone()
 	defer sess.Close()
 
@@ -125,20 +149,8 @@ func (r *mongoLocationRepository) store(l location.Location) (err error) {
 		Sparse:     true,
 	}
 
-	if err = c.EnsureIndex(index); err != nil {
-		return
-	}
-
-	_, err = c.Upsert(bson.M{"unlocode": l.UNLocode}, bson.M{"$set": l})
-
-	return
-}
-
-// NewMongoLocation returns a new instance of a MongoDB location repository.
-func NewMongoLocation(db string, session *mgo.Session) location.Repository {
-	r := &mongoLocationRepository{
-		db:      db,
-		session: session,
+	if err := c.EnsureIndex(index); err != nil {
+		return nil, err
 	}
 
 	initial := []location.Location{
@@ -154,7 +166,7 @@ func NewMongoLocation(db string, session *mgo.Session) location.Repository {
 		r.store(l)
 	}
 
-	return r
+	return r, nil
 }
 
 type mongoVoyageRepository struct {
@@ -179,7 +191,24 @@ func (r *mongoVoyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage
 	return &result, nil
 }
 
-func (r *mongoVoyageRepository) store(v *voyage.Voyage) (err error) {
+func (r *mongoVoyageRepository) store(v *voyage.Voyage) error {
+	sess := r.session.Clone()
+	defer sess.Close()
+
+	c := sess.DB(r.db).C("voyage")
+
+	_, err := c.Upsert(bson.M{"number": v.Number}, bson.M{"$set": v})
+
+	return err
+}
+
+// NewMongoVoyage returns a new instance of a MongoDB voyage repository.
+func NewMongoVoyage(db string, session *mgo.Session) (voyage.Repository, error) {
+	r := &mongoVoyageRepository{
+		db:      db,
+		session: session,
+	}
+
 	sess := r.session.Clone()
 	defer sess.Close()
 
@@ -193,20 +222,8 @@ func (r *mongoVoyageRepository) store(v *voyage.Voyage) (err error) {
 		Sparse:     true,
 	}
 
-	if err = c.EnsureIndex(index); err != nil {
-		return
-	}
-
-	_, err = c.Upsert(bson.M{"number": v.Number}, bson.M{"$set": v})
-
-	return
-}
-
-// NewMongoVoyage returns a new instance of a MongoDB voyage repository.
-func NewMongoVoyage(db string, session *mgo.Session) voyage.Repository {
-	r := &mongoVoyageRepository{
-		db:      db,
-		session: session,
+	if err := c.EnsureIndex(index); err != nil {
+		return nil, err
 	}
 
 	initial := []*voyage.Voyage{
@@ -224,7 +241,7 @@ func NewMongoVoyage(db string, session *mgo.Session) voyage.Repository {
 		r.store(v)
 	}
 
-	return r
+	return r, nil
 }
 
 type mongoHandlingEventRepository struct {
