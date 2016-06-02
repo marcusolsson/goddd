@@ -14,7 +14,7 @@ type mongoCargoRepository struct {
 }
 
 func (r *mongoCargoRepository) Store(cargo *cargo.Cargo) error {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
@@ -25,7 +25,7 @@ func (r *mongoCargoRepository) Store(cargo *cargo.Cargo) error {
 }
 
 func (r *mongoCargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
@@ -42,7 +42,7 @@ func (r *mongoCargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, 
 }
 
 func (r *mongoCargoRepository) FindAll() []*cargo.Cargo {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
@@ -70,7 +70,7 @@ func NewMongoCargo(db string, session *mgo.Session) (cargo.Repository, error) {
 		Sparse:     true,
 	}
 
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
@@ -88,7 +88,7 @@ type mongoLocationRepository struct {
 }
 
 func (r *mongoLocationRepository) Find(locode location.UNLocode) (location.Location, error) {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("location")
@@ -105,7 +105,7 @@ func (r *mongoLocationRepository) Find(locode location.UNLocode) (location.Locat
 }
 
 func (r *mongoLocationRepository) FindAll() []location.Location {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("location")
@@ -119,7 +119,7 @@ func (r *mongoLocationRepository) FindAll() []location.Location {
 }
 
 func (r *mongoLocationRepository) store(l location.Location) error {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("location")
@@ -136,7 +136,7 @@ func NewMongoLocation(db string, session *mgo.Session) (location.Repository, err
 		session: session,
 	}
 
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("location")
@@ -175,7 +175,7 @@ type mongoVoyageRepository struct {
 }
 
 func (r *mongoVoyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage, error) {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("voyage")
@@ -192,7 +192,7 @@ func (r *mongoVoyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage
 }
 
 func (r *mongoVoyageRepository) store(v *voyage.Voyage) error {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("voyage")
@@ -209,7 +209,7 @@ func NewMongoVoyage(db string, session *mgo.Session) (voyage.Repository, error) 
 		session: session,
 	}
 
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("voyage")
@@ -250,7 +250,7 @@ type mongoHandlingEventRepository struct {
 }
 
 func (r *mongoHandlingEventRepository) Store(e cargo.HandlingEvent) {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("handling_event")
@@ -259,7 +259,7 @@ func (r *mongoHandlingEventRepository) Store(e cargo.HandlingEvent) {
 }
 
 func (r *mongoHandlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
-	sess := r.session.Clone()
+	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("handling_event")
