@@ -60,11 +60,7 @@ func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itiner
 
 	c.AssignToRoute(itinerary)
 
-	if err := s.cargoRepository.Store(c); err != nil {
-		return err
-	}
-
-	return nil
+	return s.cargoRepository.Store(c)
 }
 
 func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
