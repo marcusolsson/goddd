@@ -42,10 +42,10 @@ type Service interface {
 }
 
 type service struct {
-	cargoRepository         cargo.Repository
-	locationRepository      location.Repository
-	routingService          routing.Service
-	handlingEventRepository cargo.HandlingEventRepository
+	cargos         cargo.Repository
+	locations      location.Repository
+	handlingEvents cargo.HandlingEventRepository
+	routingService routing.Service
 }
 
 func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itinerary) error {
@@ -53,14 +53,14 @@ func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itiner
 		return ErrInvalidArgument
 	}
 
-	c, err := s.cargoRepository.Find(id)
+	c, err := s.cargos.Find(id)
 	if err != nil {
 		return err
 	}
 
 	c.AssignToRoute(itinerary)
 
-	return s.cargoRepository.Store(c)
+	return s.cargos.Store(c)
 }
 
 func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
@@ -77,7 +77,7 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDea
 
 	c := cargo.New(id, rs)
 
-	if err := s.cargoRepository.Store(c); err != nil {
+	if err := s.cargos.Store(c); err != nil {
 		return "", err
 	}
 
@@ -89,12 +89,12 @@ func (s *service) LoadCargo(trackingID cargo.TrackingID) (Cargo, error) {
 		return Cargo{}, ErrInvalidArgument
 	}
 
-	c, err := s.cargoRepository.Find(trackingID)
+	c, err := s.cargos.Find(trackingID)
 	if err != nil {
 		return Cargo{}, err
 	}
 
-	return assemble(c, s.handlingEventRepository), nil
+	return assemble(c, s.handlingEvents), nil
 }
 
 func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UNLocode) error {
@@ -102,12 +102,12 @@ func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UN
 		return ErrInvalidArgument
 	}
 
-	c, err := s.cargoRepository.Find(id)
+	c, err := s.cargos.Find(id)
 	if err != nil {
 		return err
 	}
 
-	l, err := s.locationRepository.Find(destination)
+	l, err := s.locations.Find(destination)
 	if err != nil {
 		return err
 	}
@@ -118,7 +118,7 @@ func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UN
 		ArrivalDeadline: c.RouteSpecification.ArrivalDeadline,
 	})
 
-	if err := s.cargoRepository.Store(c); err != nil {
+	if err := s.cargos.Store(c); err != nil {
 		return err
 	}
 
@@ -130,7 +130,7 @@ func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Iti
 		return nil
 	}
 
-	c, err := s.cargoRepository.Find(id)
+	c, err := s.cargos.Find(id)
 	if err != nil {
 		return []cargo.Itinerary{}
 	}
@@ -140,15 +140,15 @@ func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Iti
 
 func (s *service) Cargos() []Cargo {
 	var result []Cargo
-	for _, c := range s.cargoRepository.FindAll() {
-		result = append(result, assemble(c, s.handlingEventRepository))
+	for _, c := range s.cargos.FindAll() {
+		result = append(result, assemble(c, s.handlingEvents))
 	}
 	return result
 }
 
 func (s *service) Locations() []Location {
 	var result []Location
-	for _, v := range s.locationRepository.FindAll() {
+	for _, v := range s.locations.FindAll() {
 		result = append(result, Location{
 			UNLocode: string(v.UNLocode),
 			Name:     v.Name,
@@ -160,10 +160,10 @@ func (s *service) Locations() []Location {
 // NewService creates a booking service with necessary dependencies.
 func NewService(cr cargo.Repository, lr location.Repository, her cargo.HandlingEventRepository, rs routing.Service) Service {
 	return &service{
-		cargoRepository:         cr,
-		locationRepository:      lr,
-		handlingEventRepository: her,
-		routingService:          rs,
+		cargos:         cr,
+		locations:      lr,
+		handlingEvents: her,
+		routingService: rs,
 	}
 }
 
