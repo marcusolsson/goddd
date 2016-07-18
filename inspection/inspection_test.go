@@ -6,8 +6,8 @@ import (
 	. "gopkg.in/check.v1"
 
 	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
@@ -31,8 +31,8 @@ func (h *stubEventHandler) CargoHasArrived(c *cargo.Cargo) {
 
 func (s *S) TestInspectMisdirectedCargo(c *C) {
 	var (
-		cargoRepository         = repository.NewInMemcargo()
-		handlingEventRepository = repository.NewInMemHandlingEvent()
+		cargoRepository         = inmem.NewCargoRepository()
+		handlingEventRepository = inmem.NewHandlingEventRepository()
 		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
 	)
 
@@ -69,8 +69,8 @@ func (s *S) TestInspectMisdirectedCargo(c *C) {
 func (s *S) TestInspectUnloadedCargo(c *C) {
 
 	var (
-		cargoRepository         = repository.NewInMemcargo()
-		handlingEventRepository = repository.NewInMemHandlingEvent()
+		cargoRepository         = inmem.NewCargoRepository()
+		handlingEventRepository = inmem.NewHandlingEventRepository()
 		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
 
 		inspectionService = &service{

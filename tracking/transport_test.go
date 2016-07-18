@@ -13,13 +13,13 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/repository"
+	"github.com/marcusolsson/goddd/inmem"
 )
 
 func TestTrackTrackCargo(t *testing.T) {
 	var (
-		cargos         = repository.NewInMemcargo()
-		handlingEvents = repository.NewInMemHandlingEvent()
+		cargos         = inmem.NewCargoRepository()
+		handlingEvents = inmem.NewHandlingEventRepository()
 		service        = NewService(cargos, handlingEvents)
 	)
 
@@ -78,8 +78,8 @@ func TestTrackTrackCargo(t *testing.T) {
 
 func TestTrackUnknownCargo(t *testing.T) {
 	var (
-		cargos         = repository.NewInMemcargo()
-		handlingEvents = repository.NewInMemHandlingEvent()
+		cargos         = inmem.NewCargoRepository()
+		handlingEvents = inmem.NewHandlingEventRepository()
 		service        = NewService(cargos, handlingEvents)
 	)
 

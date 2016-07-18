@@ -14,7 +14,7 @@ import (
 	"github.com/marcusolsson/goddd/handling"
 	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/repository"
+	"github.com/marcusolsson/goddd/mongo"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
@@ -40,10 +40,10 @@ func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
 	session.DB(dbname).DropDatabase()
 
 	var (
-		cargoRepository, _      = repository.NewMongoCargo(dbname, session)
-		locationRepository, _   = repository.NewMongoLocation(dbname, session)
-		voyageRepository, _     = repository.NewMongoVoyage(dbname, session)
-		handlingEventRepository = repository.NewMongoHandlingEvent(dbname, session)
+		cargoRepository, _      = mongo.NewCargoRepository(dbname, session)
+		locationRepository, _   = mongo.NewLocationRepository(dbname, session)
+		voyageRepository, _     = mongo.NewVoyageRepository(dbname, session)
+		handlingEventRepository = mongo.NewHandlingEventRepository(dbname, session)
 	)
 
 	handlingEventFactory := cargo.HandlingEventFactory{

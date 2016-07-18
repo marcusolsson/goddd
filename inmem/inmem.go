@@ -1,5 +1,5 @@
-// Package repository provides implementations of all the domain repositories.
-package repository
+// Package inmem provides in-memory implementations of all the domain repositories.
+package inmem
 
 import (
 	"sync"
@@ -40,8 +40,8 @@ func (r *cargoRepository) FindAll() []*cargo.Cargo {
 	return c
 }
 
-// NewCargo returns a new instance of a in-memory cargo repository.
-func NewInMemcargo() cargo.Repository {
+// NewCargoRepository returns a new instance of a in-memory cargo repository.
+func NewCargoRepository() cargo.Repository {
 	return &cargoRepository{
 		cargos: make(map[cargo.TrackingID]*cargo.Cargo),
 	}
@@ -66,8 +66,8 @@ func (r *locationRepository) FindAll() []location.Location {
 	return l
 }
 
-// NewLocation returns a new instance of a in-memory location repository.
-func NewInMemLocation() location.Repository {
+// NewLocationRepository returns a new instance of a in-memory location repository.
+func NewLocationRepository() location.Repository {
 	r := &locationRepository{
 		locations: make(map[location.UNLocode]location.Location),
 	}
@@ -94,8 +94,8 @@ func (r *voyageRepository) Find(voyageNumber voyage.Number) (*voyage.Voyage, err
 	return nil, voyage.ErrUnknown
 }
 
-// NewVoyage returns a new instance of a in-memory voyage repository.
-func NewInMemVoyage() voyage.Repository {
+// NewVoyageRepository returns a new instance of a in-memory voyage repository.
+func NewVoyageRepository() voyage.Repository {
 	r := &voyageRepository{
 		voyages: make(map[voyage.Number]*voyage.Voyage),
 	}
@@ -134,8 +134,8 @@ func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.Tracking
 	return cargo.HandlingHistory{HandlingEvents: r.events[trackingID]}
 }
 
-// NewHandlingEvent returns a new instance of a in-memory handling event repository.
-func NewInMemHandlingEvent() cargo.HandlingEventRepository {
+// NewHandlingEventRepository returns a new instance of a in-memory handling event repository.
+func NewHandlingEventRepository() cargo.HandlingEventRepository {
 	return &handlingEventRepository{
 		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
 	}

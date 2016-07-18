@@ -22,9 +22,10 @@ import (
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
+	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/repository"
+	"github.com/marcusolsson/goddd/mongo"
 	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/tracking"
 	"github.com/marcusolsson/goddd/voyage"
@@ -48,7 +49,7 @@ func main() {
 		routingServiceURL = flag.String("service.routing", rsurl, "routing service URL")
 		mongoDBURL        = flag.String("db.url", dburl, "MongoDB URL")
 		databaseName      = flag.String("db.name", dbname, "MongoDB database name")
-		inmem             = flag.Bool("inmem", false, "use in-memory repositories")
+		inmemory          = flag.Bool("inmem", false, "use in-memory repositories")
 
 		ctx = context.Background()
 	)
@@ -68,11 +69,11 @@ func main() {
 		handlingEvents cargo.HandlingEventRepository
 	)
 
-	if *inmem {
-		cargos = repository.NewInMemcargo()
-		locations = repository.NewInMemLocation()
-		voyages = repository.NewInMemVoyage()
-		handlingEvents = repository.NewInMemHandlingEvent()
+	if *inmemory {
+		cargos = inmem.NewCargoRepository()
+		locations = inmem.NewLocationRepository()
+		voyages = inmem.NewVoyageRepository()
+		handlingEvents = inmem.NewHandlingEventRepository()
 	} else {
 		session, err := mgo.Dial(*mongoDBURL)
 		if err != nil {
@@ -82,10 +83,10 @@ func main() {
 
 		session.SetMode(mgo.Monotonic, true)
 
-		cargos, _ = repository.NewMongoCargo(*databaseName, session)
-		locations, _ = repository.NewMongoLocation(*databaseName, session)
-		voyages, _ = repository.NewMongoVoyage(*databaseName, session)
-		handlingEvents = repository.NewMongoHandlingEvent(*databaseName, session)
+		cargos, _ = mongo.NewCargoRepository(*databaseName, session)
+		locations, _ = mongo.NewLocationRepository(*databaseName, session)
+		voyages, _ = mongo.NewVoyageRepository(*databaseName, session)
+		handlingEvents = mongo.NewHandlingEventRepository(*databaseName, session)
 	}
 
 	// Configure some questionable dependencies.

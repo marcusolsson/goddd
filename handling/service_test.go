@@ -7,8 +7,8 @@ import (
 	. "gopkg.in/check.v1"
 
 	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/repository"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
@@ -28,10 +28,10 @@ func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
 
 func (s *S) TestRegisterHandlingEvent(c *C) {
 	var (
-		cargoRepository         = repository.NewInMemcargo()
-		voyageRepository        = repository.NewInMemVoyage()
-		locationRepository      = repository.NewInMemLocation()
-		handlingEventRepository = repository.NewInMemHandlingEvent()
+		cargoRepository         = inmem.NewCargoRepository()
+		voyageRepository        = inmem.NewVoyageRepository()
+		locationRepository      = inmem.NewLocationRepository()
+		handlingEventRepository = inmem.NewHandlingEventRepository()
 	)
 
 	var (

@@ -1,4 +1,4 @@
-package repository
+package mongo
 
 import (
 	"github.com/marcusolsson/goddd/cargo"
@@ -55,8 +55,8 @@ func (r *mongoCargoRepository) FindAll() []*cargo.Cargo {
 	return result
 }
 
-// NewMongoCargo returns a new instance of a MongoDB cargo repository.
-func NewMongoCargo(db string, session *mgo.Session) (cargo.Repository, error) {
+// NewCargoRepository returns a new instance of a MongoDB cargo repository.
+func NewCargoRepository(db string, session *mgo.Session) (cargo.Repository, error) {
 	r := &mongoCargoRepository{
 		db:      db,
 		session: session,
@@ -129,8 +129,8 @@ func (r *mongoLocationRepository) store(l location.Location) error {
 	return err
 }
 
-// NewMongoLocation returns a new instance of a MongoDB location repository.
-func NewMongoLocation(db string, session *mgo.Session) (location.Repository, error) {
+// NewLocationRepository returns a new instance of a MongoDB location repository.
+func NewLocationRepository(db string, session *mgo.Session) (location.Repository, error) {
 	r := &mongoLocationRepository{
 		db:      db,
 		session: session,
@@ -202,8 +202,8 @@ func (r *mongoVoyageRepository) store(v *voyage.Voyage) error {
 	return err
 }
 
-// NewMongoVoyage returns a new instance of a MongoDB voyage repository.
-func NewMongoVoyage(db string, session *mgo.Session) (voyage.Repository, error) {
+// NewVoyageRepository returns a new instance of a MongoDB voyage repository.
+func NewVoyageRepository(db string, session *mgo.Session) (voyage.Repository, error) {
 	r := &mongoVoyageRepository{
 		db:      db,
 		session: session,
@@ -270,8 +270,8 @@ func (r *mongoHandlingEventRepository) QueryHandlingHistory(trackingID cargo.Tra
 	return cargo.HandlingHistory{HandlingEvents: result}
 }
 
-// NewMongoHandlingEvent returns a new instance of a MongoDB handling event repository.
-func NewMongoHandlingEvent(db string, session *mgo.Session) cargo.HandlingEventRepository {
+// NewHandlingEventRepository returns a new instance of a MongoDB handling event repository.
+func NewHandlingEventRepository(db string, session *mgo.Session) cargo.HandlingEventRepository {
 	return &mongoHandlingEventRepository{
 		db:      db,
 		session: session,

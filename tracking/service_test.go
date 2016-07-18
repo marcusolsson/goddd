@@ -5,36 +5,25 @@ import (
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/mock"
 )
 
-type fakeCargos struct {
-}
-
-func (r *fakeCargos) Store(cargo *cargo.Cargo) error {
-	return nil
-}
-func (r *fakeCargos) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
-	return cargo.New("FTL456", cargo.RouteSpecification{
-		Origin:      location.AUMEL,
-		Destination: location.SESTO,
-	}), nil
-}
-func (r *fakeCargos) FindAll() []*cargo.Cargo {
-	return []*cargo.Cargo{}
-}
-
-type fakeHandlingEvents struct {
-}
-
-func (r *fakeHandlingEvents) Store(e cargo.HandlingEvent) {
-}
-func (r *fakeHandlingEvents) QueryHandlingHistory(cargo.TrackingID) cargo.HandlingHistory {
-	return cargo.HandlingHistory{}
-}
-
 func TestTrack(t *testing.T) {
-	cargos := &fakeCargos{}
-	handlingEvents := &fakeHandlingEvents{}
+	cargos := &mock.CargoRepository{
+		FindFn: func(id cargo.TrackingID) (*cargo.Cargo, error) {
+			return cargo.New("FTL456", cargo.RouteSpecification{
+				Origin:      location.AUMEL,
+				Destination: location.SESTO,
+			}), nil
+		},
+	}
+
+	handlingEvents := &mock.HandlingEventRepository{
+		QueryHandlingHistoryFn: func(id cargo.TrackingID) cargo.HandlingHistory {
+			return cargo.HandlingHistory{}
+		},
+	}
+
 	ts := NewService(cargos, handlingEvents)
 
 	c, err := ts.Track("FTL456")

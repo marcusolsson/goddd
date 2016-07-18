@@ -7,8 +7,8 @@ import (
 	. "gopkg.in/check.v1"
 
 	"github.com/marcusolsson/goddd/cargo"
+	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/repository"
 )
 
 func Test(t *testing.T) { TestingT(t) }
@@ -20,9 +20,9 @@ var _ = Suite(&S{})
 func (s *S) TestBookNewCargo(c *C) {
 
 	var (
-		cargoRepository    = repository.NewInMemcargo()
-		locationRepository = repository.NewInMemLocation()
-		handlingEvents     = repository.NewInMemHandlingEvent()
+		cargoRepository    = inmem.NewCargoRepository()
+		locationRepository = inmem.NewLocationRepository()
+		handlingEvents     = inmem.NewHandlingEventRepository()
 	)
 
 	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, nil)
@@ -63,9 +63,9 @@ func (s *stubRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecifica
 func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
 	var (
-		cargoRepository    = repository.NewInMemcargo()
-		locationRepository = repository.NewInMemLocation()
-		handlingEvents     = repository.NewInMemHandlingEvent()
+		cargoRepository    = inmem.NewCargoRepository()
+		locationRepository = inmem.NewLocationRepository()
+		handlingEvents     = inmem.NewHandlingEventRepository()
 		routingService     = &stubRoutingService{}
 	)
 
@@ -87,9 +87,9 @@ func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
 
 func (s *S) TestAssignCargoToRoute(c *C) {
 	var (
-		cargoRepository    = repository.NewInMemcargo()
-		locationRepository = repository.NewInMemLocation()
-		handlingEvents     = repository.NewInMemHandlingEvent()
+		cargoRepository    = inmem.NewCargoRepository()
+		locationRepository = inmem.NewLocationRepository()
+		handlingEvents     = inmem.NewHandlingEventRepository()
 		routingService     = &stubRoutingService{}
 	)
 
@@ -115,9 +115,9 @@ func (s *S) TestAssignCargoToRoute(c *C) {
 
 func (s *S) TestChangeCargoDestination(c *C) {
 	var (
-		cargoRepository    = repository.NewInMemcargo()
-		locationRepository = repository.NewInMemLocation()
-		handlingEvents     = repository.NewInMemHandlingEvent()
+		cargoRepository    = inmem.NewCargoRepository()
+		locationRepository = inmem.NewLocationRepository()
+		handlingEvents     = inmem.NewHandlingEventRepository()
 		routingService     = &stubRoutingService{}
 	)
 
