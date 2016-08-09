@@ -4,64 +4,83 @@ import (
 	"testing"
 	"time"
 
-	. "gopkg.in/check.v1"
-
 	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/mock"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-func Test(t *testing.T) { TestingT(t) }
-
-type S struct{}
-
-var _ = Suite(&S{})
-
 type stubEventHandler struct {
-	handledEvents []interface{}
+	events []interface{}
 }
 
-func (h *stubEventHandler) CargoWasHandled(event cargo.HandlingEvent) {
-	h.handledEvents = append(h.handledEvents, event)
+func (h *stubEventHandler) CargoWasHandled(e cargo.HandlingEvent) {
+	h.events = append(h.events, e)
 }
 
-func (s *S) TestRegisterHandlingEvent(c *C) {
-	var (
-		cargoRepository         = inmem.NewCargoRepository()
-		voyageRepository        = inmem.NewVoyageRepository()
-		locationRepository      = inmem.NewLocationRepository()
-		handlingEventRepository = inmem.NewHandlingEventRepository()
-	)
+func TestRegisterHandlingEvent(t *testing.T) {
+	cargos := &mock.CargoRepository{
+		StoreFn: func(c *cargo.Cargo) error {
+			return nil
+		},
+		FindFn: func(id cargo.TrackingID) (*cargo.Cargo, error) {
+			if id == "no_such_id" {
+				return nil, cargo.ErrUnknown
+			}
+			return new(cargo.Cargo), nil
+		},
+	}
+
+	voyages := &mock.VoyageRepository{
+		FindFn: func(n voyage.Number) (*voyage.Voyage, error) {
+			return new(voyage.Voyage), nil
+		},
+	}
+
+	locations := &mock.LocationRepository{
+		FindFn: func(l location.UNLocode) (location.Location, error) {
+			return location.Location{}, nil
+		},
+	}
+
+	events := &mock.HandlingEventRepository{
+		StoreFn: func(e cargo.HandlingEvent) {},
+	}
 
 	var (
-		handlingEventHandler = &stubEventHandler{make([]interface{}, 0)}
-		handlingEventFactory = cargo.HandlingEventFactory{
-			CargoRepository:    cargoRepository,
-			VoyageRepository:   voyageRepository,
-			LocationRepository: locationRepository,
+		eh = &stubEventHandler{events: make([]interface{}, 0)}
+		ef = cargo.HandlingEventFactory{
+			CargoRepository:    cargos,
+			VoyageRepository:   voyages,
+			LocationRepository: locations,
 		}
 	)
 
-	handlingEventService := NewService(handlingEventRepository, handlingEventFactory, handlingEventHandler)
+	s := NewService(events, ef, eh)
 
 	var (
-		completionTime = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
-		trackingID     = cargo.TrackingID("ABC123")
-		voyageNumber   = voyage.Number("V100")
-		unLocode       = location.Stockholm.UNLocode
-		eventType      = cargo.Load
+		completed = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+		id        = cargo.TrackingID("ABC123")
+		voyage    = voyage.Number("V100")
 	)
 
-	cargoRepository.Store(cargo.New(trackingID, cargo.RouteSpecification{}))
+	if err := cargos.Store(cargo.New(id, cargo.RouteSpecification{})); err != nil {
+		t.Fatal(err)
+	}
 
 	var err error
 
-	err = handlingEventService.RegisterHandlingEvent(completionTime, trackingID, voyageNumber, unLocode, eventType)
-	c.Check(err, IsNil)
+	err = s.RegisterHandlingEvent(completed, id, voyage, location.SESTO, cargo.Load)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	err = handlingEventService.RegisterHandlingEvent(completionTime, "no_such_id", voyageNumber, unLocode, eventType)
-	c.Check(err, Not(IsNil))
+	err = s.RegisterHandlingEvent(completed, "no_such_id", voyage, location.SESTO, cargo.Load)
+	if err != cargo.ErrUnknown {
+		t.Errorf("err = %s; want = %s", err, cargo.ErrUnknown)
+	}
 
-	c.Check(len(handlingEventHandler.handledEvents), Equals, 1)
+	if len(eh.events) != 1 {
+		t.Errorf("1 event should be handled")
+	}
 }

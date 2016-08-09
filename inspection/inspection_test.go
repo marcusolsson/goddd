@@ -3,114 +3,159 @@ package inspection
 import (
 	"testing"
 
-	. "gopkg.in/check.v1"
-
 	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
-func Test(t *testing.T) { TestingT(t) }
-
-type S struct{}
-
-var _ = Suite(&S{})
-
 type stubEventHandler struct {
-	handledEvents []interface{}
+	events []interface{}
 }
 
 func (h *stubEventHandler) CargoWasMisdirected(c *cargo.Cargo) {
-	h.handledEvents = append(h.handledEvents, c)
+	h.events = append(h.events, c)
 }
 
 func (h *stubEventHandler) CargoHasArrived(c *cargo.Cargo) {
-	h.handledEvents = append(h.handledEvents, c)
+	h.events = append(h.events, c)
 }
 
-func (s *S) TestInspectMisdirectedCargo(c *C) {
-	var (
-		cargoRepository         = inmem.NewCargoRepository()
-		handlingEventRepository = inmem.NewHandlingEventRepository()
-		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
-	)
+func TestInspectMisdirectedCargo(t *testing.T) {
+	cargos := &mockCargoRepository{}
+	events := &mockHandlingEventRepository{
+		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
+	}
 
-	inspectionService := NewService(cargoRepository, handlingEventRepository, cargoEventHandler)
+	handler := &stubEventHandler{make([]interface{}, 0)}
 
-	trackingID := cargo.TrackingID("ABC123")
-	misdirectedCargo := cargo.New(trackingID, cargo.RouteSpecification{
+	s := NewService(cargos, events, handler)
+
+	id := cargo.TrackingID("ABC123")
+	c := cargo.New(id, cargo.RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
 	})
 
-	var voyageNumber voyage.Number = "001A"
+	voyage := voyage.Number("001A")
 
-	misdirectedCargo.AssignToRoute(cargo.Itinerary{Legs: []cargo.Leg{
-		{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+	c.AssignToRoute(cargo.Itinerary{Legs: []cargo.Leg{
+		{VoyageNumber: voyage, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		{VoyageNumber: voyage, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}})
 
-	cargoRepository.Store(misdirectedCargo)
+	if err := cargos.Store(c); err != nil {
+		t.Fatal(err)
+	}
 
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Receive, location.SESTO)
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Load, location.SESTO)
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Unload, location.USNYC)
+	storeEvent(events, id, voyage, cargo.Receive, location.SESTO)
+	storeEvent(events, id, voyage, cargo.Load, location.SESTO)
+	storeEvent(events, id, voyage, cargo.Unload, location.USNYC)
 
-	c.Check(len(cargoEventHandler.handledEvents), Equals, 0)
+	if len(handler.events) != 0 {
+		t.Errorf("no events should be handled")
+	}
 
-	inspectionService.InspectCargo(trackingID)
+	s.InspectCargo(id)
 
-	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
+	if len(handler.events) != 1 {
+		t.Errorf("1 event should be handled")
+	}
 
-	inspectionService.InspectCargo("no_such_id")
+	s.InspectCargo("no_such_id")
+
+	// no events was published
+	if len(handler.events) != 1 {
+		t.Errorf("len(handler.events) = %d; want = %d", len(handler.events), 1)
+	}
 }
 
-func (s *S) TestInspectUnloadedCargo(c *C) {
+func TestInspectUnloadedCargo(t *testing.T) {
+	cargos := &mockCargoRepository{}
+	events := &mockHandlingEventRepository{
+		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
+	}
+	cargoEventHandler := &stubEventHandler{make([]interface{}, 0)}
 
-	var (
-		cargoRepository         = inmem.NewCargoRepository()
-		handlingEventRepository = inmem.NewHandlingEventRepository()
-		cargoEventHandler       = &stubEventHandler{make([]interface{}, 0)}
+	s := &service{
+		cargoRepository:         cargos,
+		handlingEventRepository: events,
+		cargoEventHandler:       cargoEventHandler,
+	}
 
-		inspectionService = &service{
-			cargoRepository:         cargoRepository,
-			handlingEventRepository: handlingEventRepository,
-			cargoEventHandler:       cargoEventHandler,
-		}
-	)
-
-	trackingID := cargo.TrackingID("ABC123")
-	unloadedCargo := cargo.New(trackingID, cargo.RouteSpecification{
+	id := cargo.TrackingID("ABC123")
+	unloadedCargo := cargo.New(id, cargo.RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
 	})
 
-	var voyageNumber voyage.Number = "001A"
+	var voyage voyage.Number = "001A"
 
 	unloadedCargo.AssignToRoute(cargo.Itinerary{Legs: []cargo.Leg{
-		{VoyageNumber: voyageNumber, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		{VoyageNumber: voyageNumber, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+		{VoyageNumber: voyage, LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		{VoyageNumber: voyage, LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
 	}})
 
-	cargoRepository.Store(unloadedCargo)
+	cargos.Store(unloadedCargo)
 
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Receive, location.SESTO)
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Load, location.SESTO)
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Unload, location.AUMEL)
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Load, location.AUMEL)
-	storeEvent(handlingEventRepository, trackingID, voyageNumber, cargo.Unload, location.CNHKG)
+	storeEvent(events, id, voyage, cargo.Receive, location.SESTO)
+	storeEvent(events, id, voyage, cargo.Load, location.SESTO)
+	storeEvent(events, id, voyage, cargo.Unload, location.AUMEL)
+	storeEvent(events, id, voyage, cargo.Load, location.AUMEL)
+	storeEvent(events, id, voyage, cargo.Unload, location.CNHKG)
 
-	c.Check(len(cargoEventHandler.handledEvents), Equals, 0)
+	if len(cargoEventHandler.events) != 0 {
+		t.Errorf("no event should be handled")
+	}
 
-	inspectionService.InspectCargo(trackingID)
+	s.InspectCargo(id)
 
-	c.Check(len(cargoEventHandler.handledEvents), Equals, 1)
+	if len(cargoEventHandler.events) != 1 {
+		t.Errorf("1 event should be handled")
+	}
 }
 
-func storeEvent(repository cargo.HandlingEventRepository, trackingID cargo.TrackingID, voyage voyage.Number, activityType cargo.HandlingEventType, location location.UNLocode) {
-	repository.Store(cargo.HandlingEvent{
-		TrackingID: trackingID,
-		Activity:   cargo.HandlingActivity{VoyageNumber: voyage, Type: activityType, Location: location},
+func storeEvent(r cargo.HandlingEventRepository, id cargo.TrackingID, voyage voyage.Number, typ cargo.HandlingEventType, loc location.UNLocode) {
+	r.Store(cargo.HandlingEvent{
+		TrackingID: id,
+		Activity: cargo.HandlingActivity{
+			VoyageNumber: voyage,
+			Type:         typ,
+			Location:     loc,
+		},
 	})
+}
+
+type mockCargoRepository struct {
+	cargo *cargo.Cargo
+}
+
+func (r *mockCargoRepository) Store(c *cargo.Cargo) error {
+	r.cargo = c
+	return nil
+}
+
+func (r *mockCargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
+	if r.cargo != nil {
+		return r.cargo, nil
+	}
+	return nil, cargo.ErrUnknown
+}
+
+func (r *mockCargoRepository) FindAll() []*cargo.Cargo {
+	return []*cargo.Cargo{r.cargo}
+}
+
+type mockHandlingEventRepository struct {
+	events map[cargo.TrackingID][]cargo.HandlingEvent
+}
+
+func (r *mockHandlingEventRepository) Store(e cargo.HandlingEvent) {
+	if _, ok := r.events[e.TrackingID]; !ok {
+		r.events[e.TrackingID] = make([]cargo.HandlingEvent, 0)
+	}
+	r.events[e.TrackingID] = append(r.events[e.TrackingID], e)
+}
+
+func (r *mockHandlingEventRepository) QueryHandlingHistory(id cargo.TrackingID) cargo.HandlingHistory {
+	return cargo.HandlingHistory{HandlingEvents: r.events[id]}
 }

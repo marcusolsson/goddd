@@ -4,69 +4,44 @@ import (
 	"testing"
 	"time"
 
-	. "gopkg.in/check.v1"
-
 	"github.com/marcusolsson/goddd/location"
 )
 
-func Test(t *testing.T) { TestingT(t) }
-
-type S struct{}
-
-var _ = Suite(&S{})
-
-func (s *S) TestConstruction(c *C) {
-	trackingID := NextTrackingID()
-	specification := RouteSpecification{
+func TestConstruction(t *testing.T) {
+	id := NextTrackingID()
+	spec := RouteSpecification{
 		Origin:          location.SESTO,
 		Destination:     location.AUMEL,
 		ArrivalDeadline: time.Date(2009, time.March, 13, 0, 0, 0, 0, time.UTC),
 	}
 
-	cargo := New(trackingID, specification)
+	c := New(id, spec)
 
-	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
-	c.Check(cargo.Delivery.TransportStatus, Equals, NotReceived)
-	c.Check(cargo.Delivery.LastKnownLocation, Equals, location.UNLocode(""))
+	if c.Delivery.RoutingStatus != NotRouted {
+		t.Errorf("RoutingStatus = %v; want = %v",
+			c.Delivery.RoutingStatus, NotRouted)
+	}
+	if c.Delivery.TransportStatus != NotReceived {
+		t.Errorf("TransportStatus = %v; want = %v",
+			c.Delivery.TransportStatus, NotReceived)
+	}
+	if c.Delivery.LastKnownLocation != "" {
+		t.Errorf("LastKnownLocation = %s; want = %s",
+			c.Delivery.LastKnownLocation, "")
+	}
 }
 
-func (s *S) TestEquality(c *C) {
-	spec1 := RouteSpecification{
-		Origin:      location.SESTO,
-		Destination: location.CNHKG,
-	}
-	spec2 := RouteSpecification{
-		Origin:      location.SESTO,
-		Destination: location.AUMEL,
+func TestRoutingStatus(t *testing.T) {
+	good := Itinerary{
+		Legs: []Leg{
+			{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+		},
 	}
 
-	c.Check(spec1, DeepEquals, spec1)
-	c.Check(spec1, Not(DeepEquals), spec2)
-
-	c1 := New("ABC", spec1)
-	c2 := New("CBA", spec1)
-	c3 := New("ABC", spec2)
-	c4 := New("ABC", spec1)
-
-	c.Check(c1.TrackingID, Equals, c4.TrackingID)
-	c.Check(c1.TrackingID, Equals, c3.TrackingID)
-	c.Check(c3.TrackingID, Equals, c4.TrackingID)
-	c.Check(c1.TrackingID, Not(Equals), c2.TrackingID)
-}
-
-func (s *S) TestRoutingStatus(c *C) {
-	cargo := New("ABC", RouteSpecification{})
-
-	good := Itinerary{Legs: make([]Leg, 1)}
-	good.Legs[0] = Leg{
-		LoadLocation:   location.SESTO,
-		UnloadLocation: location.AUMEL,
-	}
-
-	bad := Itinerary{Legs: make([]Leg, 1)}
-	bad.Legs[0] = Leg{
-		LoadLocation:   location.SESTO,
-		UnloadLocation: location.CNHKG,
+	bad := Itinerary{
+		Legs: []Leg{
+			{LoadLocation: location.SESTO, UnloadLocation: location.CNHKG},
+		},
 	}
 
 	acceptOnlyGood := RouteSpecification{
@@ -74,33 +49,54 @@ func (s *S) TestRoutingStatus(c *C) {
 		Destination: location.AUMEL,
 	}
 
-	cargo.SpecifyNewRoute(acceptOnlyGood)
-	c.Check(cargo.Delivery.RoutingStatus, Equals, NotRouted)
+	c := New("ABC", RouteSpecification{})
 
-	cargo.AssignToRoute(bad)
-	c.Check(cargo.Delivery.RoutingStatus, Equals, Misrouted)
+	c.SpecifyNewRoute(acceptOnlyGood)
+	if c.Delivery.RoutingStatus != NotRouted {
+		t.Errorf("RoutingStatus = %v; want = %v",
+			c.Delivery.RoutingStatus, NotRouted)
+	}
 
-	cargo.AssignToRoute(good)
-	c.Check(cargo.Delivery.RoutingStatus, Equals, Routed)
+	c.AssignToRoute(bad)
+	if c.Delivery.RoutingStatus != Misrouted {
+		t.Errorf("RoutingStatus = %v; want = %v",
+			c.Delivery.RoutingStatus, Misrouted)
+	}
+
+	c.AssignToRoute(good)
+	if c.Delivery.RoutingStatus != Routed {
+		t.Errorf("RoutingStatus = %v; want = %v",
+			c.Delivery.RoutingStatus, Routed)
+	}
 }
 
-func (s *S) TestLastKnownLocationUnknownWhenNoEvents(c *C) {
-	cargo := New("ABC", RouteSpecification{
+func TestLastKnownLocation_WhenNoEvents(t *testing.T) {
+	c := New("ABC", RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.CNHKG,
 	})
 
-	c.Check(location.UNLocode(""), Equals, cargo.Delivery.LastKnownLocation)
+	if c.Delivery.LastKnownLocation != "" {
+		t.Errorf("should be equal")
+	}
 }
 
-func (s *S) TestLastKnownLocationReceived(c *C) {
-	cargo := populateCargoReceivedInStockholm()
-	c.Check(location.SESTO, Equals, cargo.Delivery.LastKnownLocation)
+func TestLastKnownLocation_WhenReceived(t *testing.T) {
+	c := populateCargoReceivedInStockholm()
+
+	if c.Delivery.LastKnownLocation != location.SESTO {
+		t.Errorf("LastKnownLocation = %s; want = %s",
+			c.Delivery.LastKnownLocation, location.SESTO)
+	}
 }
 
-func (s *S) TestLastKnownLocationClaimed(c *C) {
-	cargo := populateCargoReceivedInStockholm()
-	c.Check(location.SESTO, Equals, cargo.Delivery.LastKnownLocation)
+func TestLastKnownLocation_WhenClaimed(t *testing.T) {
+	c := populateCargoClaimedInMelbourne()
+
+	if c.Delivery.LastKnownLocation != location.AUMEL {
+		t.Errorf("LastKnownLocation = %s; want = %s",
+			c.Delivery.LastKnownLocation, location.AUMEL)
+	}
 }
 
 var routingStatusTests = []struct {
@@ -113,9 +109,12 @@ var routingStatusTests = []struct {
 	{1000, ""},
 }
 
-func (s *S) TestRoutingStatusStringer(c *C) {
+func TestRoutingStatus_Stringer(t *testing.T) {
 	for _, tt := range routingStatusTests {
-		c.Check(tt.routingStatus.String(), Equals, tt.expected)
+		if tt.routingStatus.String() != tt.expected {
+			t.Errorf("routingStatus.String() = %s; want = %s",
+				tt.routingStatus.String(), tt.expected)
+		}
 	}
 }
 
@@ -131,52 +130,57 @@ var transportStatusTests = []struct {
 	{1000, ""},
 }
 
-func (s *S) TestTransportStatusStringer(c *C) {
+func TestTransportStatus_Stringer(t *testing.T) {
 	for _, tt := range transportStatusTests {
-		c.Check(tt.transportStatus.String(), Equals, tt.expected)
+		if tt.transportStatus.String() != tt.expected {
+			t.Errorf("transportStatus.String() = %s; want = %s",
+				tt.transportStatus.String(), tt.expected)
+		}
 	}
 }
 
 func populateCargoReceivedInStockholm() *Cargo {
-	cargo := New("XYZ", RouteSpecification{
+	c := New("XYZ", RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.AUMEL,
 	})
 
 	e := HandlingEvent{
-		TrackingID: cargo.TrackingID,
+		TrackingID: c.TrackingID,
 		Activity: HandlingActivity{
 			Type:     Receive,
 			Location: location.SESTO,
 		},
 	}
 
-	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}
-	history.HandlingEvents = append(history.HandlingEvents, e)
+	hh := HandlingHistory{
+		HandlingEvents: []HandlingEvent{e},
+	}
 
-	cargo.DeriveDeliveryProgress(history)
+	c.DeriveDeliveryProgress(hh)
 
-	return cargo
+	return c
 }
 
 func populateCargoClaimedInMelbourne() *Cargo {
-	cargo := New("XYZ", RouteSpecification{
+	c := New("XYZ", RouteSpecification{
 		Origin:      location.SESTO,
 		Destination: location.AUMEL,
 	})
 
 	e := HandlingEvent{
-		TrackingID: cargo.TrackingID,
+		TrackingID: c.TrackingID,
 		Activity: HandlingActivity{
 			Type:     Claim,
 			Location: location.AUMEL,
 		},
 	}
 
-	history := HandlingHistory{HandlingEvents: make([]HandlingEvent, 0)}
-	history.HandlingEvents = append(history.HandlingEvents, e)
+	hh := HandlingHistory{
+		HandlingEvents: []HandlingEvent{e},
+	}
 
-	cargo.DeriveDeliveryProgress(history)
+	c.DeriveDeliveryProgress(hh)
 
-	return cargo
+	return c
 }

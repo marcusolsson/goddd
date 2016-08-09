@@ -1,94 +1,77 @@
 package cargo
 
 import (
-	. "gopkg.in/check.v1"
+	"reflect"
+	"testing"
 
 	"github.com/marcusolsson/goddd/location"
 )
 
-func (s *S) TestCreateEmptyItinerary(c *C) {
-	emptyItinerary := Itinerary{}
+func TestItinerary_CreateEmpty(t *testing.T) {
+	i := Itinerary{}
 
-	var emptyLegs []Leg
+	var legs []Leg
 
-	c.Check(emptyItinerary.Legs, DeepEquals, emptyLegs)
-	c.Check(emptyItinerary.InitialDepartureLocation(), Equals, location.UNLocode(""))
-	c.Check(emptyItinerary.FinalArrivalLocation(), Equals, location.UNLocode(""))
+	if !reflect.DeepEqual(i.Legs, legs) {
+		t.Errorf("should be equal")
+	}
+	if i.InitialDepartureLocation() != "" {
+		t.Errorf("InitialDepartureLocation() = %s; want = %s",
+			i.InitialDepartureLocation(), "")
+	}
+	if i.FinalArrivalLocation() != "" {
+		t.Errorf("FinalArrivalLocation() = %s; want = %s",
+			i.FinalArrivalLocation(), "")
+	}
 }
 
-func (s *S) TestItineraryEquality(c *C) {
+func TestItinerary_IsExpected_EmptyItinerary(t *testing.T) {
+	i := Itinerary{}
+	e := HandlingEvent{}
 
-	i1 := Itinerary{Legs: []Leg{
-		{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
-	}}
-
-	i2 := Itinerary{Legs: []Leg{
-		{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
-	}}
-
-	i3 := Itinerary{Legs: []Leg{
-		{LoadLocation: location.CNHKG, UnloadLocation: location.AUMEL},
-		{LoadLocation: location.AUMEL, UnloadLocation: location.SESTO},
-	}}
-
-	c.Check(i1, DeepEquals, i1)
-	c.Check(i1, DeepEquals, i2)
-	c.Check(i1, Not(DeepEquals), i3)
-	c.Check(i2, Not(DeepEquals), i3)
+	if got, want := i.IsExpected(e), true; got != want {
+		t.Errorf("IsExpected() = %v; want = %v", got, want)
+	}
 }
 
-func (s *S) TestLegEquality(c *C) {
-	l1 := Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL}
-	l2 := Leg{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL}
-	l3 := Leg{LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG}
-
-	c.Check(l1, DeepEquals, l1)
-	c.Check(l1, DeepEquals, l2)
-	c.Check(l1, Not(DeepEquals), l3)
-	c.Check(l2, Not(DeepEquals), l3)
+type eventExpectedTest struct {
+	act HandlingActivity
+	exp bool
 }
 
-func (s *S) TestItineraryIsExpected(c *C) {
+var eventExpectedTests = []eventExpectedTest{
+	{HandlingActivity{}, true},
+	{HandlingActivity{Type: Receive, Location: location.SESTO}, true},
+	{HandlingActivity{Type: Receive, Location: location.AUMEL}, false},
+	{HandlingActivity{Type: Load, Location: location.AUMEL, VoyageNumber: "001A"}, true},
+	{HandlingActivity{Type: Load, Location: location.CNHKG, VoyageNumber: "001A"}, false},
+	{HandlingActivity{Type: Unload, Location: location.CNHKG, VoyageNumber: "001A"}, true},
+	{HandlingActivity{Type: Unload, Location: location.SESTO, VoyageNumber: "001A"}, false},
+	{HandlingActivity{Type: Claim, Location: location.CNHKG}, true},
+	{HandlingActivity{Type: Claim, Location: location.SESTO}, false},
+}
 
-	emptyItinerary := Itinerary{}
-	emptyEvent := HandlingEvent{}
-
-	c.Check(emptyItinerary.IsExpected(emptyEvent), Equals, true)
-
+func TestItinerary_IsExpected(t *testing.T) {
 	i := Itinerary{Legs: []Leg{
-		{VoyageNumber: "001A", LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
-		{VoyageNumber: "001A", LoadLocation: location.AUMEL, UnloadLocation: location.CNHKG},
+		{
+			VoyageNumber:   "001A",
+			LoadLocation:   location.SESTO,
+			UnloadLocation: location.AUMEL,
+		},
+		{
+			VoyageNumber:   "001A",
+			LoadLocation:   location.AUMEL,
+			UnloadLocation: location.CNHKG,
+		},
 	}}
 
-	c.Check(i.IsExpected(emptyEvent), Equals, true)
+	for _, tt := range eventExpectedTests {
+		e := HandlingEvent{
+			Activity: tt.act,
+		}
 
-	var (
-		receiveEvent              = HandlingEvent{Activity: HandlingActivity{Type: Receive, Location: location.SESTO}}
-		receiveEventWrongLocation = HandlingEvent{Activity: HandlingActivity{Type: Receive, Location: location.AUMEL}}
-	)
-	c.Check(i.IsExpected(receiveEvent), Equals, true)
-	c.Check(i.IsExpected(receiveEventWrongLocation), Equals, false)
-
-	var (
-		loadEvent              = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Load, Location: location.AUMEL}}
-		loadEventWrongLocation = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Load, Location: location.CNHKG}}
-	)
-	c.Check(i.IsExpected(loadEvent), Equals, true)
-	c.Check(i.IsExpected(loadEventWrongLocation), Equals, false)
-
-	var (
-		unloadEvent              = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Unload, Location: location.CNHKG}}
-		unloadEventWrongLocation = HandlingEvent{Activity: HandlingActivity{VoyageNumber: "001A", Type: Unload, Location: location.SESTO}}
-	)
-	c.Check(i.IsExpected(unloadEvent), Equals, true)
-	c.Check(i.IsExpected(unloadEventWrongLocation), Equals, false)
-
-	var (
-		claimEvent              = HandlingEvent{Activity: HandlingActivity{Type: Claim, Location: location.CNHKG}}
-		claimEventWrongLocation = HandlingEvent{Activity: HandlingActivity{Type: Claim, Location: location.SESTO}}
-	)
-	c.Check(i.IsExpected(claimEvent), Equals, true)
-	c.Check(i.IsExpected(claimEventWrongLocation), Equals, false)
+		if got := i.IsExpected(e); got != tt.exp {
+			t.Errorf("IsExpected() = %v; want = %v", got, tt.exp)
+		}
+	}
 }

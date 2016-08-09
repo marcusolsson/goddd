@@ -13,28 +13,31 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/inmem"
+	"github.com/marcusolsson/goddd/mock"
 )
 
-func TestTrackTrackCargo(t *testing.T) {
-	var (
-		cargos         = inmem.NewCargoRepository()
-		handlingEvents = inmem.NewHandlingEventRepository()
-		service        = NewService(cargos, handlingEvents)
-	)
+func TestTrackCargo(t *testing.T) {
+	cargos := &mockCargoRepository{}
+	events := &mock.HandlingEventRepository{
+		QueryHandlingHistoryFn: func(cargo.TrackingID) cargo.HandlingHistory {
+			return cargo.HandlingHistory{}
+		},
+	}
+	s := NewService(cargos, events)
 
 	c := cargo.New("TEST", cargo.RouteSpecification{
 		Origin:          "SESTO",
 		Destination:     "FIHEL",
 		ArrivalDeadline: time.Date(2005, 12, 4, 0, 0, 0, 0, time.UTC),
 	})
+
 	cargos.Store(c)
 
 	ctx := context.Background()
 
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := MakeHandler(ctx, service, logger)
+	h := MakeHandler(ctx, s, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/TEST", nil)
 	rec := httptest.NewRecorder()
@@ -77,17 +80,20 @@ func TestTrackTrackCargo(t *testing.T) {
 }
 
 func TestTrackUnknownCargo(t *testing.T) {
-	var (
-		cargos         = inmem.NewCargoRepository()
-		handlingEvents = inmem.NewHandlingEventRepository()
-		service        = NewService(cargos, handlingEvents)
-	)
+	cargos := &mockCargoRepository{}
+	events := &mock.HandlingEventRepository{
+		QueryHandlingHistoryFn: func(cargo.TrackingID) cargo.HandlingHistory {
+			return cargo.HandlingHistory{}
+		},
+	}
+
+	s := NewService(cargos, events)
 
 	ctx := context.Background()
 
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := MakeHandler(ctx, service, logger)
+	h := MakeHandler(ctx, s, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/not_found", nil)
 	rec := httptest.NewRecorder()
@@ -115,4 +121,24 @@ func TestTrackUnknownCargo(t *testing.T) {
 	if err != "unknown cargo" {
 		t.Errorf(`"error": %q; want = %q`, err, "unknown cargo")
 	}
+}
+
+type mockCargoRepository struct {
+	cargo *cargo.Cargo
+}
+
+func (r *mockCargoRepository) Store(c *cargo.Cargo) error {
+	r.cargo = c
+	return nil
+}
+
+func (r *mockCargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
+	if r.cargo != nil {
+		return r.cargo, nil
+	}
+	return nil, cargo.ErrUnknown
+}
+
+func (r *mockCargoRepository) FindAll() []*cargo.Cargo {
+	return []*cargo.Cargo{r.cargo}
 }

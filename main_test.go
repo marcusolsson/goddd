@@ -1,5 +1,3 @@
-// +build integration
-
 package main
 
 import (
@@ -7,14 +5,13 @@ import (
 	"time"
 
 	. "gopkg.in/check.v1"
-	"gopkg.in/mgo.v2"
 
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
+	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/mongo"
 	"github.com/marcusolsson/goddd/voyage"
 )
 
@@ -25,25 +22,13 @@ type S struct{}
 var _ = Suite(&S{})
 
 func (s *S) TestCargoFromHongkongToStockholm(chk *C) {
-	dbname := "dddsample_test"
-
 	var err error
 
-	session, err := mgo.Dial("127.0.0.1")
-	if err != nil {
-		panic(err)
-	}
-	defer session.Close()
-
-	session.SetMode(mgo.Monotonic, true)
-
-	session.DB(dbname).DropDatabase()
-
 	var (
-		cargoRepository, _      = mongo.NewCargoRepository(dbname, session)
-		locationRepository, _   = mongo.NewLocationRepository(dbname, session)
-		voyageRepository, _     = mongo.NewVoyageRepository(dbname, session)
-		handlingEventRepository = mongo.NewHandlingEventRepository(dbname, session)
+		cargoRepository         = inmem.NewCargoRepository()
+		locationRepository      = inmem.NewLocationRepository()
+		voyageRepository        = inmem.NewVoyageRepository()
+		handlingEventRepository = inmem.NewHandlingEventRepository()
 	)
 
 	handlingEventFactory := cargo.HandlingEventFactory{

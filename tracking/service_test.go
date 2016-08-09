@@ -18,21 +18,21 @@ func TestTrack(t *testing.T) {
 		},
 	}
 
-	handlingEvents := &mock.HandlingEventRepository{
+	events := &mock.HandlingEventRepository{
 		QueryHandlingHistoryFn: func(id cargo.TrackingID) cargo.HandlingHistory {
 			return cargo.HandlingHistory{}
 		},
 	}
 
-	ts := NewService(cargos, handlingEvents)
+	s := NewService(cargos, events)
 
-	c, err := ts.Track("FTL456")
+	c, err := s.Track("FTL456")
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if c.TrackingID != "FTL456" {
-		t.Errorf("c.TrackingID = %v; want = %v", c.TrackingID, "ABC123")
+		t.Errorf("c.TrackingID = %v; want = %v", c.TrackingID, "FTL456")
 	}
 	if c.Origin != "AUMEL" {
 		t.Errorf("c.Origin = %v; want = %v", c.Destination, "AUMEL")
@@ -40,7 +40,7 @@ func TestTrack(t *testing.T) {
 	if c.Destination != "SESTO" {
 		t.Errorf("c.Destination = %v; want = %v", c.Destination, "SESTO")
 	}
-	if c.StatusText != "Not received" {
-		t.Errorf("c.StatusText = %v; want = %v", c.StatusText, "Not received")
+	if c.StatusText != cargo.NotReceived.String() {
+		t.Errorf("c.StatusText = %v; want = %v", c.StatusText, cargo.NotReceived.String())
 	}
 }

@@ -4,55 +4,53 @@ import (
 	"testing"
 	"time"
 
-	. "gopkg.in/check.v1"
-
 	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/location"
+	"github.com/marcusolsson/goddd/mock"
 )
 
-func Test(t *testing.T) { TestingT(t) }
-
-type S struct{}
-
-var _ = Suite(&S{})
-
-func (s *S) TestBookNewCargo(c *C) {
-
+func TestBookNewCargo(t *testing.T) {
 	var (
-		cargoRepository    = inmem.NewCargoRepository()
-		locationRepository = inmem.NewLocationRepository()
-		handlingEvents     = inmem.NewHandlingEventRepository()
+		origin      = location.SESTO
+		destination = location.AUMEL
+		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
-	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, nil)
+	cargos := &mockCargoRepository{}
 
-	origin, destination := location.SESTO, location.AUMEL
-	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+	s := NewService(cargos, nil, nil, nil)
 
-	trackingID, err := bookingService.BookNewCargo(origin, destination, arrivalDeadline)
+	id, err := s.BookNewCargo(origin, destination, deadline)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	c.Assert(err, IsNil)
+	c, err := cargos.Find(id)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	cargo, err := cargoRepository.Find(trackingID)
-
-	c.Assert(err, IsNil)
-
-	c.Check(trackingID, Equals, cargo.TrackingID)
-	c.Check(location.SESTO, Equals, cargo.Origin)
-	c.Check(location.AUMEL, Equals, cargo.RouteSpecification.Destination)
-	c.Check(arrivalDeadline, Equals, cargo.RouteSpecification.ArrivalDeadline)
+	if c.TrackingID != id {
+		t.Errorf("c.TrackingID = %s; want = %s", c.TrackingID, id)
+	}
+	if c.Origin != origin {
+		t.Errorf("c.Origin = %s; want = %s", c.Origin, origin)
+	}
+	if c.RouteSpecification.Destination != destination {
+		t.Errorf("c.RouteSpecification.Destination = %s; want = %s",
+			c.RouteSpecification.Destination, destination)
+	}
+	if c.RouteSpecification.ArrivalDeadline != deadline {
+		t.Errorf("c.RouteSpecification.ArrivalDeadline = %s; want = %s",
+			c.RouteSpecification.ArrivalDeadline, deadline)
+	}
 }
 
 type stubRoutingService struct{}
 
 func (s *stubRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
-
 	legs := []cargo.Leg{
-		{
-			LoadLocation:   rs.Origin,
-			UnloadLocation: rs.Destination,
-		},
+		{LoadLocation: rs.Origin, UnloadLocation: rs.Destination},
 	}
 
 	return []cargo.Itinerary{
@@ -60,91 +58,138 @@ func (s *stubRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecifica
 	}
 }
 
-func (s *S) TestRequestPossibleRoutesForCargo(c *C) {
-
+func TestRequestPossibleRoutesForCargo(t *testing.T) {
 	var (
-		cargoRepository    = inmem.NewCargoRepository()
-		locationRepository = inmem.NewLocationRepository()
-		handlingEvents     = inmem.NewHandlingEventRepository()
-		routingService     = &stubRoutingService{}
+		origin      = location.SESTO
+		destination = location.AUMEL
+		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
-	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, routingService)
+	cargos := &mockCargoRepository{}
+	rs := &stubRoutingService{}
 
-	origin, destination := location.Stockholm, location.Melbourne
-	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+	s := NewService(cargos, nil, nil, rs)
 
-	c.Check(bookingService.RequestPossibleRoutesForCargo("no_such_id"), Not(IsNil))
+	r := s.RequestPossibleRoutesForCargo("no_such_id")
 
-	trackingID, err := bookingService.BookNewCargo(origin.UNLocode, destination.UNLocode, arrivalDeadline)
+	if len(r) != 0 {
+		t.Errorf("len(r) = %d; want = %d", len(r), 0)
+	}
 
-	c.Assert(err, IsNil)
+	id, err := s.BookNewCargo(origin, destination, deadline)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	itineraries := bookingService.RequestPossibleRoutesForCargo(trackingID)
+	i := s.RequestPossibleRoutesForCargo(id)
 
-	c.Check(itineraries, HasLen, 1)
+	if len(i) != 1 {
+		t.Errorf("len(i) = %d; want = %d", len(i), 1)
+	}
 }
 
-func (s *S) TestAssignCargoToRoute(c *C) {
+func TestAssignCargoToRoute(t *testing.T) {
+	cargos := &mockCargoRepository{}
+
+	rs := &stubRoutingService{}
+
+	s := NewService(cargos, nil, nil, rs)
+
 	var (
-		cargoRepository    = inmem.NewCargoRepository()
-		locationRepository = inmem.NewLocationRepository()
-		handlingEvents     = inmem.NewHandlingEventRepository()
-		routingService     = &stubRoutingService{}
+		origin      = location.SESTO
+		destination = location.AUMEL
+		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
-	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, routingService)
+	id, err := s.BookNewCargo(origin, destination, deadline)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	origin, destination := location.Stockholm, location.Melbourne
-	arrivalDeadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+	i := s.RequestPossibleRoutesForCargo(id)
 
-	trackingID, err := bookingService.BookNewCargo(origin.UNLocode, destination.UNLocode, arrivalDeadline)
+	if len(i) != 1 {
+		t.Errorf("len(i) = %d; want = %d", len(i), 1)
+	}
 
-	c.Assert(err, IsNil)
+	if err := s.AssignCargoToRoute(id, i[0]); err != nil {
+		t.Fatal(err)
+	}
 
-	itineraries := bookingService.RequestPossibleRoutesForCargo(trackingID)
-
-	c.Assert(itineraries, HasLen, 1)
-
-	err = bookingService.AssignCargoToRoute(trackingID, itineraries[0])
-
-	c.Assert(err, IsNil)
-
-	c.Assert(bookingService.AssignCargoToRoute("no_such_id", cargo.Itinerary{}), Not(IsNil))
+	if err := s.AssignCargoToRoute("no_such_id", cargo.Itinerary{}); err != ErrInvalidArgument {
+		t.Errorf("err = %s; want = %s", err, ErrInvalidArgument)
+	}
 }
 
-func (s *S) TestChangeCargoDestination(c *C) {
-	var (
-		cargoRepository    = inmem.NewCargoRepository()
-		locationRepository = inmem.NewLocationRepository()
-		handlingEvents     = inmem.NewHandlingEventRepository()
-		routingService     = &stubRoutingService{}
-	)
+func TestChangeCargoDestination(t *testing.T) {
+	cargos := &mockCargoRepository{}
+	locations := &mock.LocationRepository{
+		FindFn: func(loc location.UNLocode) (location.Location, error) {
+			if loc != location.AUMEL {
+				return location.Location{}, location.ErrUnknown
+			}
+			return location.Melbourne, nil
+		},
+	}
 
-	var bookingService = NewService(cargoRepository, locationRepository, handlingEvents, routingService)
+	rs := &stubRoutingService{}
 
-	c1 := cargo.New("ABC", cargo.RouteSpecification{
-		Origin:          location.Stockholm.UNLocode,
-		Destination:     location.Hongkong.UNLocode,
+	s := NewService(cargos, locations, nil, rs)
+
+	c := cargo.New("ABC", cargo.RouteSpecification{
+		Origin:          location.SESTO,
+		Destination:     location.CNHKG,
 		ArrivalDeadline: time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC),
 	})
 
-	c.Check(bookingService.ChangeDestination("no_such_id", location.Stockholm.UNLocode), Not(IsNil))
+	if err := s.ChangeDestination("no_such_id", location.SESTO); err != cargo.ErrUnknown {
+		t.Errorf("err = %s; want = %s", err, cargo.ErrUnknown)
+	}
 
-	var err error
+	if err := cargos.Store(c); err != nil {
+		t.Fatal(err)
+	}
 
-	err = cargoRepository.Store(c1)
-	c.Assert(err, IsNil)
+	if err := s.ChangeDestination(c.TrackingID, "no_such_unlocode"); err != location.ErrUnknown {
+		t.Errorf("err = %s; want = %s", err, location.ErrUnknown)
+	}
 
-	c.Check(bookingService.ChangeDestination(c1.TrackingID, "no_such_unlocode"), Not(IsNil))
+	if c.RouteSpecification.Destination != location.CNHKG {
+		t.Errorf("c.RouteSpecification.Destination = %s; want = %s",
+			c.RouteSpecification.Destination, location.CNHKG)
+	}
 
-	c.Assert(c1.RouteSpecification.Destination, Equals, location.CNHKG)
+	if err := s.ChangeDestination(c.TrackingID, location.AUMEL); err != nil {
+		t.Fatal(err)
+	}
 
-	err = bookingService.ChangeDestination(c1.TrackingID, location.AUMEL)
-	c.Assert(err, IsNil)
+	uc, err := cargos.Find(c.TrackingID)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	updatedCargo, err := cargoRepository.Find(c1.TrackingID)
+	if uc.RouteSpecification.Destination != location.AUMEL {
+		t.Errorf("uc.RouteSpecification.Destination = %s; want = %s",
+			uc.RouteSpecification.Destination, location.AUMEL)
+	}
+}
 
-	c.Assert(err, IsNil)
-	c.Assert(updatedCargo.RouteSpecification.Destination, Equals, location.AUMEL)
+type mockCargoRepository struct {
+	cargo *cargo.Cargo
+}
+
+func (r *mockCargoRepository) Store(c *cargo.Cargo) error {
+	r.cargo = c
+	return nil
+}
+
+func (r *mockCargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
+	if r.cargo != nil {
+		return r.cargo, nil
+	}
+	return nil, cargo.ErrUnknown
+}
+
+func (r *mockCargoRepository) FindAll() []*cargo.Cargo {
+	return []*cargo.Cargo{r.cargo}
 }
