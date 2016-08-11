@@ -42,7 +42,7 @@ docker run --name some-goddd \
   --link some-pathfinder:pathfinder \
   -p 8080:8080 \
   -e ROUTINGSERVICE_URL=http://pathfinder:8080 \
-  marcusolsson/goddd
+  marcusolsson/goddd /goddd -inmem
 ```
 
 ... or if you're using Docker Compose:
