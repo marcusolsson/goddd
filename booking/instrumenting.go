@@ -24,14 +24,14 @@ func NewInstrumentingService(counter metrics.Counter, latency metrics.TimeHistog
 	}
 }
 
-func (s *instrumentingService) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
+func (s *instrumentingService) BookNewCargo(origin, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error) {
 	defer func(begin time.Time) {
 		methodField := metrics.Field{Key: "method", Value: "book"}
 		s.requestCount.With(methodField).Add(1)
 		s.requestLatency.With(methodField).Observe(time.Since(begin))
 	}(time.Now())
 
-	return s.Service.BookNewCargo(origin, destination, arrivalDeadline)
+	return s.Service.BookNewCargo(origin, destination, deadline)
 }
 
 func (s *instrumentingService) LoadCargo(id cargo.TrackingID) (c Cargo, err error) {

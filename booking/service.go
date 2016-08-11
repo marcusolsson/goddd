@@ -18,21 +18,21 @@ var ErrInvalidArgument = errors.New("invalid argument")
 type Service interface {
 	// BookNewCargo registers a new cargo in the tracking system, not yet
 	// routed.
-	BookNewCargo(origin location.UNLocode, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error)
+	BookNewCargo(origin location.UNLocode, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error)
 
 	// LoadCargo returns a read model of a cargo.
-	LoadCargo(trackingID cargo.TrackingID) (Cargo, error)
+	LoadCargo(id cargo.TrackingID) (Cargo, error)
 
 	// RequestPossibleRoutesForCargo requests a list of itineraries describing
 	// possible routes for this cargo.
-	RequestPossibleRoutesForCargo(trackingID cargo.TrackingID) []cargo.Itinerary
+	RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary
 
 	// AssignCargoToRoute assigns a cargo to the route specified by the
 	// itinerary.
-	AssignCargoToRoute(trackingID cargo.TrackingID, itinerary cargo.Itinerary) error
+	AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itinerary) error
 
 	// ChangeDestination changes the destination of a cargo.
-	ChangeDestination(trackingID cargo.TrackingID, unLocode location.UNLocode) error
+	ChangeDestination(id cargo.TrackingID, destination location.UNLocode) error
 
 	// Cargos returns a list of all cargos that have been booked.
 	Cargos() []Cargo
@@ -63,8 +63,8 @@ func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itiner
 	return s.cargos.Store(c)
 }
 
-func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDeadline time.Time) (cargo.TrackingID, error) {
-	if origin == "" || destination == "" || arrivalDeadline.IsZero() {
+func (s *service) BookNewCargo(origin, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error) {
+	if origin == "" || destination == "" || deadline.IsZero() {
 		return "", ErrInvalidArgument
 	}
 
@@ -72,7 +72,7 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDea
 	rs := cargo.RouteSpecification{
 		Origin:          origin,
 		Destination:     destination,
-		ArrivalDeadline: arrivalDeadline,
+		ArrivalDeadline: deadline,
 	}
 
 	c := cargo.New(id, rs)
@@ -84,12 +84,12 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, arrivalDea
 	return c.TrackingID, nil
 }
 
-func (s *service) LoadCargo(trackingID cargo.TrackingID) (Cargo, error) {
-	if trackingID == "" {
+func (s *service) LoadCargo(id cargo.TrackingID) (Cargo, error) {
+	if id == "" {
 		return Cargo{}, ErrInvalidArgument
 	}
 
-	c, err := s.cargos.Find(trackingID)
+	c, err := s.cargos.Find(id)
 	if err != nil {
 		return Cargo{}, err
 	}
@@ -158,11 +158,11 @@ func (s *service) Locations() []Location {
 }
 
 // NewService creates a booking service with necessary dependencies.
-func NewService(cr cargo.Repository, lr location.Repository, her cargo.HandlingEventRepository, rs routing.Service) Service {
+func NewService(cargos cargo.Repository, locations location.Repository, events cargo.HandlingEventRepository, rs routing.Service) Service {
 	return &service{
-		cargos:         cr,
-		locations:      lr,
-		handlingEvents: her,
+		cargos:         cargos,
+		locations:      locations,
+		handlingEvents: events,
 		routingService: rs,
 	}
 }
@@ -184,7 +184,7 @@ type Cargo struct {
 	TrackingID      string      `json:"tracking_id"`
 }
 
-func assemble(c *cargo.Cargo, her cargo.HandlingEventRepository) Cargo {
+func assemble(c *cargo.Cargo, events cargo.HandlingEventRepository) Cargo {
 	return Cargo{
 		TrackingID:      string(c.TrackingID),
 		Origin:          string(c.Origin),

@@ -25,7 +25,7 @@ func NewInstrumentingService(counter metrics.Counter, latency metrics.TimeHistog
 	}
 }
 
-func (s *instrumentingService) RegisterHandlingEvent(completionTime time.Time, trackingID cargo.TrackingID, voyage voyage.Number,
+func (s *instrumentingService) RegisterHandlingEvent(completed time.Time, id cargo.TrackingID, voyageNumber voyage.Number,
 	loc location.UNLocode, eventType cargo.HandlingEventType) error {
 
 	defer func(begin time.Time) {
@@ -34,5 +34,5 @@ func (s *instrumentingService) RegisterHandlingEvent(completionTime time.Time, t
 		s.requestLatency.With(methodField).Observe(time.Since(begin))
 	}(time.Now())
 
-	return s.Service.RegisterHandlingEvent(completionTime, trackingID, voyage, loc, eventType)
+	return s.Service.RegisterHandlingEvent(completed, id, voyageNumber, loc, eventType)
 }

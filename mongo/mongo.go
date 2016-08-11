@@ -24,14 +24,14 @@ func (r *cargoRepository) Store(cargo *cargo.Cargo) error {
 	return err
 }
 
-func (r *cargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
+func (r *cargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("cargo")
 
 	var result cargo.Cargo
-	if err := c.Find(bson.M{"trackingid": trackingID}).One(&result); err != nil {
+	if err := c.Find(bson.M{"trackingid": id}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, cargo.ErrUnknown
 		}
@@ -258,14 +258,14 @@ func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
 	_ = c.Insert(e)
 }
 
-func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
+func (r *handlingEventRepository) QueryHandlingHistory(id cargo.TrackingID) cargo.HandlingHistory {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("handling_event")
 
 	var result []cargo.HandlingEvent
-	_ = c.Find(bson.M{"trackingid": trackingID}).All(&result)
+	_ = c.Find(bson.M{"trackingid": id}).All(&result)
 
 	return cargo.HandlingHistory{HandlingEvents: result}
 }

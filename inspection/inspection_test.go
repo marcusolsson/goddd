@@ -80,9 +80,9 @@ func TestInspectUnloadedCargo(t *testing.T) {
 	handler := stubEventHandler{make([]interface{}, 0)}
 
 	s := &service{
-		cargoRepository:         &cargos,
-		handlingEventRepository: &events,
-		cargoEventHandler:       &handler,
+		cargos:  &cargos,
+		events:  &events,
+		handler: &handler,
 	}
 
 	id := cargo.TrackingID("ABC123")
@@ -117,11 +117,11 @@ func TestInspectUnloadedCargo(t *testing.T) {
 	}
 }
 
-func storeEvent(r cargo.HandlingEventRepository, id cargo.TrackingID, voyage voyage.Number, typ cargo.HandlingEventType, loc location.UNLocode) {
+func storeEvent(r cargo.HandlingEventRepository, id cargo.TrackingID, voyageNumber voyage.Number, typ cargo.HandlingEventType, loc location.UNLocode) {
 	e := cargo.HandlingEvent{
 		TrackingID: id,
 		Activity: cargo.HandlingActivity{
-			VoyageNumber: voyage,
+			VoyageNumber: voyageNumber,
 			Type:         typ,
 			Location:     loc,
 		},

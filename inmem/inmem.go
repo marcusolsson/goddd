@@ -21,10 +21,10 @@ func (r *cargoRepository) Store(c *cargo.Cargo) error {
 	return nil
 }
 
-func (r *cargoRepository) Find(trackingID cargo.TrackingID) (*cargo.Cargo, error) {
+func (r *cargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	if val, ok := r.cargos[trackingID]; ok {
+	if val, ok := r.cargos[id]; ok {
 		return val, nil
 	}
 	return nil, cargo.ErrUnknown
@@ -128,10 +128,10 @@ func (r *handlingEventRepository) Store(e cargo.HandlingEvent) {
 	r.events[e.TrackingID] = append(r.events[e.TrackingID], e)
 }
 
-func (r *handlingEventRepository) QueryHandlingHistory(trackingID cargo.TrackingID) cargo.HandlingHistory {
+func (r *handlingEventRepository) QueryHandlingHistory(id cargo.TrackingID) cargo.HandlingHistory {
 	r.mtx.RLock()
 	defer r.mtx.RUnlock()
-	return cargo.HandlingHistory{HandlingEvents: r.events[trackingID]}
+	return cargo.HandlingHistory{HandlingEvents: r.events[id]}
 }
 
 // NewHandlingEventRepository returns a new instance of a in-memory handling event repository.
