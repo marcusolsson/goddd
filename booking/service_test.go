@@ -16,9 +16,9 @@ func TestBookNewCargo(t *testing.T) {
 		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
-	cargos := &mockCargoRepository{}
+	var cargos mockCargoRepository
 
-	s := NewService(cargos, nil, nil, nil)
+	s := NewService(&cargos, nil, nil, nil)
 
 	id, err := s.BookNewCargo(origin, destination, deadline)
 	if err != nil {
@@ -65,10 +65,11 @@ func TestRequestPossibleRoutesForCargo(t *testing.T) {
 		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
-	cargos := &mockCargoRepository{}
-	rs := &stubRoutingService{}
+	var cargos mockCargoRepository
 
-	s := NewService(cargos, nil, nil, rs)
+	var rs stubRoutingService
+
+	s := NewService(&cargos, nil, nil, &rs)
 
 	r := s.RequestPossibleRoutesForCargo("no_such_id")
 
@@ -89,11 +90,11 @@ func TestRequestPossibleRoutesForCargo(t *testing.T) {
 }
 
 func TestAssignCargoToRoute(t *testing.T) {
-	cargos := &mockCargoRepository{}
+	var cargos mockCargoRepository
 
-	rs := &stubRoutingService{}
+	var rs stubRoutingService
 
-	s := NewService(cargos, nil, nil, rs)
+	s := NewService(&cargos, nil, nil, &rs)
 
 	var (
 		origin      = location.SESTO
@@ -122,19 +123,19 @@ func TestAssignCargoToRoute(t *testing.T) {
 }
 
 func TestChangeCargoDestination(t *testing.T) {
-	cargos := &mockCargoRepository{}
-	locations := &mock.LocationRepository{
-		FindFn: func(loc location.UNLocode) (location.Location, error) {
-			if loc != location.AUMEL {
-				return location.Location{}, location.ErrUnknown
-			}
-			return location.Melbourne, nil
-		},
+	var cargos mockCargoRepository
+	var locations mock.LocationRepository
+
+	locations.FindFn = func(loc location.UNLocode) (location.Location, error) {
+		if loc != location.AUMEL {
+			return location.Location{}, location.ErrUnknown
+		}
+		return location.Melbourne, nil
 	}
 
-	rs := &stubRoutingService{}
+	var rs stubRoutingService
 
-	s := NewService(cargos, locations, nil, rs)
+	s := NewService(&cargos, &locations, nil, &rs)
 
 	c := cargo.New("ABC", cargo.RouteSpecification{
 		Origin:          location.SESTO,

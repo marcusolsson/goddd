@@ -17,13 +17,14 @@ import (
 )
 
 func TestTrackCargo(t *testing.T) {
-	cargos := &mockCargoRepository{}
-	events := &mock.HandlingEventRepository{
-		QueryHandlingHistoryFn: func(cargo.TrackingID) cargo.HandlingHistory {
-			return cargo.HandlingHistory{}
-		},
+	var cargos mockCargoRepository
+
+	var events mock.HandlingEventRepository
+	events.QueryHandlingHistoryFn = func(cargo.TrackingID) cargo.HandlingHistory {
+		return cargo.HandlingHistory{}
 	}
-	s := NewService(cargos, events)
+
+	s := NewService(&cargos, &events)
 
 	c := cargo.New("TEST", cargo.RouteSpecification{
 		Origin:          "SESTO",
@@ -80,14 +81,14 @@ func TestTrackCargo(t *testing.T) {
 }
 
 func TestTrackUnknownCargo(t *testing.T) {
-	cargos := &mockCargoRepository{}
-	events := &mock.HandlingEventRepository{
-		QueryHandlingHistoryFn: func(cargo.TrackingID) cargo.HandlingHistory {
-			return cargo.HandlingHistory{}
-		},
+	var cargos mockCargoRepository
+
+	var events mock.HandlingEventRepository
+	events.QueryHandlingHistoryFn = func(cargo.TrackingID) cargo.HandlingHistory {
+		return cargo.HandlingHistory{}
 	}
 
-	s := NewService(cargos, events)
+	s := NewService(&cargos, &events)
 
 	ctx := context.Background()
 

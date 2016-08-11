@@ -9,22 +9,20 @@ import (
 )
 
 func TestTrack(t *testing.T) {
-	cargos := &mock.CargoRepository{
-		FindFn: func(id cargo.TrackingID) (*cargo.Cargo, error) {
-			return cargo.New("FTL456", cargo.RouteSpecification{
-				Origin:      location.AUMEL,
-				Destination: location.SESTO,
-			}), nil
-		},
+	var cargos mock.CargoRepository
+	cargos.FindFn = func(id cargo.TrackingID) (*cargo.Cargo, error) {
+		return cargo.New("FTL456", cargo.RouteSpecification{
+			Origin:      location.AUMEL,
+			Destination: location.SESTO,
+		}), nil
 	}
 
-	events := &mock.HandlingEventRepository{
-		QueryHandlingHistoryFn: func(id cargo.TrackingID) cargo.HandlingHistory {
-			return cargo.HandlingHistory{}
-		},
+	var events mock.HandlingEventRepository
+	events.QueryHandlingHistoryFn = func(id cargo.TrackingID) cargo.HandlingHistory {
+		return cargo.HandlingHistory{}
 	}
 
-	s := NewService(cargos, events)
+	s := NewService(&cargos, &events)
 
 	c, err := s.Track("FTL456")
 	if err != nil {

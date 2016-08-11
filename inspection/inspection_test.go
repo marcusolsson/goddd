@@ -21,14 +21,15 @@ func (h *stubEventHandler) CargoHasArrived(c *cargo.Cargo) {
 }
 
 func TestInspectMisdirectedCargo(t *testing.T) {
-	cargos := &mockCargoRepository{}
-	events := &mockHandlingEventRepository{
+	var cargos mockCargoRepository
+
+	events := mockHandlingEventRepository{
 		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
 	}
 
-	handler := &stubEventHandler{make([]interface{}, 0)}
+	handler := stubEventHandler{make([]interface{}, 0)}
 
-	s := NewService(cargos, events, handler)
+	s := NewService(&cargos, &events, &handler)
 
 	id := cargo.TrackingID("ABC123")
 	c := cargo.New(id, cargo.RouteSpecification{
@@ -47,9 +48,9 @@ func TestInspectMisdirectedCargo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	storeEvent(events, id, voyage, cargo.Receive, location.SESTO)
-	storeEvent(events, id, voyage, cargo.Load, location.SESTO)
-	storeEvent(events, id, voyage, cargo.Unload, location.USNYC)
+	storeEvent(&events, id, voyage, cargo.Receive, location.SESTO)
+	storeEvent(&events, id, voyage, cargo.Load, location.SESTO)
+	storeEvent(&events, id, voyage, cargo.Unload, location.USNYC)
 
 	if len(handler.events) != 0 {
 		t.Errorf("no events should be handled")
@@ -70,16 +71,18 @@ func TestInspectMisdirectedCargo(t *testing.T) {
 }
 
 func TestInspectUnloadedCargo(t *testing.T) {
-	cargos := &mockCargoRepository{}
-	events := &mockHandlingEventRepository{
+	var cargos mockCargoRepository
+
+	events := mockHandlingEventRepository{
 		events: make(map[cargo.TrackingID][]cargo.HandlingEvent),
 	}
-	cargoEventHandler := &stubEventHandler{make([]interface{}, 0)}
+
+	handler := stubEventHandler{make([]interface{}, 0)}
 
 	s := &service{
-		cargoRepository:         cargos,
-		handlingEventRepository: events,
-		cargoEventHandler:       cargoEventHandler,
+		cargoRepository:         &cargos,
+		handlingEventRepository: &events,
+		cargoEventHandler:       &handler,
 	}
 
 	id := cargo.TrackingID("ABC123")
@@ -97,32 +100,34 @@ func TestInspectUnloadedCargo(t *testing.T) {
 
 	cargos.Store(unloadedCargo)
 
-	storeEvent(events, id, voyage, cargo.Receive, location.SESTO)
-	storeEvent(events, id, voyage, cargo.Load, location.SESTO)
-	storeEvent(events, id, voyage, cargo.Unload, location.AUMEL)
-	storeEvent(events, id, voyage, cargo.Load, location.AUMEL)
-	storeEvent(events, id, voyage, cargo.Unload, location.CNHKG)
+	storeEvent(&events, id, voyage, cargo.Receive, location.SESTO)
+	storeEvent(&events, id, voyage, cargo.Load, location.SESTO)
+	storeEvent(&events, id, voyage, cargo.Unload, location.AUMEL)
+	storeEvent(&events, id, voyage, cargo.Load, location.AUMEL)
+	storeEvent(&events, id, voyage, cargo.Unload, location.CNHKG)
 
-	if len(cargoEventHandler.events) != 0 {
-		t.Errorf("no event should be handled")
+	if len(handler.events) != 0 {
+		t.Errorf("len(handler.events) = %d; want = %d", len(handler.events), 0)
 	}
 
 	s.InspectCargo(id)
 
-	if len(cargoEventHandler.events) != 1 {
-		t.Errorf("1 event should be handled")
+	if len(handler.events) != 1 {
+		t.Errorf("len(handler.events) = %d; want = %d", len(handler.events), 1)
 	}
 }
 
 func storeEvent(r cargo.HandlingEventRepository, id cargo.TrackingID, voyage voyage.Number, typ cargo.HandlingEventType, loc location.UNLocode) {
-	r.Store(cargo.HandlingEvent{
+	e := cargo.HandlingEvent{
 		TrackingID: id,
 		Activity: cargo.HandlingActivity{
 			VoyageNumber: voyage,
 			Type:         typ,
 			Location:     loc,
 		},
-	})
+	}
+
+	r.Store(e)
 }
 
 type mockCargoRepository struct {

@@ -19,44 +19,38 @@ func (h *stubEventHandler) CargoWasHandled(e cargo.HandlingEvent) {
 }
 
 func TestRegisterHandlingEvent(t *testing.T) {
-	cargos := &mock.CargoRepository{
-		StoreFn: func(c *cargo.Cargo) error {
-			return nil
-		},
-		FindFn: func(id cargo.TrackingID) (*cargo.Cargo, error) {
-			if id == "no_such_id" {
-				return nil, cargo.ErrUnknown
-			}
-			return new(cargo.Cargo), nil
-		},
+	var cargos mock.CargoRepository
+	cargos.StoreFn = func(c *cargo.Cargo) error {
+		return nil
 	}
-
-	voyages := &mock.VoyageRepository{
-		FindFn: func(n voyage.Number) (*voyage.Voyage, error) {
-			return new(voyage.Voyage), nil
-		},
-	}
-
-	locations := &mock.LocationRepository{
-		FindFn: func(l location.UNLocode) (location.Location, error) {
-			return location.Location{}, nil
-		},
-	}
-
-	events := &mock.HandlingEventRepository{
-		StoreFn: func(e cargo.HandlingEvent) {},
-	}
-
-	var (
-		eh = &stubEventHandler{events: make([]interface{}, 0)}
-		ef = cargo.HandlingEventFactory{
-			CargoRepository:    cargos,
-			VoyageRepository:   voyages,
-			LocationRepository: locations,
+	cargos.FindFn = func(id cargo.TrackingID) (*cargo.Cargo, error) {
+		if id == "no_such_id" {
+			return nil, cargo.ErrUnknown
 		}
-	)
+		return new(cargo.Cargo), nil
+	}
 
-	s := NewService(events, ef, eh)
+	var voyages mock.VoyageRepository
+	voyages.FindFn = func(n voyage.Number) (*voyage.Voyage, error) {
+		return new(voyage.Voyage), nil
+	}
+
+	var locations mock.LocationRepository
+	locations.FindFn = func(l location.UNLocode) (location.Location, error) {
+		return location.Location{}, nil
+	}
+
+	var events mock.HandlingEventRepository
+	events.StoreFn = func(e cargo.HandlingEvent) {}
+
+	eh := &stubEventHandler{events: make([]interface{}, 0)}
+	ef := cargo.HandlingEventFactory{
+		CargoRepository:    &cargos,
+		VoyageRepository:   &voyages,
+		LocationRepository: &locations,
+	}
+
+	s := NewService(&events, ef, eh)
 
 	var (
 		completed = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
@@ -64,11 +58,12 @@ func TestRegisterHandlingEvent(t *testing.T) {
 		voyage    = voyage.Number("V100")
 	)
 
-	if err := cargos.Store(cargo.New(id, cargo.RouteSpecification{})); err != nil {
+	var err error
+
+	err = cargos.Store(cargo.New(id, cargo.RouteSpecification{}))
+	if err != nil {
 		t.Fatal(err)
 	}
-
-	var err error
 
 	err = s.RegisterHandlingEvent(completed, id, voyage, location.SESTO, cargo.Load)
 	if err != nil {
@@ -81,6 +76,6 @@ func TestRegisterHandlingEvent(t *testing.T) {
 	}
 
 	if len(eh.events) != 1 {
-		t.Errorf("1 event should be handled")
+		t.Errorf("len(eh.events) = %d; want = %d", len(eh.events), 1)
 	}
 }
