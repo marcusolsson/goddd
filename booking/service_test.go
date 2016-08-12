@@ -217,7 +217,7 @@ func TestLoadCargo(t *testing.T) {
 		t.Errorf("cargo should not have been routed")
 	}
 	if len(c.Legs) != 0 {
-		t.Errorf("len(c.Legs) = %s; want = %s", len(c.Legs), 0)
+		t.Errorf("len(c.Legs) = %d; want = %d", len(c.Legs), 0)
 	}
 }
 
