@@ -36,8 +36,8 @@ func TestRegisterHandlingEvent(t *testing.T) {
 	}
 
 	var locations mock.LocationRepository
-	locations.FindFn = func(l location.UNLocode) (location.Location, error) {
-		return location.Location{}, nil
+	locations.FindFn = func(l location.UNLocode) (*location.Location, error) {
+		return nil, nil
 	}
 
 	var events mock.HandlingEventRepository

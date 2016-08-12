@@ -126,9 +126,9 @@ func TestChangeCargoDestination(t *testing.T) {
 	var cargos mockCargoRepository
 	var locations mock.LocationRepository
 
-	locations.FindFn = func(loc location.UNLocode) (location.Location, error) {
+	locations.FindFn = func(loc location.UNLocode) (*location.Location, error) {
 		if loc != location.AUMEL {
-			return location.Location{}, location.ErrUnknown
+			return nil, location.ErrUnknown
 		}
 		return location.Melbourne, nil
 	}

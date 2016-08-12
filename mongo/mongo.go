@@ -87,7 +87,7 @@ type locationRepository struct {
 	session *mgo.Session
 }
 
-func (r *locationRepository) Find(locode location.UNLocode) (location.Location, error) {
+func (r *locationRepository) Find(locode location.UNLocode) (*location.Location, error) {
 	sess := r.session.Copy()
 	defer sess.Close()
 
@@ -96,29 +96,29 @@ func (r *locationRepository) Find(locode location.UNLocode) (location.Location, 
 	var result location.Location
 	if err := c.Find(bson.M{"unlocode": locode}).One(&result); err != nil {
 		if err == mgo.ErrNotFound {
-			return location.Location{}, location.ErrUnknown
+			return nil, location.ErrUnknown
 		}
-		return location.Location{}, err
+		return nil, err
 	}
 
-	return result, nil
+	return &result, nil
 }
 
-func (r *locationRepository) FindAll() []location.Location {
+func (r *locationRepository) FindAll() []*location.Location {
 	sess := r.session.Copy()
 	defer sess.Close()
 
 	c := sess.DB(r.db).C("location")
 
-	var result []location.Location
+	var result []*location.Location
 	if err := c.Find(bson.M{}).All(&result); err != nil {
-		return []location.Location{}
+		return []*location.Location{}
 	}
 
 	return result
 }
 
-func (r *locationRepository) store(l location.Location) error {
+func (r *locationRepository) store(l *location.Location) error {
 	sess := r.session.Copy()
 	defer sess.Close()
 
@@ -153,7 +153,7 @@ func NewLocationRepository(db string, session *mgo.Session) (location.Repository
 		return nil, err
 	}
 
-	initial := []location.Location{
+	initial := []*location.Location{
 		location.Stockholm,
 		location.Melbourne,
 		location.Hongkong,

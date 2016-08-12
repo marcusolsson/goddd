@@ -38,21 +38,21 @@ func (r *CargoRepository) FindAll() []*cargo.Cargo {
 
 // LocationRepository is a mock location repository.
 type LocationRepository struct {
-	FindFn      func(location.UNLocode) (location.Location, error)
+	FindFn      func(location.UNLocode) (*location.Location, error)
 	FindInvoked bool
 
-	FindAllFn      func() []location.Location
+	FindAllFn      func() []*location.Location
 	FindAllInvoked bool
 }
 
 // Find calls the FindFn.
-func (r *LocationRepository) Find(locode location.UNLocode) (location.Location, error) {
+func (r *LocationRepository) Find(locode location.UNLocode) (*location.Location, error) {
 	r.FindInvoked = true
 	return r.FindFn(locode)
 }
 
 // FindAll calls the FindAllFn.
-func (r *LocationRepository) FindAll() []location.Location {
+func (r *LocationRepository) FindAll() []*location.Location {
 	r.FindAllInvoked = true
 	return r.FindAllFn()
 }

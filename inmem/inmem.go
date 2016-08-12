@@ -48,18 +48,18 @@ func NewCargoRepository() cargo.Repository {
 }
 
 type locationRepository struct {
-	locations map[location.UNLocode]location.Location
+	locations map[location.UNLocode]*location.Location
 }
 
-func (r *locationRepository) Find(locode location.UNLocode) (location.Location, error) {
+func (r *locationRepository) Find(locode location.UNLocode) (*location.Location, error) {
 	if l, ok := r.locations[locode]; ok {
 		return l, nil
 	}
-	return location.Location{}, location.ErrUnknown
+	return nil, location.ErrUnknown
 }
 
-func (r *locationRepository) FindAll() []location.Location {
-	l := make([]location.Location, 0, len(r.locations))
+func (r *locationRepository) FindAll() []*location.Location {
+	l := make([]*location.Location, 0, len(r.locations))
 	for _, val := range r.locations {
 		l = append(l, val)
 	}
@@ -69,7 +69,7 @@ func (r *locationRepository) FindAll() []location.Location {
 // NewLocationRepository returns a new instance of a in-memory location repository.
 func NewLocationRepository() location.Repository {
 	r := &locationRepository{
-		locations: make(map[location.UNLocode]location.Location),
+		locations: make(map[location.UNLocode]*location.Location),
 	}
 
 	r.locations[location.SESTO] = location.Stockholm
