@@ -175,6 +175,52 @@ func TestChangeCargoDestination(t *testing.T) {
 	}
 }
 
+func TestLoadCargo(t *testing.T) {
+	deadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
+
+	var cargos mock.CargoRepository
+	cargos.FindFn = func(id cargo.TrackingID) (*cargo.Cargo, error) {
+		return &cargo.Cargo{
+			TrackingID: "test_id",
+			Origin:     location.SESTO,
+			RouteSpecification: cargo.RouteSpecification{
+				Origin:          location.SESTO,
+				Destination:     location.AUMEL,
+				ArrivalDeadline: deadline,
+			},
+		}, nil
+	}
+
+	s := NewService(&cargos, nil, nil, nil)
+
+	c, err := s.LoadCargo("test_id")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if c.TrackingID != "test_id" {
+		t.Errorf("c.TrackingID = %s; want = %s", c.TrackingID, "test_id")
+	}
+	if c.Origin != "SESTO" {
+		t.Errorf("c.Origin = %s; want = %s", c.Origin, "SESTO")
+	}
+	if c.Destination != "AUMEL" {
+		t.Errorf("c.Destination = %s; want = %s", c.Origin, "AUMEL")
+	}
+	if c.ArrivalDeadline != deadline {
+		t.Errorf("c.ArrivalDeadline = %s; want = %s", c.ArrivalDeadline, deadline)
+	}
+	if c.Misrouted {
+		t.Errorf("cargo should not be misrouted")
+	}
+	if c.Routed {
+		t.Errorf("cargo should not have been routed")
+	}
+	if len(c.Legs) != 0 {
+		t.Errorf("len(c.Legs) = %s; want = %s", len(c.Legs), 0)
+	}
+}
+
 type mockCargoRepository struct {
 	cargo *cargo.Cargo
 }
