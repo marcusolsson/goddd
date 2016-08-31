@@ -73,6 +73,20 @@ Each application service is exposed as a API. If you want to try it out for your
 - [Handling](http://dddsample.marcusoncode.se/handling/v1/docs)
 - [Tracking](http://dddsample.marcusoncode.se/tracking/v1/docs)
 
+## Contributing
+
+If you want to fork the repository, follow these step to avoid having to rewrite the import paths.
+
+```shell
+go get github.com/marcusolsson/goddd
+cd $GOPATH/src/github.com/marcusolsson/goddd
+git remote add fork git://github.com:<yourname>/goddd.git
+// commit your changes
+git push fork
+```
+
+For more information, read [this](http://blog.campoy.cat/2014/03/github-and-go-forking-pull-requests-and.html).
+
 ## Additional resources
 
 - [Domain Driven Design in Go: Part 1](http://www.citerus.se/go-ddd)
