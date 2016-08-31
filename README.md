@@ -81,7 +81,9 @@ If you want to fork the repository, follow these step to avoid having to rewrite
 go get github.com/marcusolsson/goddd
 cd $GOPATH/src/github.com/marcusolsson/goddd
 git remote add fork git://github.com:<yourname>/goddd.git
-// commit your changes
+
+# commit your changes
+
 git push fork
 ```
 
