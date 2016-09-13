@@ -2,11 +2,12 @@ BINARY=goddd
 
 DOCKER_IMAGE_NAME=marcusolsson/goddd
 
-default:
-	@go build -o ${BINARY}
+.DEFAULT_GOAL: ${BINARY}
 
-build: test lint vet
+${BINARY}:
 	@CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${BINARY} .
+
+check: test lint vet
 
 test:
 	@go test -race -v $(shell go list ./... | grep -v /vendor/)
@@ -23,10 +24,10 @@ install:
 clean:
 	@if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
 
-docker-build: build
+docker-build: ${BINARY}
 	@docker build -t ${DOCKER_IMAGE_NAME} .
 
 docker-push:
 	@docker push ${DOCKER_IMAGE_NAME}
 
-.PHONY: test vet install clean docker-build docker-push
+.PHONY: test vet install clean docker-push
