@@ -11,8 +11,11 @@ services:
 install:
   - go get -u github.com/golang/lint/golint
 
+before_script:
+  - make check
+
 script: 
-  - make build
+  - make
 
 after_success:
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
