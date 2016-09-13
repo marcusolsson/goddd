@@ -14,9 +14,7 @@ install:
 script: 
   - make build
 
-before_deploy:
+after_success:
   - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
-
-deploy:
   - make docker-build
   - make docker-push
