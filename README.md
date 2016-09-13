@@ -91,9 +91,17 @@ For more information, read [this](http://blog.campoy.cat/2014/03/github-and-go-f
 
 ## Additional resources
 
+### For watching
+
+- [Building an Enterprise Service in Go](https://www.youtube.com/watch?v=twcDf_Y2gXY) at Golang UK Conference 2016
+
+### For reading
+
 - [Domain Driven Design in Go: Part 1](http://www.citerus.se/go-ddd)
 - [Domain Driven Design in Go: Part 2](http://www.citerus.se/part-2-domain-driven-design-in-go)
 - [Domain Driven Design in Go: Part 3](http://www.citerus.se/part-3-domain-driven-design-in-go)
+
+### Related projects
 
 The original application uses a external routing service to demonstrate the use of _bounded contexts_. For those who are interested, I have ported this service as well:
 
