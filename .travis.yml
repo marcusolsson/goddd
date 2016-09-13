@@ -9,11 +9,14 @@ services:
   - docker
 
 install:
-  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+  - go get -u github.com/golang/lint/golint
 
-script:
+script: 
   - make build
 
-after_success:
+before_deploy:
+  - docker login -e $DOCKER_EMAIL -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+
+deploy:
   - make docker-build
   - make docker-push
