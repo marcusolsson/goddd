@@ -4,6 +4,7 @@
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/marcusolsson/goddd)
 [![Go Report Card](https://goreportcard.com/badge/github.com/marcusolsson/goddd)](https://goreportcard.com/report/github.com/marcusolsson/goddd)
 [![License MIT](https://img.shields.io/badge/license-MIT-lightgrey.svg?style=flat)](LICENSE)
+[![unstable](http://badges.github.io/stability-badges/dist/unstable.svg)](http://github.com/badges/stability-badges)
 
 This is an attempt to port the [DDD Sample App](http://dddsample.sourceforge.net/) to idiomatic Go. This project aims to:
 
