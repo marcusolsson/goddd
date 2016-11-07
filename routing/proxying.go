@@ -56,7 +56,7 @@ func (s proxyService) FetchRoutesForSpecification(rs cargo.RouteSpecification) [
 type ServiceMiddleware func(Service) Service
 
 // NewProxyingMiddleware returns a new instance of a proxying middleware.
-func NewProxyingMiddleware(proxyURL string, ctx context.Context) ServiceMiddleware {
+func NewProxyingMiddleware(ctx context.Context, proxyURL string) ServiceMiddleware {
 	return func(next Service) Service {
 		var e endpoint.Endpoint
 		e = makeFetchRoutesEndpoint(ctx, proxyURL)

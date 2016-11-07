@@ -107,7 +107,7 @@ func main() {
 	fieldKeys := []string{"method"}
 
 	var rs routing.Service
-	rs = routing.NewProxyingMiddleware(*routingServiceURL, ctx)(rs)
+	rs = routing.NewProxyingMiddleware(ctx, *routingServiceURL)(rs)
 
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
