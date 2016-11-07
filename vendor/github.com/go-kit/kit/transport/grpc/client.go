@@ -3,6 +3,7 @@ package grpc
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -24,7 +25,7 @@ type Client struct {
 }
 
 // NewClient constructs a usable Client for a single remote endpoint.
-// Pass an zero-value Protobuf message of the RPC response type as
+// Pass an zero-value protobuf message of the RPC response type as
 // the grpcReply argument.
 func NewClient(
 	cc *grpc.ClientConn,
@@ -35,9 +36,12 @@ func NewClient(
 	grpcReply interface{},
 	options ...ClientOption,
 ) *Client {
+	if strings.IndexByte(serviceName, '.') == -1 {
+		serviceName = "pb." + serviceName
+	}
 	c := &Client{
 		client: cc,
-		method: fmt.Sprintf("/pb.%s/%s", serviceName, method),
+		method: fmt.Sprintf("/%s/%s", serviceName, method),
 		enc:    enc,
 		dec:    dec,
 		// We are using reflect.Indirect here to allow both reply structs and
@@ -60,9 +64,9 @@ func NewClient(
 // ClientOption sets an optional parameter for clients.
 type ClientOption func(*Client)
 
-// SetClientBefore sets the RequestFuncs that are applied to the outgoing gRPC
+// ClientBefore sets the RequestFuncs that are applied to the outgoing gRPC
 // request before it's invoked.
-func SetClientBefore(before ...RequestFunc) ClientOption {
+func ClientBefore(before ...RequestFunc) ClientOption {
 	return func(c *Client) { c.before = before }
 }
 

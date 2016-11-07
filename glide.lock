@@ -1,5 +1,5 @@
-hash: f98f33862c8e9516a852fe2a244c87f0a21e2f42f462f44af5af2ac161c1ad9a
-updated: 2016-11-07T10:18:33.120236351+01:00
+hash: 5f789e1cbf91870f0554a127f268756f5c7d1c2d4f06f2226a21e7d178125fac
+updated: 2016-11-07T11:50:22.549479207+01:00
 imports:
 - name: github.com/afex/hystrix-go
   version: 9351b724be3950ef0ca82c53f817dcd33947e95e
@@ -17,13 +17,14 @@ imports:
   version: e88be87d51429689cef99043a54150d733265cd7
   repo: https://github.com/codahale/hdrhistogram
 - name: github.com/go-kit/kit
-  version: 4479f0122fd25f40d8b429ce76e193b6e2319ff4
+  version: b30b670b3bd120d0d807f3e0bf4788a25167e187
   repo: https://github.com/go-kit/kit
   subpackages:
   - circuitbreaker
   - endpoint
   - log
   - metrics
+  - metrics/internal/lv
   - metrics/prometheus
   - transport/http
 - name: github.com/go-logfmt/logfmt

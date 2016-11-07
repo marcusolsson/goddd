@@ -14,7 +14,7 @@ import:
   version: e88be87d51429689cef99043a54150d733265cd7
   repo: https://github.com/codahale/hdrhistogram
 - package: github.com/go-kit/kit
-  version: 4479f0122fd25f40d8b429ce76e193b6e2319ff4
+  version: b30b670b3bd120d0d807f3e0bf4788a25167e187
   repo: https://github.com/go-kit/kit
   subpackages:
   - circuitbreaker

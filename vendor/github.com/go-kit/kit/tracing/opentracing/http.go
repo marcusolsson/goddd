@@ -16,14 +16,13 @@ import (
 // ToHTTPRequest returns an http RequestFunc that injects an OpenTracing Span
 // found in `ctx` into the http headers. If no such Span can be found, the
 // RequestFunc is a noop.
-//
-// The logger is used to report errors and may be nil.
 func ToHTTPRequest(tracer opentracing.Tracer, logger log.Logger) kithttp.RequestFunc {
 	return func(ctx context.Context, req *http.Request) context.Context {
 		// Try to find a Span in the Context.
 		if span := opentracing.SpanFromContext(ctx); span != nil {
 			// Add standard OpenTracing tags.
-			ext.HTTPMethod.Set(span, req.URL.RequestURI())
+			ext.HTTPMethod.Set(span, req.Method)
+			ext.HTTPUrl.Set(span, req.URL.String())
 			host, portString, err := net.SplitHostPort(req.URL.Host)
 			if err == nil {
 				ext.PeerHostname.Set(span, host)
@@ -35,13 +34,12 @@ func ToHTTPRequest(tracer opentracing.Tracer, logger log.Logger) kithttp.Request
 			}
 
 			// There's nothing we can do with any errors here.
-			err = tracer.Inject(
-				span,
+			if err = tracer.Inject(
+				span.Context(),
 				opentracing.TextMap,
-				opentracing.HTTPHeaderTextMapCarrier(req.Header),
-			)
-			if err != nil && logger != nil {
-				logger.Log("msg", "Join failed", "err", err)
+				opentracing.HTTPHeadersCarrier(req.Header),
+			); err != nil {
+				logger.Log("err", err)
 			}
 		}
 		return ctx
@@ -53,23 +51,21 @@ func ToHTTPRequest(tracer opentracing.Tracer, logger log.Logger) kithttp.Request
 // `operationName` accordingly. If no trace could be found in `req`, the Span
 // will be a trace root. The Span is incorporated in the returned Context and
 // can be retrieved with opentracing.SpanFromContext(ctx).
-//
-// The logger is used to report errors and may be nil.
 func FromHTTPRequest(tracer opentracing.Tracer, operationName string, logger log.Logger) kithttp.RequestFunc {
 	return func(ctx context.Context, req *http.Request) context.Context {
-		// Try to join to a trace propagated in `req`. There's nothing we can
-		// do with any errors here, so we ignore them.
-		span, err := tracer.Join(
-			operationName,
+		// Try to join to a trace propagated in `req`.
+		var span opentracing.Span
+		wireContext, err := tracer.Extract(
 			opentracing.TextMap,
-			opentracing.HTTPHeaderTextMapCarrier(req.Header),
+			opentracing.HTTPHeadersCarrier(req.Header),
 		)
-		if err != nil && logger != nil {
-			logger.Log("msg", "Join failed", "err", err)
+		if err != nil && err != opentracing.ErrSpanContextNotFound {
+			logger.Log("err", err)
 		}
-		if span == nil {
-			span = opentracing.StartSpan(operationName)
-		}
+
+		span = tracer.StartSpan(operationName, ext.RPCServerOption(wireContext))
+		ext.HTTPMethod.Set(span, req.Method)
+		ext.HTTPUrl.Set(span, req.URL.String())
 		return opentracing.ContextWithSpan(ctx, span)
 	}
 }

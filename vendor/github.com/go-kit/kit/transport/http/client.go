@@ -18,10 +18,11 @@ type Client struct {
 	enc            EncodeRequestFunc
 	dec            DecodeResponseFunc
 	before         []RequestFunc
+	after          []ClientResponseFunc
 	bufferedStream bool
 }
 
-// NewClient constructs a usable Client for a single remote endpoint.
+// NewClient constructs a usable Client for a single remote method.
 func NewClient(
 	method string,
 	tgt *url.URL,
@@ -36,6 +37,7 @@ func NewClient(
 		enc:            enc,
 		dec:            dec,
 		before:         []RequestFunc{},
+		after:          []ClientResponseFunc{},
 		bufferedStream: false,
 	}
 	for _, option := range options {
@@ -53,20 +55,26 @@ func SetClient(client *http.Client) ClientOption {
 	return func(c *Client) { c.client = client }
 }
 
-// SetClientBefore sets the RequestFuncs that are applied to the outgoing HTTP
+// ClientBefore sets the RequestFuncs that are applied to the outgoing HTTP
 // request before it's invoked.
-func SetClientBefore(before ...RequestFunc) ClientOption {
+func ClientBefore(before ...RequestFunc) ClientOption {
 	return func(c *Client) { c.before = before }
 }
 
-// SetBufferedStream sets whether the Response.Body is left open, allowing it
+// ClientAfter sets the ClientResponseFuncs applied to the incoming HTTP
+// request prior to it being decoded. This is useful for obtaining anything off
+// of the response and adding onto the context prior to decoding.
+func ClientAfter(after ...ClientResponseFunc) ClientOption {
+	return func(c *Client) { c.after = after }
+}
+
+// BufferedStream sets whether the Response.Body is left open, allowing it
 // to be read from later. Useful for transporting a file as a buffered stream.
-func SetBufferedStream(buffered bool) ClientOption {
+func BufferedStream(buffered bool) ClientOption {
 	return func(c *Client) { c.bufferedStream = buffered }
 }
 
-// Endpoint returns a usable endpoint that will invoke the RPC specified by
-// the client.
+// Endpoint returns a usable endpoint that invokes the remote endpoint.
 func (c Client) Endpoint() endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
 		ctx, cancel := context.WithCancel(ctx)
@@ -91,6 +99,10 @@ func (c Client) Endpoint() endpoint.Endpoint {
 		}
 		if !c.bufferedStream {
 			defer resp.Body.Close()
+		}
+
+		for _, f := range c.after {
+			ctx = f(ctx, resp)
 		}
 
 		response, err := c.dec(ctx, resp)

@@ -16,7 +16,7 @@ type Server struct {
 	dec          DecodeRequestFunc
 	enc          EncodeResponseFunc
 	before       []RequestFunc
-	after        []ResponseFunc
+	after        []ServerResponseFunc
 	errorEncoder ErrorEncoder
 	logger       log.Logger
 }
@@ -55,7 +55,7 @@ func ServerBefore(before ...RequestFunc) ServerOption {
 
 // ServerAfter functions are executed on the HTTP response writer after the
 // endpoint is invoked, but before anything is written to the client.
-func ServerAfter(after ...ResponseFunc) ServerOption {
+func ServerAfter(after ...ServerResponseFunc) ServerOption {
 	return func(s *Server) { s.after = after }
 }
 
@@ -76,8 +76,7 @@ func ServerErrorLogger(logger log.Logger) ServerOption {
 
 // ServeHTTP implements http.Handler.
 func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	ctx, cancel := context.WithCancel(s.ctx)
-	defer cancel()
+	ctx := s.ctx
 
 	for _, f := range s.before {
 		ctx = f(ctx, r)
@@ -98,7 +97,7 @@ func (s Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, f := range s.after {
-		f(ctx, w)
+		ctx = f(ctx, w)
 	}
 
 	if err := s.enc(ctx, w, response); err != nil {

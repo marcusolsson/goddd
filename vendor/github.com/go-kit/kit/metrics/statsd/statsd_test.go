@@ -1,143 +1,66 @@
 package statsd
 
 import (
-	"bytes"
-	"fmt"
-	"strings"
-	"sync"
 	"testing"
-	"time"
+
+	"github.com/go-kit/kit/log"
+	"github.com/go-kit/kit/metrics/teststat"
 )
 
 func TestCounter(t *testing.T) {
-	buf := &syncbuf{buf: &bytes.Buffer{}}
-	reportc := make(chan time.Time)
-	c := NewCounterTick(buf, "test_statsd_counter", reportc)
-
-	c.Add(1)
-	c.Add(2)
-
-	want, have := "test_statsd_counter:1|c\ntest_statsd_counter:2|c\n", ""
-	by(t, 100*time.Millisecond, func() bool {
-		have = buf.String()
-		return want == have
-	}, func() {
-		reportc <- time.Now()
-	}, fmt.Sprintf("want %q, have %q", want, have))
-}
-
-func TestGauge(t *testing.T) {
-	buf := &syncbuf{buf: &bytes.Buffer{}}
-	reportc := make(chan time.Time)
-	g := NewGaugeTick(buf, "test_statsd_gauge", reportc)
-
-	delta := 1.0
-	g.Add(delta)
-
-	want, have := fmt.Sprintf("test_statsd_gauge:+%f|g\n", delta), ""
-	by(t, 100*time.Millisecond, func() bool {
-		have = buf.String()
-		return want == have
-	}, func() {
-		reportc <- time.Now()
-	}, fmt.Sprintf("want %q, have %q", want, have))
-
-	buf.Reset()
-	delta = -2.0
-	g.Add(delta)
-
-	want, have = fmt.Sprintf("test_statsd_gauge:%f|g\n", delta), ""
-	by(t, 100*time.Millisecond, func() bool {
-		have = buf.String()
-		return want == have
-	}, func() {
-		reportc <- time.Now()
-	}, fmt.Sprintf("want %q, have %q", want, have))
-
-	buf.Reset()
-	value := 3.0
-	g.Set(value)
-
-	want, have = fmt.Sprintf("test_statsd_gauge:%f|g\n", value), ""
-	by(t, 100*time.Millisecond, func() bool {
-		have = buf.String()
-		return want == have
-	}, func() {
-		reportc <- time.Now()
-	}, fmt.Sprintf("want %q, have %q", want, have))
-}
-
-func TestCallbackGauge(t *testing.T) {
-	buf := &syncbuf{buf: &bytes.Buffer{}}
-	reportc, scrapec := make(chan time.Time), make(chan time.Time)
-	value := 55.55
-	cb := func() float64 { return value }
-	NewCallbackGaugeTick(buf, "test_statsd_callback_gauge", reportc, scrapec, cb)
-
-	scrapec <- time.Now()
-	reportc <- time.Now()
-
-	// Travis is annoying
-	by(t, time.Second, func() bool {
-		return buf.String() != ""
-	}, func() {
-		reportc <- time.Now()
-	}, "buffer never got write+flush")
-
-	want, have := fmt.Sprintf("test_statsd_callback_gauge:%f|g\n", value), ""
-	by(t, 100*time.Millisecond, func() bool {
-		have = buf.String()
-		return strings.HasPrefix(have, want) // HasPrefix because we might get multiple writes
-	}, func() {
-		reportc <- time.Now()
-	}, fmt.Sprintf("want %q, have %q", want, have))
-}
-
-func TestHistogram(t *testing.T) {
-	buf := &syncbuf{buf: &bytes.Buffer{}}
-	reportc := make(chan time.Time)
-	h := NewHistogramTick(buf, "test_statsd_histogram", reportc)
-
-	h.Observe(123)
-
-	want, have := "test_statsd_histogram:123|ms\n", ""
-	by(t, 100*time.Millisecond, func() bool {
-		have = buf.String()
-		return want == have
-	}, func() {
-		reportc <- time.Now()
-	}, fmt.Sprintf("want %q, have %q", want, have))
-}
-
-func by(t *testing.T, d time.Duration, check func() bool, execute func(), msg string) {
-	deadline := time.Now().Add(d)
-	for !check() {
-		if time.Now().After(deadline) {
-			t.Fatal(msg)
-		}
-		execute()
+	prefix, name := "abc.", "def"
+	label, value := "label", "value" // ignored
+	regex := `^` + prefix + name + `:([0-9\.]+)\|c$`
+	s := New(prefix, log.NewNopLogger())
+	counter := s.NewCounter(name, 1.0).With(label, value)
+	valuef := teststat.SumLines(s, regex)
+	if err := teststat.TestCounter(counter, valuef); err != nil {
+		t.Fatal(err)
 	}
 }
 
-type syncbuf struct {
-	mtx sync.Mutex
-	buf *bytes.Buffer
+func TestCounterSampled(t *testing.T) {
+	// This will involve multiplying the observed sum by the inverse of the
+	// sample rate and checking against the expected value within some
+	// tolerance.
+	t.Skip("TODO")
 }
 
-func (s *syncbuf) Write(p []byte) (int, error) {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
-	return s.buf.Write(p)
+func TestGauge(t *testing.T) {
+	prefix, name := "ghi.", "jkl"
+	label, value := "xyz", "abc" // ignored
+	regex := `^` + prefix + name + `:([0-9\.]+)\|g$`
+	s := New(prefix, log.NewNopLogger())
+	gauge := s.NewGauge(name).With(label, value)
+	valuef := teststat.LastLine(s, regex)
+	if err := teststat.TestGauge(gauge, valuef); err != nil {
+		t.Fatal(err)
+	}
 }
 
-func (s *syncbuf) String() string {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
-	return s.buf.String()
+// StatsD timings just emit all observations. So, we collect them into a generic
+// histogram, and run the statistics test on that.
+
+func TestTiming(t *testing.T) {
+	prefix, name := "statsd.", "timing_test"
+	label, value := "abc", "def" // ignored
+	regex := `^` + prefix + name + `:([0-9\.]+)\|ms$`
+	s := New(prefix, log.NewNopLogger())
+	timing := s.NewTiming(name, 1.0).With(label, value)
+	quantiles := teststat.Quantiles(s, regex, 50) // no |@0.X
+	if err := teststat.TestHistogram(timing, quantiles, 0.01); err != nil {
+		t.Fatal(err)
+	}
 }
 
-func (s *syncbuf) Reset() {
-	s.mtx.Lock()
-	defer s.mtx.Unlock()
-	s.buf.Reset()
+func TestTimingSampled(t *testing.T) {
+	prefix, name := "statsd.", "sampled_timing_test"
+	label, value := "foo", "bar" // ignored
+	regex := `^` + prefix + name + `:([0-9\.]+)\|ms\|@0\.01[0]*$`
+	s := New(prefix, log.NewNopLogger())
+	timing := s.NewTiming(name, 0.01).With(label, value)
+	quantiles := teststat.Quantiles(s, regex, 50)
+	if err := teststat.TestHistogram(timing, quantiles, 0.02); err != nil {
+		t.Fatal(err)
+	}
 }

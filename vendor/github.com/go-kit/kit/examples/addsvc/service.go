@@ -1,71 +1,164 @@
-package main
+package addsvc
+
+// This file contains the Service definition, and a basic service
+// implementation. It also includes service middlewares.
 
 import (
+	"errors"
 	"time"
 
-	"github.com/go-kit/kit/examples/addsvc/server"
+	"golang.org/x/net/context"
+
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"
 )
 
-type pureAddService struct{}
-
-func (pureAddService) Sum(a, b int) int { return a + b }
-
-func (pureAddService) Concat(a, b string) string { return a + b }
-
-type loggingMiddleware struct {
-	server.AddService
-	log.Logger
+// Service describes a service that adds things together.
+type Service interface {
+	Sum(ctx context.Context, a, b int) (int, error)
+	Concat(ctx context.Context, a, b string) (string, error)
 }
 
-func (m loggingMiddleware) Sum(a, b int) (v int) {
+// Business-domain errors like these may be served in two ways: returned
+// directly by endpoints, or bundled into the response struct. Both methods can
+// be made to work, but errors returned directly by endpoints are counted by
+// middlewares that check errors, like circuit breakers.
+//
+// If you don't want that behavior -- and you probably don't -- then it's better
+// to bundle errors into the response struct.
+
+var (
+	// ErrTwoZeroes is an arbitrary business rule for the Add method.
+	ErrTwoZeroes = errors.New("can't sum two zeroes")
+
+	// ErrIntOverflow protects the Add method. We've decided that this error
+	// indicates a misbehaving service and should count against e.g. circuit
+	// breakers. So, we return it directly in endpoints, to illustrate the
+	// difference. In a real service, this probably wouldn't be the case.
+	ErrIntOverflow = errors.New("integer overflow")
+
+	// ErrMaxSizeExceeded protects the Concat method.
+	ErrMaxSizeExceeded = errors.New("result exceeds maximum size")
+)
+
+// These annoying helper functions are required to translate Go error types to
+// and from strings, which is the type we use in our IDLs to represent errors.
+// There is special casing to treat empty strings as nil errors.
+
+func str2err(s string) error {
+	if s == "" {
+		return nil
+	}
+	return errors.New(s)
+}
+
+func err2str(err error) string {
+	if err == nil {
+		return ""
+	}
+	return err.Error()
+}
+
+// NewBasicService returns a naïve, stateless implementation of Service.
+func NewBasicService() Service {
+	return basicService{}
+}
+
+type basicService struct{}
+
+const (
+	intMax = 1<<31 - 1
+	intMin = -(intMax + 1)
+	maxLen = 102400
+)
+
+// Sum implements Service.
+func (s basicService) Sum(_ context.Context, a, b int) (int, error) {
+	if a == 0 && b == 0 {
+		return 0, ErrTwoZeroes
+	}
+	if (b > 0 && a > (intMax-b)) || (b < 0 && a < (intMin-b)) {
+		return 0, ErrIntOverflow
+	}
+	return a + b, nil
+}
+
+// Concat implements Service.
+func (s basicService) Concat(_ context.Context, a, b string) (string, error) {
+	if len(a)+len(b) > maxLen {
+		return "", ErrMaxSizeExceeded
+	}
+	return a + b, nil
+}
+
+// Middleware describes a service (as opposed to endpoint) middleware.
+type Middleware func(Service) Service
+
+// ServiceLoggingMiddleware returns a service middleware that logs the
+// parameters and result of each method invocation.
+func ServiceLoggingMiddleware(logger log.Logger) Middleware {
+	return func(next Service) Service {
+		return serviceLoggingMiddleware{
+			logger: logger,
+			next:   next,
+		}
+	}
+}
+
+type serviceLoggingMiddleware struct {
+	logger log.Logger
+	next   Service
+}
+
+func (mw serviceLoggingMiddleware) Sum(ctx context.Context, a, b int) (v int, err error) {
 	defer func(begin time.Time) {
-		m.Logger.Log(
-			"method", "sum",
-			"a", a,
-			"b", b,
-			"v", v,
+		mw.logger.Log(
+			"method", "Sum",
+			"a", a, "b", b, "result", v, "error", err,
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	v = m.AddService.Sum(a, b)
-	return
+	return mw.next.Sum(ctx, a, b)
 }
 
-func (m loggingMiddleware) Concat(a, b string) (v string) {
+func (mw serviceLoggingMiddleware) Concat(ctx context.Context, a, b string) (v string, err error) {
 	defer func(begin time.Time) {
-		m.Logger.Log(
-			"method", "concat",
-			"a", a,
-			"b", b,
-			"v", v,
+		mw.logger.Log(
+			"method", "Concat",
+			"a", a, "b", b, "result", v, "error", err,
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	v = m.AddService.Concat(a, b)
-	return
+	return mw.next.Concat(ctx, a, b)
 }
 
-type instrumentingMiddleware struct {
-	server.AddService
-	requestDuration metrics.TimeHistogram
+// ServiceInstrumentingMiddleware returns a service middleware that instruments
+// the number of integers summed and characters concatenated over the lifetime of
+// the service.
+func ServiceInstrumentingMiddleware(ints, chars metrics.Counter) Middleware {
+	return func(next Service) Service {
+		return serviceInstrumentingMiddleware{
+			ints:  ints,
+			chars: chars,
+			next:  next,
+		}
+	}
 }
 
-func (m instrumentingMiddleware) Sum(a, b int) (v int) {
-	defer func(begin time.Time) {
-		methodField := metrics.Field{Key: "method", Value: "sum"}
-		m.requestDuration.With(methodField).Observe(time.Since(begin))
-	}(time.Now())
-	v = m.AddService.Sum(a, b)
-	return
+type serviceInstrumentingMiddleware struct {
+	ints  metrics.Counter
+	chars metrics.Counter
+	next  Service
 }
 
-func (m instrumentingMiddleware) Concat(a, b string) (v string) {
-	defer func(begin time.Time) {
-		methodField := metrics.Field{Key: "method", Value: "concat"}
-		m.requestDuration.With(methodField).Observe(time.Since(begin))
-	}(time.Now())
-	v = m.AddService.Concat(a, b)
-	return
+func (mw serviceInstrumentingMiddleware) Sum(ctx context.Context, a, b int) (int, error) {
+	v, err := mw.next.Sum(ctx, a, b)
+	mw.ints.Add(float64(v))
+	return v, err
+}
+
+func (mw serviceInstrumentingMiddleware) Concat(ctx context.Context, a, b string) (string, error) {
+	v, err := mw.next.Concat(ctx, a, b)
+	mw.chars.Add(float64(len(v)))
+	return v, err
 }
