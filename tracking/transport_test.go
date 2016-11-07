@@ -9,8 +9,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-kit/kit/log"
 	"golang.org/x/net/context"
+
+	"github.com/go-kit/kit/log"
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/mock"

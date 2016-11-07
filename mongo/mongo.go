@@ -1,11 +1,12 @@
 package mongo
 
 import (
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
+
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/voyage"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 type cargoRepository struct {

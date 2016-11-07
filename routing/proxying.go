@@ -6,10 +6,11 @@ import (
 	"net/url"
 	"time"
 
+	"golang.org/x/net/context"
+
 	"github.com/go-kit/kit/circuitbreaker"
 	"github.com/go-kit/kit/endpoint"
 	kithttp "github.com/go-kit/kit/transport/http"
-	"golang.org/x/net/context"
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"

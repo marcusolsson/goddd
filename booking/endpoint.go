@@ -3,8 +3,9 @@ package booking
 import (
 	"time"
 
-	"github.com/go-kit/kit/endpoint"
 	"golang.org/x/net/context"
+
+	"github.com/go-kit/kit/endpoint"
 
 	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/location"

@@ -10,10 +10,9 @@ import (
 	"syscall"
 	"time"
 
-	"gopkg.in/mgo.v2"
-
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
 	"golang.org/x/net/context"
+	"gopkg.in/mgo.v2"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/metrics"

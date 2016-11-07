@@ -5,10 +5,11 @@ import (
 	"errors"
 	"net/http"
 
-	kitlog "github.com/go-kit/kit/log"
-	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 	"golang.org/x/net/context"
+
+	kitlog "github.com/go-kit/kit/log"
+	kithttp "github.com/go-kit/kit/transport/http"
 
 	"github.com/marcusolsson/goddd/cargo"
 )
