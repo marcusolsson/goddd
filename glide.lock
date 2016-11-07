@@ -1,0 +1,98 @@
+hash: f98f33862c8e9516a852fe2a244c87f0a21e2f42f462f44af5af2ac161c1ad9a
+updated: 2016-11-07T10:18:33.120236351+01:00
+imports:
+- name: github.com/afex/hystrix-go
+  version: 9351b724be3950ef0ca82c53f817dcd33947e95e
+  repo: https://github.com/afex/hystrix-go
+  subpackages:
+  - hystrix
+  - hystrix/metric_collector
+  - hystrix/rolling
+- name: github.com/beorn7/perks
+  version: 3ac7bf7a47d159a033b107610db8a1b6575507a4
+  repo: https://github.com/beorn7/perks
+  subpackages:
+  - quantile
+- name: github.com/codahale/hdrhistogram
+  version: e88be87d51429689cef99043a54150d733265cd7
+  repo: https://github.com/codahale/hdrhistogram
+- name: github.com/go-kit/kit
+  version: 4479f0122fd25f40d8b429ce76e193b6e2319ff4
+  repo: https://github.com/go-kit/kit
+  subpackages:
+  - circuitbreaker
+  - endpoint
+  - log
+  - metrics
+  - metrics/prometheus
+  - transport/http
+- name: github.com/go-logfmt/logfmt
+  version: 538518f3a61c040f3d15f05decfffef6bd0302bc
+  repo: https://github.com/go-logfmt/logfmt
+- name: github.com/go-stack/stack
+  version: 100eb0c0a9c5b306ca2fb4f165df21d80ada4b82
+  repo: https://github.com/go-stack/stack
+- name: github.com/golang/protobuf
+  version: 0fd8c908d872c921af513ef5091964bbd2e0d904
+  repo: https://github.com/golang/protobuf
+  subpackages:
+  - proto
+- name: github.com/gorilla/context
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
+- name: github.com/gorilla/mux
+  version: 0eeaf8392f5b04950925b8a69fe70f110fa7cbfc
+- name: github.com/kr/logfmt
+  version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
+  repo: https://github.com/kr/logfmt
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: d0c3fe89de86839aecf2e0579c40ba3bb336a453
+  repo: https://github.com/matttproud/golang_protobuf_extensions
+  subpackages:
+  - pbutil
+- name: github.com/pborman/uuid
+  version: a97ce2ca70fa5a848076093f05e639a89ca34d06
+- name: github.com/prometheus/client_golang
+  version: 18acf9993a863f4c4b40612e19cdd243e7c86831
+  repo: https://github.com/prometheus/client_golang
+  subpackages:
+  - prometheus
+- name: github.com/prometheus/client_model
+  version: fa8ad6fec33561be4280a8f0514318c79d7f6cb6
+  repo: https://github.com/prometheus/client_model
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: e8eabff8812b05acf522b45fdcd725a785188e37
+  repo: https://github.com/prometheus/common
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: 406e5b7bfd8201a36e2bb5f7bdae0b03380c2ce8
+  repo: https://github.com/prometheus/procfs
+- name: github.com/sony/gobreaker
+  version: 809bcd5a528f344e95c2368796c9225d128f9b3e
+- name: github.com/streadway/handy
+  version: f450267a206e480d863d2a92846a40f6e2896b2a
+  subpackages:
+  - breaker
+- name: golang.org/x/net
+  version: 55a3084c9119aeb9ba2437d595b0a7e9cb635da9
+  subpackages:
+  - context
+  - context/ctxhttp
+- name: gopkg.in/check.v1
+  version: 4f90aeace3a26ad7021961c297b22c42160c7b25
+  repo: https://gopkg.in/check.v1
+- name: gopkg.in/mgo.v2
+  version: b6e2fa371e64216a45e61072a96d4e3859f169da
+  repo: https://gopkg.in/mgo.v2
+  subpackages:
+  - bson
+  - internal/sasl
+  - internal/scram
+- name: gopkg.in/tomb.v2
+  version: 14b3d72120e8d10ea6e6b7f87f7175734b1faab8
+  repo: https://gopkg.in/tomb.v2
+testImports: []
