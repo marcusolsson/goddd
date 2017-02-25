@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -18,7 +19,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hashicorp/consul/api"
 	stdopentracing "github.com/opentracing/opentracing-go"
-	"golang.org/x/net/context"
 
 	"github.com/go-kit/kit/endpoint"
 	"github.com/go-kit/kit/examples/addsvc"
@@ -104,7 +104,7 @@ func main() {
 		// HTTP handler, and just install it under a particular path prefix in
 		// our router.
 
-		r.PathPrefix("addsvc/").Handler(addsvc.MakeHTTPHandler(ctx, endpoints, tracer, logger))
+		r.PathPrefix("/addsvc").Handler(http.StripPrefix("/addsvc", addsvc.MakeHTTPHandler(ctx, endpoints, tracer, logger)))
 	}
 
 	// stringsvc routes.

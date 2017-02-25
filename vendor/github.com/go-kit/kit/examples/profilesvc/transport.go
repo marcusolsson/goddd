@@ -4,15 +4,14 @@ package profilesvc
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"net/http"
-
 	"net/url"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
 
 	"github.com/go-kit/kit/log"
 	httptransport "github.com/go-kit/kit/transport/http"
@@ -405,16 +404,6 @@ func codeFrom(err error) int {
 	case ErrAlreadyExists, ErrInconsistentIDs:
 		return http.StatusBadRequest
 	default:
-		if e, ok := err.(httptransport.Error); ok {
-			switch e.Domain {
-			case httptransport.DomainDecode:
-				return http.StatusBadRequest
-			case httptransport.DomainDo:
-				return http.StatusServiceUnavailable
-			default:
-				return http.StatusInternalServerError
-			}
-		}
 		return http.StatusInternalServerError
 	}
 }

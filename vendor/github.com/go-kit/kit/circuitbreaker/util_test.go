@@ -1,14 +1,13 @@
 package circuitbreaker_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"path/filepath"
 	"runtime"
 	"testing"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/go-kit/kit/endpoint"
 )
@@ -67,7 +66,7 @@ func testFailingEndpoint(
 
 type mock struct {
 	through int
-	err  error
+	err     error
 }
 
 func (m *mock) endpoint(context.Context, interface{}) (interface{}, error) {

@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/go-kit/kit/log"
 

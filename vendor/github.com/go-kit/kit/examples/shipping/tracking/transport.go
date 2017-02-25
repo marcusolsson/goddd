@@ -1,16 +1,17 @@
 package tracking
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
 
-	"github.com/go-kit/kit/examples/shipping/cargo"
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
+
+	"github.com/go-kit/kit/examples/shipping/cargo"
 )
 
 // MakeHandler returns a handler for the tracking service.

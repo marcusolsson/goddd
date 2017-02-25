@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/http"
@@ -11,7 +12,6 @@ import (
 	"time"
 
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"golang.org/x/net/context"
 	"gopkg.in/mgo.v2"
 
 	"github.com/go-kit/kit/log"

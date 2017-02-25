@@ -38,7 +38,7 @@ type Graphite struct {
 	logger     log.Logger
 }
 
-// New returns a Statsd object that may be used to create metrics. Prefix is
+// New returns a Graphite object that may be used to create metrics. Prefix is
 // applied to all created metrics. Callers must ensure that regular calls to
 // WriteTo are performed, either manually or with one of the helper methods.
 func New(prefix string, logger log.Logger) *Graphite {
@@ -181,6 +181,9 @@ func (g *Gauge) With(...string) metrics.Gauge { return g }
 
 // Set implements gauge.
 func (g *Gauge) Set(value float64) { g.g.Set(value) }
+
+// Add implements metrics.Gauge.
+func (g *Gauge) Add(delta float64) { g.g.Add(delta) }
 
 // Histogram is a Graphite histogram metric. Observations are bucketed into
 // per-quantile gauges.

@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"context"
+
 	"github.com/gorilla/mux"
-	"golang.org/x/net/context"
 
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
