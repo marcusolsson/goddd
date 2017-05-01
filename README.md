@@ -66,14 +66,6 @@ curl localhost:8080/booking/v1/cargos -d '{"origin": "SESTO", "destination": "FI
 curl localhost:8080/booking/v1/cargos/ABC123/request_routes
 ```
 
-## REST API
-
-Each application service is exposed as a API. If you want to try it out for yourself, the documentation is available here:
-
-- [Booking](http://dddsample.marcusoncode.se/booking/v1/docs)
-- [Handling](http://dddsample.marcusoncode.se/handling/v1/docs)
-- [Tracking](http://dddsample.marcusoncode.se/tracking/v1/docs)
-
 ## Contributing
 
 If you want to fork the repository, follow these step to avoid having to rewrite the import paths.
