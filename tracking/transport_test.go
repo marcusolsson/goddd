@@ -9,8 +9,6 @@ import (
 	"testing"
 	"time"
 
-	"context"
-
 	"github.com/go-kit/kit/log"
 
 	"github.com/marcusolsson/goddd/cargo"
@@ -35,11 +33,9 @@ func TestTrackCargo(t *testing.T) {
 
 	cargos.Store(c)
 
-	ctx := context.Background()
-
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := MakeHandler(ctx, s, logger)
+	h := MakeHandler(s, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/TEST", nil)
 	rec := httptest.NewRecorder()
@@ -91,11 +87,9 @@ func TestTrackUnknownCargo(t *testing.T) {
 
 	s := NewService(&cargos, &events)
 
-	ctx := context.Background()
-
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := MakeHandler(ctx, s, logger)
+	h := MakeHandler(s, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/not_found", nil)
 	rec := httptest.NewRecorder()

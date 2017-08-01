@@ -15,7 +15,7 @@ import (
 )
 
 // MakeHandler returns a handler for the tracking service.
-func MakeHandler(ctx context.Context, ts Service, logger kitlog.Logger) http.Handler {
+func MakeHandler(ts Service, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
 	opts := []kithttp.ServerOption{
@@ -24,7 +24,6 @@ func MakeHandler(ctx context.Context, ts Service, logger kitlog.Logger) http.Han
 	}
 
 	trackCargoHandler := kithttp.NewServer(
-		ctx,
 		makeTrackCargoEndpoint(ts),
 		decodeTrackCargoRequest,
 		encodeResponse,
@@ -61,6 +60,7 @@ type errorer interface {
 
 // encode errors from business-logic
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch err {
 	case cargo.ErrUnknown:
 		w.WriteHeader(http.StatusNotFound)
@@ -69,7 +69,6 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	default:
 		w.WriteHeader(http.StatusInternalServerError)
 	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"error": err.Error(),
 	})
