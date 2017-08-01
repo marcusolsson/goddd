@@ -8,10 +8,12 @@ matrix:
     - go: 1.4
     - go: 1.5
     - go: 1.6
+    - go: 1.7
+    - go: 1.8
     - go: tip
 
 install:
-  - go get golang.org/x/tools/cmd/vet
+  - # Skip
 
 script:
   - go get -t -v ./...

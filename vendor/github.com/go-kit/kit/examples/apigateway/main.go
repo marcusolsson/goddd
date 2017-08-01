@@ -44,8 +44,8 @@ func main() {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stderr)
-		logger = log.NewContext(logger).With("ts", log.DefaultTimestampUTC)
-		logger = log.NewContext(logger).With("caller", log.DefaultCaller)
+		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
+		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
 
 	// Service discovery domain. In this example we use Consul.
@@ -84,18 +84,19 @@ func main() {
 			tags        = []string{}
 			passingOnly = true
 			endpoints   = addsvc.Endpoints{}
+			instancer   = consulsd.NewInstancer(client, logger, "addsvc", tags, passingOnly)
 		)
 		{
 			factory := addsvcFactory(addsvc.MakeSumEndpoint, tracer, logger)
-			subscriber := consulsd.NewSubscriber(client, factory, logger, "addsvc", tags, passingOnly)
-			balancer := lb.NewRoundRobin(subscriber)
+			endpointer := sd.NewEndpointer(instancer, factory, logger)
+			balancer := lb.NewRoundRobin(endpointer)
 			retry := lb.Retry(*retryMax, *retryTimeout, balancer)
 			endpoints.SumEndpoint = retry
 		}
 		{
 			factory := addsvcFactory(addsvc.MakeConcatEndpoint, tracer, logger)
-			subscriber := consulsd.NewSubscriber(client, factory, logger, "addsvc", tags, passingOnly)
-			balancer := lb.NewRoundRobin(subscriber)
+			endpointer := sd.NewEndpointer(instancer, factory, logger)
+			balancer := lb.NewRoundRobin(endpointer)
 			retry := lb.Retry(*retryMax, *retryTimeout, balancer)
 			endpoints.ConcatEndpoint = retry
 		}
@@ -104,7 +105,7 @@ func main() {
 		// HTTP handler, and just install it under a particular path prefix in
 		// our router.
 
-		r.PathPrefix("/addsvc").Handler(http.StripPrefix("/addsvc", addsvc.MakeHTTPHandler(ctx, endpoints, tracer, logger)))
+		r.PathPrefix("/addsvc").Handler(http.StripPrefix("/addsvc", addsvc.MakeHTTPHandler(endpoints, tracer, logger)))
 	}
 
 	// stringsvc routes.
@@ -120,18 +121,19 @@ func main() {
 			passingOnly = true
 			uppercase   endpoint.Endpoint
 			count       endpoint.Endpoint
+			instancer   = consulsd.NewInstancer(client, logger, "stringsvc", tags, passingOnly)
 		)
 		{
 			factory := stringsvcFactory(ctx, "GET", "/uppercase")
-			subscriber := consulsd.NewSubscriber(client, factory, logger, "stringsvc", tags, passingOnly)
-			balancer := lb.NewRoundRobin(subscriber)
+			endpointer := sd.NewEndpointer(instancer, factory, logger)
+			balancer := lb.NewRoundRobin(endpointer)
 			retry := lb.Retry(*retryMax, *retryTimeout, balancer)
 			uppercase = retry
 		}
 		{
 			factory := stringsvcFactory(ctx, "GET", "/count")
-			subscriber := consulsd.NewSubscriber(client, factory, logger, "stringsvc", tags, passingOnly)
-			balancer := lb.NewRoundRobin(subscriber)
+			endpointer := sd.NewEndpointer(instancer, factory, logger)
+			balancer := lb.NewRoundRobin(endpointer)
 			retry := lb.Retry(*retryMax, *retryTimeout, balancer)
 			count = retry
 		}
@@ -140,8 +142,8 @@ func main() {
 		// have to do provide it with the encode and decode functions for our
 		// stringsvc methods.
 
-		r.Handle("/stringsvc/uppercase", httptransport.NewServer(ctx, uppercase, decodeUppercaseRequest, encodeJSONResponse))
-		r.Handle("/stringsvc/count", httptransport.NewServer(ctx, count, decodeCountRequest, encodeJSONResponse))
+		r.Handle("/stringsvc/uppercase", httptransport.NewServer(uppercase, decodeUppercaseRequest, encodeJSONResponse))
+		r.Handle("/stringsvc/count", httptransport.NewServer(count, decodeCountRequest, encodeJSONResponse))
 	}
 
 	// Interrupt handler.

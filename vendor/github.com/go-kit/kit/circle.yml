@@ -2,7 +2,7 @@ machine:
   pre:
     - curl -sSL https://s3.amazonaws.com/circle-downloads/install-circleci-docker.sh | bash -s -- 1.10.0
     - sudo rm -rf /usr/local/go
-    - curl -sSL https://storage.googleapis.com/golang/go1.8.linux-amd64.tar.gz | sudo tar xz -C /usr/local
+    - curl -sSL https://storage.googleapis.com/golang/go1.8.3.linux-amd64.tar.gz | sudo tar xz -C /usr/local
   services:
     - docker
 
@@ -24,3 +24,4 @@ test:
           ETCD_ADDR: http://localhost:2379
           CONSUL_ADDR: localhost:8500
           ZK_ADDR: localhost:2181
+          EUREKA_ADDR: http://localhost:8761/eureka

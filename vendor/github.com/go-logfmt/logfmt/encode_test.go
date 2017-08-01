@@ -53,6 +53,11 @@ func TestEncodeKeyval(t *testing.T) {
 		{key: decimalStringer{5, 9}, value: "v", want: "5.9=v"},
 		{key: (*decimalStringer)(nil), value: "v", err: logfmt.ErrNilKey},
 		{key: marshalerStringer{5, 9}, value: "v", want: "5.9=v"},
+		{key: "k", value: "\xbd", want: `k="\ufffd"`},
+		{key: "k", value: "\ufffd\x00", want: `k="\ufffd\u0000"`},
+		{key: "k", value: "\ufffd", want: `k="\ufffd"`},
+		{key: "k", value: []byte("\ufffd\x00"), want: `k="\ufffd\u0000"`},
+		{key: "k", value: []byte("\ufffd"), want: `k="\ufffd"`},
 	}
 
 	for _, d := range data {
@@ -82,6 +87,8 @@ func TestMarshalKeyvals(t *testing.T) {
 		{in: kv(), want: nil},
 		{in: kv(nil, "v"), err: logfmt.ErrNilKey},
 		{in: kv(nilPtr, "v"), err: logfmt.ErrNilKey},
+		{in: kv("\ufffd"), err: logfmt.ErrInvalidKey},
+		{in: kv("\xbd"), err: logfmt.ErrInvalidKey},
 		{in: kv("k"), want: []byte("k=null")},
 		{in: kv("k", nil), want: []byte("k=null")},
 		{in: kv("k", ""), want: []byte("k=")},
@@ -125,8 +132,8 @@ func TestMarshalKeyvals(t *testing.T) {
 		if err != d.err {
 			t.Errorf("%#v: got error: %v, want error: %v", d.in, err, d.err)
 		}
-		if got, want := got, d.want; !reflect.DeepEqual(got, want) {
-			t.Errorf("%#v: got '%s', want '%s'", d.in, got, want)
+		if !reflect.DeepEqual(got, d.want) {
+			t.Errorf("%#v: got '%s', want '%s'", d.in, got, d.want)
 		}
 	}
 }
@@ -181,12 +188,12 @@ func (t marshalerStringer) String() string {
 	return fmt.Sprint(t.a + t.b)
 }
 
-var marshalError = errors.New("marshal error")
+var errMarshal = errors.New("marshal error")
 
 type errorMarshaler struct{}
 
 func (errorMarshaler) MarshalText() ([]byte, error) {
-	return nil, marshalError
+	return nil, errMarshal
 }
 
 func BenchmarkEncodeKeyval(b *testing.B) {

@@ -1,4 +1,4 @@
-# Go kit [![Circle CI](https://circleci.com/gh/go-kit/kit.svg?style=svg)](https://circleci.com/gh/go-kit/kit) [![Travis CI](https://travis-ci.org/go-kit/kit.svg?branch=master)](https://travis-ci.org/go-kit/kit) [![GoDoc](https://godoc.org/github.com/go-kit/kit?status.svg)](https://godoc.org/github.com/go-kit/kit) [![Coverage Status](https://coveralls.io/repos/go-kit/kit/badge.svg?branch=master&service=github)](https://coveralls.io/github/go-kit/kit?branch=master) [![Go Report Card](https://goreportcard.com/badge/go-kit/kit)](https://goreportcard.com/report/go-kit/kit)
+# Go kit [![Circle CI](https://circleci.com/gh/go-kit/kit.svg?style=shield)](https://circleci.com/gh/go-kit/kit) [![Travis CI](https://travis-ci.org/go-kit/kit.svg?branch=master)](https://travis-ci.org/go-kit/kit) [![GoDoc](https://godoc.org/github.com/go-kit/kit?status.svg)](https://godoc.org/github.com/go-kit/kit) [![Coverage Status](https://coveralls.io/repos/go-kit/kit/badge.svg?branch=master&service=github)](https://coveralls.io/github/go-kit/kit?branch=master) [![Go Report Card](https://goreportcard.com/badge/go-kit/kit)](https://goreportcard.com/report/go-kit/kit) [![Sourcegraph](https://sourcegraph.com/github.com/go-kit/kit/-/badge.svg)](https://sourcegraph.com/github.com/go-kit/kit?badge)
 
 **Go kit** is a **distributed programming toolkit** for building microservices
 in large organizations. We solve common problems in distributed systems, so
@@ -75,7 +75,6 @@ Projects with a ★ have had particular influence on Go kit's design (or vice-ve
 
 - [gizmo](https://github.com/nytimes/gizmo), a microservice toolkit from The New York Times ★
 - [go-micro](https://github.com/myodc/go-micro), a microservices client/server library ★
-- [h2](https://github.com/hailocab/h2), a microservices framework ★
 - [gotalk](https://github.com/rsms/gotalk), async peer communication protocol &amp; library
 - [Kite](https://github.com/koding/kite), a micro-service framework
 - [gocircuit](https://github.com/gocircuit/circuit), dynamic cloud orchestration
@@ -115,3 +114,7 @@ Projects with a ★ have had particular influence on Go kit's design (or vice-ve
 - [Architecting for the Cloud](http://fr.slideshare.net/stonse/architecting-for-the-cloud-using-netflixoss-codemash-workshop-29852233) — Netflix
 - [Dapper, a Large-Scale Distributed Systems Tracing Infrastructure](http://research.google.com/pubs/pub36356.html) — Google
 - [Your Server as a Function](http://monkey.org/~marius/funsrv.pdf) (PDF) — Twitter
+
+---
+
+Development supported by [DigitalOcean](https://digitalocean.com).
