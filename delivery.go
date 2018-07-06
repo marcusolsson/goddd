@@ -1,10 +1,7 @@
-package cargo
+package shipping
 
 import (
 	"time"
-
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
 )
 
 // Delivery is the actual transportation of the cargo, as opposed to the
@@ -16,8 +13,8 @@ type Delivery struct {
 	TransportStatus         TransportStatus
 	NextExpectedActivity    HandlingActivity
 	LastEvent               HandlingEvent
-	LastKnownLocation       location.UNLocode
-	CurrentVoyage           voyage.Number
+	LastKnownLocation       UNLocode
+	CurrentVoyage           VoyageNumber
 	ETA                     time.Time
 	IsMisdirected           bool
 	IsUnloadedAtDestination bool
@@ -121,7 +118,7 @@ func calculateTransportStatus(event HandlingEvent) TransportStatus {
 	return Unknown
 }
 
-func calculateLastKnownLocation(event HandlingEvent) location.UNLocode {
+func calculateLastKnownLocation(event HandlingEvent) UNLocode {
 	return event.Activity.Location
 }
 
@@ -157,12 +154,12 @@ func calculateNextExpectedActivity(d Delivery) HandlingActivity {
 	return HandlingActivity{}
 }
 
-func calculateCurrentVoyage(transportStatus TransportStatus, event HandlingEvent) voyage.Number {
+func calculateCurrentVoyage(transportStatus TransportStatus, event HandlingEvent) VoyageNumber {
 	if transportStatus == OnboardCarrier && event.Activity.Type != NotHandled {
 		return event.Activity.VoyageNumber
 	}
 
-	return voyage.Number("")
+	return VoyageNumber("")
 }
 
 func calculateETA(d Delivery) time.Time {

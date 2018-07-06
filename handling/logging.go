@@ -5,9 +5,7 @@ import (
 
 	"github.com/go-kit/kit/log"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
+	shipping "github.com/marcusolsson/goddd"
 )
 
 type loggingService struct {
@@ -20,8 +18,8 @@ func NewLoggingService(logger log.Logger, s Service) Service {
 	return &loggingService{logger, s}
 }
 
-func (s *loggingService) RegisterHandlingEvent(completed time.Time, id cargo.TrackingID, voyageNumber voyage.Number,
-	unLocode location.UNLocode, eventType cargo.HandlingEventType) (err error) {
+func (s *loggingService) RegisterHandlingEvent(completed time.Time, id shipping.TrackingID, voyageNumber shipping.VoyageNumber,
+	unLocode shipping.UNLocode, eventType shipping.HandlingEventType) (err error) {
 	defer func(begin time.Time) {
 		s.logger.Log(
 			"method", "register_incident",

@@ -4,15 +4,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
+	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/mock"
 )
 
 func TestBookNewCargo(t *testing.T) {
 	var (
-		origin      = location.SESTO
-		destination = location.AUMEL
+		origin      = shipping.SESTO
+		destination = shipping.AUMEL
 		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
@@ -48,20 +47,20 @@ func TestBookNewCargo(t *testing.T) {
 
 type stubRoutingService struct{}
 
-func (s *stubRoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
-	legs := []cargo.Leg{
+func (s *stubRoutingService) FetchRoutesForSpecification(rs shipping.RouteSpecification) []shipping.Itinerary {
+	legs := []shipping.Leg{
 		{LoadLocation: rs.Origin, UnloadLocation: rs.Destination},
 	}
 
-	return []cargo.Itinerary{
+	return []shipping.Itinerary{
 		{Legs: legs},
 	}
 }
 
 func TestRequestPossibleRoutesForCargo(t *testing.T) {
 	var (
-		origin      = location.SESTO
-		destination = location.AUMEL
+		origin      = shipping.SESTO
+		destination = shipping.AUMEL
 		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
@@ -97,8 +96,8 @@ func TestAssignCargoToRoute(t *testing.T) {
 	s := NewService(&cargos, nil, nil, &rs)
 
 	var (
-		origin      = location.SESTO
-		destination = location.AUMEL
+		origin      = shipping.SESTO
+		destination = shipping.AUMEL
 		deadline    = time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 	)
 
@@ -117,7 +116,7 @@ func TestAssignCargoToRoute(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err := s.AssignCargoToRoute("no_such_id", cargo.Itinerary{}); err != ErrInvalidArgument {
+	if err := s.AssignCargoToRoute("no_such_id", shipping.Itinerary{}); err != ErrInvalidArgument {
 		t.Errorf("err = %s; want = %s", err, ErrInvalidArgument)
 	}
 }
@@ -126,41 +125,41 @@ func TestChangeCargoDestination(t *testing.T) {
 	var cargos mockCargoRepository
 	var locations mock.LocationRepository
 
-	locations.FindFn = func(loc location.UNLocode) (*location.Location, error) {
-		if loc != location.AUMEL {
-			return nil, location.ErrUnknown
+	locations.FindFn = func(loc shipping.UNLocode) (*shipping.Location, error) {
+		if loc != shipping.AUMEL {
+			return nil, shipping.ErrUnknownLocation
 		}
-		return location.Melbourne, nil
+		return shipping.Melbourne, nil
 	}
 
 	var rs stubRoutingService
 
 	s := NewService(&cargos, &locations, nil, &rs)
 
-	c := cargo.New("ABC", cargo.RouteSpecification{
-		Origin:          location.SESTO,
-		Destination:     location.CNHKG,
+	c := shipping.NewCargo("ABC", shipping.RouteSpecification{
+		Origin:          shipping.SESTO,
+		Destination:     shipping.CNHKG,
 		ArrivalDeadline: time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC),
 	})
 
-	if err := s.ChangeDestination("no_such_id", location.SESTO); err != cargo.ErrUnknown {
-		t.Errorf("err = %s; want = %s", err, cargo.ErrUnknown)
+	if err := s.ChangeDestination("no_such_id", shipping.SESTO); err != shipping.ErrUnknownCargo {
+		t.Errorf("err = %s; want = %s", err, shipping.ErrUnknownCargo)
 	}
 
 	if err := cargos.Store(c); err != nil {
 		t.Fatal(err)
 	}
 
-	if err := s.ChangeDestination(c.TrackingID, "no_such_unlocode"); err != location.ErrUnknown {
-		t.Errorf("err = %s; want = %s", err, location.ErrUnknown)
+	if err := s.ChangeDestination(c.TrackingID, "no_such_unlocode"); err != shipping.ErrUnknownLocation {
+		t.Errorf("err = %s; want = %s", err, shipping.ErrUnknownLocation)
 	}
 
-	if c.RouteSpecification.Destination != location.CNHKG {
+	if c.RouteSpecification.Destination != shipping.CNHKG {
 		t.Errorf("c.RouteSpecification.Destination = %s; want = %s",
-			c.RouteSpecification.Destination, location.CNHKG)
+			c.RouteSpecification.Destination, shipping.CNHKG)
 	}
 
-	if err := s.ChangeDestination(c.TrackingID, location.AUMEL); err != nil {
+	if err := s.ChangeDestination(c.TrackingID, shipping.AUMEL); err != nil {
 		t.Fatal(err)
 	}
 
@@ -169,9 +168,9 @@ func TestChangeCargoDestination(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if uc.RouteSpecification.Destination != location.AUMEL {
+	if uc.RouteSpecification.Destination != shipping.AUMEL {
 		t.Errorf("uc.RouteSpecification.Destination = %s; want = %s",
-			uc.RouteSpecification.Destination, location.AUMEL)
+			uc.RouteSpecification.Destination, shipping.AUMEL)
 	}
 }
 
@@ -179,13 +178,13 @@ func TestLoadCargo(t *testing.T) {
 	deadline := time.Date(2015, time.November, 10, 23, 0, 0, 0, time.UTC)
 
 	var cargos mock.CargoRepository
-	cargos.FindFn = func(id cargo.TrackingID) (*cargo.Cargo, error) {
-		return &cargo.Cargo{
+	cargos.FindFn = func(id shipping.TrackingID) (*shipping.Cargo, error) {
+		return &shipping.Cargo{
 			TrackingID: "test_id",
-			Origin:     location.SESTO,
-			RouteSpecification: cargo.RouteSpecification{
-				Origin:          location.SESTO,
-				Destination:     location.AUMEL,
+			Origin:     shipping.SESTO,
+			RouteSpecification: shipping.RouteSpecification{
+				Origin:          shipping.SESTO,
+				Destination:     shipping.AUMEL,
 				ArrivalDeadline: deadline,
 			},
 		}, nil
@@ -222,21 +221,21 @@ func TestLoadCargo(t *testing.T) {
 }
 
 type mockCargoRepository struct {
-	cargo *cargo.Cargo
+	cargo *shipping.Cargo
 }
 
-func (r *mockCargoRepository) Store(c *cargo.Cargo) error {
+func (r *mockCargoRepository) Store(c *shipping.Cargo) error {
 	r.cargo = c
 	return nil
 }
 
-func (r *mockCargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
+func (r *mockCargoRepository) Find(id shipping.TrackingID) (*shipping.Cargo, error) {
 	if r.cargo != nil {
 		return r.cargo, nil
 	}
-	return nil, cargo.ErrUnknown
+	return nil, shipping.ErrUnknownCargo
 }
 
-func (r *mockCargoRepository) FindAll() []*cargo.Cargo {
-	return []*cargo.Cargo{r.cargo}
+func (r *mockCargoRepository) FindAll() []*shipping.Cargo {
+	return []*shipping.Cargo{r.cargo}
 }

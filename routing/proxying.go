@@ -11,9 +11,7 @@ import (
 	"github.com/go-kit/kit/endpoint"
 	kithttp "github.com/go-kit/kit/transport/http"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
+	shipping "github.com/marcusolsson/goddd"
 )
 
 type proxyService struct {
@@ -22,31 +20,31 @@ type proxyService struct {
 	Service
 }
 
-func (s proxyService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
+func (s proxyService) FetchRoutesForSpecification(rs shipping.RouteSpecification) []shipping.Itinerary {
 	response, err := s.FetchRoutesEndpoint(s.Context, fetchRoutesRequest{
 		From: string(rs.Origin),
 		To:   string(rs.Destination),
 	})
 	if err != nil {
-		return []cargo.Itinerary{}
+		return []shipping.Itinerary{}
 	}
 
 	resp := response.(fetchRoutesResponse)
 
-	var itineraries []cargo.Itinerary
+	var itineraries []shipping.Itinerary
 	for _, r := range resp.Paths {
-		var legs []cargo.Leg
+		var legs []shipping.Leg
 		for _, e := range r.Edges {
-			legs = append(legs, cargo.Leg{
-				VoyageNumber:   voyage.Number(e.Voyage),
-				LoadLocation:   location.UNLocode(e.Origin),
-				UnloadLocation: location.UNLocode(e.Destination),
+			legs = append(legs, shipping.Leg{
+				VoyageNumber:   shipping.VoyageNumber(e.Voyage),
+				LoadLocation:   shipping.UNLocode(e.Origin),
+				UnloadLocation: shipping.UNLocode(e.Destination),
 				LoadTime:       e.Departure,
 				UnloadTime:     e.Arrival,
 			})
 		}
 
-		itineraries = append(itineraries, cargo.Itinerary{Legs: legs})
+		itineraries = append(itineraries, shipping.Itinerary{Legs: legs})
 	}
 
 	return itineraries

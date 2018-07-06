@@ -6,20 +6,18 @@ import (
 	"context"
 
 	"github.com/go-kit/kit/endpoint"
-
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
+	shipping "github.com/marcusolsson/goddd"
 )
 
 type bookCargoRequest struct {
-	Origin          location.UNLocode
-	Destination     location.UNLocode
+	Origin          shipping.UNLocode
+	Destination     shipping.UNLocode
 	ArrivalDeadline time.Time
 }
 
 type bookCargoResponse struct {
-	ID  cargo.TrackingID `json:"tracking_id,omitempty"`
-	Err error            `json:"error,omitempty"`
+	ID  shipping.TrackingID `json:"tracking_id,omitempty"`
+	Err error               `json:"error,omitempty"`
 }
 
 func (r bookCargoResponse) error() error { return r.Err }
@@ -33,7 +31,7 @@ func makeBookCargoEndpoint(s Service) endpoint.Endpoint {
 }
 
 type loadCargoRequest struct {
-	ID cargo.TrackingID
+	ID shipping.TrackingID
 }
 
 type loadCargoResponse struct {
@@ -52,12 +50,12 @@ func makeLoadCargoEndpoint(s Service) endpoint.Endpoint {
 }
 
 type requestRoutesRequest struct {
-	ID cargo.TrackingID
+	ID shipping.TrackingID
 }
 
 type requestRoutesResponse struct {
-	Routes []cargo.Itinerary `json:"routes,omitempty"`
-	Err    error             `json:"error,omitempty"`
+	Routes []shipping.Itinerary `json:"routes,omitempty"`
+	Err    error                `json:"error,omitempty"`
 }
 
 func (r requestRoutesResponse) error() error { return r.Err }
@@ -71,8 +69,8 @@ func makeRequestRoutesEndpoint(s Service) endpoint.Endpoint {
 }
 
 type assignToRouteRequest struct {
-	ID        cargo.TrackingID
-	Itinerary cargo.Itinerary
+	ID        shipping.TrackingID
+	Itinerary shipping.Itinerary
 }
 
 type assignToRouteResponse struct {
@@ -90,8 +88,8 @@ func makeAssignToRouteEndpoint(s Service) endpoint.Endpoint {
 }
 
 type changeDestinationRequest struct {
-	ID          cargo.TrackingID
-	Destination location.UNLocode
+	ID          shipping.TrackingID
+	Destination shipping.UNLocode
 }
 
 type changeDestinationResponse struct {

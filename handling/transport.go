@@ -11,9 +11,7 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
+	shipping "github.com/marcusolsson/goddd"
 )
 
 // MakeHandler returns a handler for the handling service.
@@ -53,20 +51,20 @@ func decodeRegisterIncidentRequest(_ context.Context, r *http.Request) (interfac
 
 	return registerIncidentRequest{
 		CompletionTime: body.CompletionTime,
-		ID:             cargo.TrackingID(body.TrackingID),
-		Voyage:         voyage.Number(body.VoyageNumber),
-		Location:       location.UNLocode(body.Location),
+		ID:             shipping.TrackingID(body.TrackingID),
+		Voyage:         shipping.VoyageNumber(body.VoyageNumber),
+		Location:       shipping.UNLocode(body.Location),
 		EventType:      stringToEventType(body.EventType),
 	}, nil
 }
 
-func stringToEventType(s string) cargo.HandlingEventType {
-	types := map[string]cargo.HandlingEventType{
-		cargo.Receive.String(): cargo.Receive,
-		cargo.Load.String():    cargo.Load,
-		cargo.Unload.String():  cargo.Unload,
-		cargo.Customs.String(): cargo.Customs,
-		cargo.Claim.String():   cargo.Claim,
+func stringToEventType(s string) shipping.HandlingEventType {
+	types := map[string]shipping.HandlingEventType{
+		shipping.Receive.String(): shipping.Receive,
+		shipping.Load.String():    shipping.Load,
+		shipping.Unload.String():  shipping.Unload,
+		shipping.Customs.String(): shipping.Customs,
+		shipping.Claim.String():   shipping.Claim,
 	}
 	return types[s]
 }
@@ -88,7 +86,7 @@ type errorer interface {
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch err {
-	case cargo.ErrUnknown:
+	case shipping.ErrUnknownCargo:
 		w.WriteHeader(http.StatusNotFound)
 	case ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)
