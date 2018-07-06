@@ -1,4 +1,4 @@
-// Package booking provides the use-case of booking a cargo. Used by views
+// Package booking provides the use-case of booking a shipping. Used by views
 // facing an administrator.
 package booking
 
@@ -6,8 +6,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
+	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/routing"
 )
 
@@ -18,21 +17,21 @@ var ErrInvalidArgument = errors.New("invalid argument")
 type Service interface {
 	// BookNewCargo registers a new cargo in the tracking system, not yet
 	// routed.
-	BookNewCargo(origin location.UNLocode, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error)
+	BookNewCargo(origin shipping.UNLocode, destination shipping.UNLocode, deadline time.Time) (shipping.TrackingID, error)
 
-	// LoadCargo returns a read model of a cargo.
-	LoadCargo(id cargo.TrackingID) (Cargo, error)
+	// LoadCargo returns a read model of a shipping.
+	LoadCargo(id shipping.TrackingID) (Cargo, error)
 
 	// RequestPossibleRoutesForCargo requests a list of itineraries describing
-	// possible routes for this cargo.
-	RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary
+	// possible routes for this shipping.
+	RequestPossibleRoutesForCargo(id shipping.TrackingID) []shipping.Itinerary
 
 	// AssignCargoToRoute assigns a cargo to the route specified by the
 	// itinerary.
-	AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itinerary) error
+	AssignCargoToRoute(id shipping.TrackingID, itinerary shipping.Itinerary) error
 
-	// ChangeDestination changes the destination of a cargo.
-	ChangeDestination(id cargo.TrackingID, destination location.UNLocode) error
+	// ChangeDestination changes the destination of a shipping.
+	ChangeDestination(id shipping.TrackingID, destination shipping.UNLocode) error
 
 	// Cargos returns a list of all cargos that have been booked.
 	Cargos() []Cargo
@@ -42,13 +41,13 @@ type Service interface {
 }
 
 type service struct {
-	cargos         cargo.Repository
-	locations      location.Repository
-	handlingEvents cargo.HandlingEventRepository
+	cargos         shipping.CargoRepository
+	locations      shipping.LocationRepository
+	handlingEvents shipping.HandlingEventRepository
 	routingService routing.Service
 }
 
-func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itinerary) error {
+func (s *service) AssignCargoToRoute(id shipping.TrackingID, itinerary shipping.Itinerary) error {
 	if id == "" || len(itinerary.Legs) == 0 {
 		return ErrInvalidArgument
 	}
@@ -63,19 +62,19 @@ func (s *service) AssignCargoToRoute(id cargo.TrackingID, itinerary cargo.Itiner
 	return s.cargos.Store(c)
 }
 
-func (s *service) BookNewCargo(origin, destination location.UNLocode, deadline time.Time) (cargo.TrackingID, error) {
+func (s *service) BookNewCargo(origin, destination shipping.UNLocode, deadline time.Time) (shipping.TrackingID, error) {
 	if origin == "" || destination == "" || deadline.IsZero() {
 		return "", ErrInvalidArgument
 	}
 
-	id := cargo.NextTrackingID()
-	rs := cargo.RouteSpecification{
+	id := shipping.NextTrackingID()
+	rs := shipping.RouteSpecification{
 		Origin:          origin,
 		Destination:     destination,
 		ArrivalDeadline: deadline,
 	}
 
-	c := cargo.New(id, rs)
+	c := shipping.NewCargo(id, rs)
 
 	if err := s.cargos.Store(c); err != nil {
 		return "", err
@@ -84,7 +83,7 @@ func (s *service) BookNewCargo(origin, destination location.UNLocode, deadline t
 	return c.TrackingID, nil
 }
 
-func (s *service) LoadCargo(id cargo.TrackingID) (Cargo, error) {
+func (s *service) LoadCargo(id shipping.TrackingID) (Cargo, error) {
 	if id == "" {
 		return Cargo{}, ErrInvalidArgument
 	}
@@ -97,7 +96,7 @@ func (s *service) LoadCargo(id cargo.TrackingID) (Cargo, error) {
 	return assemble(c, s.handlingEvents), nil
 }
 
-func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UNLocode) error {
+func (s *service) ChangeDestination(id shipping.TrackingID, destination shipping.UNLocode) error {
 	if id == "" || destination == "" {
 		return ErrInvalidArgument
 	}
@@ -112,7 +111,7 @@ func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UN
 		return err
 	}
 
-	c.SpecifyNewRoute(cargo.RouteSpecification{
+	c.SpecifyNewRoute(shipping.RouteSpecification{
 		Origin:          c.Origin,
 		Destination:     l.UNLocode,
 		ArrivalDeadline: c.RouteSpecification.ArrivalDeadline,
@@ -125,14 +124,14 @@ func (s *service) ChangeDestination(id cargo.TrackingID, destination location.UN
 	return nil
 }
 
-func (s *service) RequestPossibleRoutesForCargo(id cargo.TrackingID) []cargo.Itinerary {
+func (s *service) RequestPossibleRoutesForCargo(id shipping.TrackingID) []shipping.Itinerary {
 	if id == "" {
 		return nil
 	}
 
 	c, err := s.cargos.Find(id)
 	if err != nil {
-		return []cargo.Itinerary{}
+		return []shipping.Itinerary{}
 	}
 
 	return s.routingService.FetchRoutesForSpecification(c.RouteSpecification)
@@ -158,7 +157,7 @@ func (s *service) Locations() []Location {
 }
 
 // NewService creates a booking service with necessary dependencies.
-func NewService(cargos cargo.Repository, locations location.Repository, events cargo.HandlingEventRepository, rs routing.Service) Service {
+func NewService(cargos shipping.CargoRepository, locations shipping.LocationRepository, events shipping.HandlingEventRepository, rs routing.Service) Service {
 	return &service{
 		cargos:         cargos,
 		locations:      locations,
@@ -175,21 +174,21 @@ type Location struct {
 
 // Cargo is a read model for booking views.
 type Cargo struct {
-	ArrivalDeadline time.Time   `json:"arrival_deadline"`
-	Destination     string      `json:"destination"`
-	Legs            []cargo.Leg `json:"legs,omitempty"`
-	Misrouted       bool        `json:"misrouted"`
-	Origin          string      `json:"origin"`
-	Routed          bool        `json:"routed"`
-	TrackingID      string      `json:"tracking_id"`
+	ArrivalDeadline time.Time      `json:"arrival_deadline"`
+	Destination     string         `json:"destination"`
+	Legs            []shipping.Leg `json:"legs,omitempty"`
+	Misrouted       bool           `json:"misrouted"`
+	Origin          string         `json:"origin"`
+	Routed          bool           `json:"routed"`
+	TrackingID      string         `json:"tracking_id"`
 }
 
-func assemble(c *cargo.Cargo, events cargo.HandlingEventRepository) Cargo {
+func assemble(c *shipping.Cargo, events shipping.HandlingEventRepository) Cargo {
 	return Cargo{
 		TrackingID:      string(c.TrackingID),
 		Origin:          string(c.Origin),
 		Destination:     string(c.RouteSpecification.Destination),
-		Misrouted:       c.Delivery.RoutingStatus == cargo.Misrouted,
+		Misrouted:       c.Delivery.RoutingStatus == shipping.Misrouted,
 		Routed:          !c.Itinerary.IsEmpty(),
 		ArrivalDeadline: c.RouteSpecification.ArrivalDeadline,
 		Legs:            c.Itinerary.Legs,

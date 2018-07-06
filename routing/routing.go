@@ -3,11 +3,13 @@
 // bounded context.
 package routing
 
-import "github.com/marcusolsson/goddd/cargo"
+import (
+	shipping "github.com/marcusolsson/goddd"
+)
 
 // Service provides access to an external routing service.
 type Service interface {
 	// FetchRoutesForSpecification finds all possible routes that satisfy a
 	// given specification.
-	FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary
+	FetchRoutesForSpecification(rs shipping.RouteSpecification) []shipping.Itinerary
 }

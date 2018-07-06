@@ -1,21 +1,19 @@
-package cargo
+package shipping
 
 import (
 	"testing"
 	"time"
-
-	"github.com/marcusolsson/goddd/location"
 )
 
 func TestConstruction(t *testing.T) {
 	id := NextTrackingID()
 	spec := RouteSpecification{
-		Origin:          location.SESTO,
-		Destination:     location.AUMEL,
+		Origin:          SESTO,
+		Destination:     AUMEL,
 		ArrivalDeadline: time.Date(2009, time.March, 13, 0, 0, 0, 0, time.UTC),
 	}
 
-	c := New(id, spec)
+	c := NewCargo(id, spec)
 
 	if c.Delivery.RoutingStatus != NotRouted {
 		t.Errorf("RoutingStatus = %v; want = %v",
@@ -34,22 +32,22 @@ func TestConstruction(t *testing.T) {
 func TestRoutingStatus(t *testing.T) {
 	good := Itinerary{
 		Legs: []Leg{
-			{LoadLocation: location.SESTO, UnloadLocation: location.AUMEL},
+			{LoadLocation: SESTO, UnloadLocation: AUMEL},
 		},
 	}
 
 	bad := Itinerary{
 		Legs: []Leg{
-			{LoadLocation: location.SESTO, UnloadLocation: location.CNHKG},
+			{LoadLocation: SESTO, UnloadLocation: CNHKG},
 		},
 	}
 
 	acceptOnlyGood := RouteSpecification{
-		Origin:      location.SESTO,
-		Destination: location.AUMEL,
+		Origin:      SESTO,
+		Destination: AUMEL,
 	}
 
-	c := New("ABC", RouteSpecification{})
+	c := NewCargo("ABC", RouteSpecification{})
 
 	c.SpecifyNewRoute(acceptOnlyGood)
 	if c.Delivery.RoutingStatus != NotRouted {
@@ -71,9 +69,9 @@ func TestRoutingStatus(t *testing.T) {
 }
 
 func TestLastKnownLocation_WhenNoEvents(t *testing.T) {
-	c := New("ABC", RouteSpecification{
-		Origin:      location.SESTO,
-		Destination: location.CNHKG,
+	c := NewCargo("ABC", RouteSpecification{
+		Origin:      SESTO,
+		Destination: CNHKG,
 	})
 
 	if c.Delivery.LastKnownLocation != "" {
@@ -84,18 +82,18 @@ func TestLastKnownLocation_WhenNoEvents(t *testing.T) {
 func TestLastKnownLocation_WhenReceived(t *testing.T) {
 	c := populateCargoReceivedInStockholm()
 
-	if c.Delivery.LastKnownLocation != location.SESTO {
+	if c.Delivery.LastKnownLocation != SESTO {
 		t.Errorf("LastKnownLocation = %s; want = %s",
-			c.Delivery.LastKnownLocation, location.SESTO)
+			c.Delivery.LastKnownLocation, SESTO)
 	}
 }
 
 func TestLastKnownLocation_WhenClaimed(t *testing.T) {
 	c := populateCargoClaimedInMelbourne()
 
-	if c.Delivery.LastKnownLocation != location.AUMEL {
+	if c.Delivery.LastKnownLocation != AUMEL {
 		t.Errorf("LastKnownLocation = %s; want = %s",
-			c.Delivery.LastKnownLocation, location.AUMEL)
+			c.Delivery.LastKnownLocation, AUMEL)
 	}
 }
 
@@ -140,16 +138,16 @@ func TestTransportStatus_Stringer(t *testing.T) {
 }
 
 func populateCargoReceivedInStockholm() *Cargo {
-	c := New("XYZ", RouteSpecification{
-		Origin:      location.SESTO,
-		Destination: location.AUMEL,
+	c := NewCargo("XYZ", RouteSpecification{
+		Origin:      SESTO,
+		Destination: AUMEL,
 	})
 
 	e := HandlingEvent{
 		TrackingID: c.TrackingID,
 		Activity: HandlingActivity{
 			Type:     Receive,
-			Location: location.SESTO,
+			Location: SESTO,
 		},
 	}
 
@@ -163,16 +161,16 @@ func populateCargoReceivedInStockholm() *Cargo {
 }
 
 func populateCargoClaimedInMelbourne() *Cargo {
-	c := New("XYZ", RouteSpecification{
-		Origin:      location.SESTO,
-		Destination: location.AUMEL,
+	c := NewCargo("XYZ", RouteSpecification{
+		Origin:      SESTO,
+		Destination: AUMEL,
 	})
 
 	e := HandlingEvent{
 		TrackingID: c.TrackingID,
 		Activity: HandlingActivity{
 			Type:     Claim,
-			Location: location.AUMEL,
+			Location: AUMEL,
 		},
 	}
 

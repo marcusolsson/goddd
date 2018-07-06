@@ -1,10 +1,8 @@
-package cargo
+package shipping
 
 import (
 	"reflect"
 	"testing"
-
-	"github.com/marcusolsson/goddd/location"
 )
 
 func TestItinerary_CreateEmpty(t *testing.T) {
@@ -41,27 +39,27 @@ type eventExpectedTest struct {
 
 var eventExpectedTests = []eventExpectedTest{
 	{HandlingActivity{}, true},
-	{HandlingActivity{Type: Receive, Location: location.SESTO}, true},
-	{HandlingActivity{Type: Receive, Location: location.AUMEL}, false},
-	{HandlingActivity{Type: Load, Location: location.AUMEL, VoyageNumber: "001A"}, true},
-	{HandlingActivity{Type: Load, Location: location.CNHKG, VoyageNumber: "001A"}, false},
-	{HandlingActivity{Type: Unload, Location: location.CNHKG, VoyageNumber: "001A"}, true},
-	{HandlingActivity{Type: Unload, Location: location.SESTO, VoyageNumber: "001A"}, false},
-	{HandlingActivity{Type: Claim, Location: location.CNHKG}, true},
-	{HandlingActivity{Type: Claim, Location: location.SESTO}, false},
+	{HandlingActivity{Type: Receive, Location: SESTO}, true},
+	{HandlingActivity{Type: Receive, Location: AUMEL}, false},
+	{HandlingActivity{Type: Load, Location: AUMEL, VoyageNumber: "001A"}, true},
+	{HandlingActivity{Type: Load, Location: CNHKG, VoyageNumber: "001A"}, false},
+	{HandlingActivity{Type: Unload, Location: CNHKG, VoyageNumber: "001A"}, true},
+	{HandlingActivity{Type: Unload, Location: SESTO, VoyageNumber: "001A"}, false},
+	{HandlingActivity{Type: Claim, Location: CNHKG}, true},
+	{HandlingActivity{Type: Claim, Location: SESTO}, false},
 }
 
 func TestItinerary_IsExpected(t *testing.T) {
 	i := Itinerary{Legs: []Leg{
 		{
 			VoyageNumber:   "001A",
-			LoadLocation:   location.SESTO,
-			UnloadLocation: location.AUMEL,
+			LoadLocation:   SESTO,
+			UnloadLocation: AUMEL,
 		},
 		{
 			VoyageNumber:   "001A",
-			LoadLocation:   location.AUMEL,
-			UnloadLocation: location.CNHKG,
+			LoadLocation:   AUMEL,
+			UnloadLocation: CNHKG,
 		},
 	}}
 

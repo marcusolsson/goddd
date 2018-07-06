@@ -1,103 +1,101 @@
 package mock
 
 import (
-	"github.com/marcusolsson/goddd/cargo"
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
+	shipping "github.com/marcusolsson/goddd"
 )
 
 // CargoRepository is a mock cargo repository.
 type CargoRepository struct {
-	StoreFn      func(c *cargo.Cargo) error
+	StoreFn      func(c *shipping.Cargo) error
 	StoreInvoked bool
 
-	FindFn      func(id cargo.TrackingID) (*cargo.Cargo, error)
+	FindFn      func(id shipping.TrackingID) (*shipping.Cargo, error)
 	FindInvoked bool
 
-	FindAllFn      func() []*cargo.Cargo
+	FindAllFn      func() []*shipping.Cargo
 	FindAllInvoked bool
 }
 
 // Store calls the StoreFn.
-func (r *CargoRepository) Store(c *cargo.Cargo) error {
+func (r *CargoRepository) Store(c *shipping.Cargo) error {
 	r.StoreInvoked = true
 	return r.StoreFn(c)
 }
 
 // Find calls the FindFn.
-func (r *CargoRepository) Find(id cargo.TrackingID) (*cargo.Cargo, error) {
+func (r *CargoRepository) Find(id shipping.TrackingID) (*shipping.Cargo, error) {
 	r.FindInvoked = true
 	return r.FindFn(id)
 }
 
 // FindAll calls the FindAllFn.
-func (r *CargoRepository) FindAll() []*cargo.Cargo {
+func (r *CargoRepository) FindAll() []*shipping.Cargo {
 	r.FindAllInvoked = true
 	return r.FindAllFn()
 }
 
 // LocationRepository is a mock location repository.
 type LocationRepository struct {
-	FindFn      func(location.UNLocode) (*location.Location, error)
+	FindFn      func(shipping.UNLocode) (*shipping.Location, error)
 	FindInvoked bool
 
-	FindAllFn      func() []*location.Location
+	FindAllFn      func() []*shipping.Location
 	FindAllInvoked bool
 }
 
 // Find calls the FindFn.
-func (r *LocationRepository) Find(locode location.UNLocode) (*location.Location, error) {
+func (r *LocationRepository) Find(locode shipping.UNLocode) (*shipping.Location, error) {
 	r.FindInvoked = true
 	return r.FindFn(locode)
 }
 
 // FindAll calls the FindAllFn.
-func (r *LocationRepository) FindAll() []*location.Location {
+func (r *LocationRepository) FindAll() []*shipping.Location {
 	r.FindAllInvoked = true
 	return r.FindAllFn()
 }
 
 // VoyageRepository is a mock voyage repository.
 type VoyageRepository struct {
-	FindFn      func(voyage.Number) (*voyage.Voyage, error)
+	FindFn      func(shipping.VoyageNumber) (*shipping.Voyage, error)
 	FindInvoked bool
 }
 
 // Find calls the FindFn.
-func (r *VoyageRepository) Find(number voyage.Number) (*voyage.Voyage, error) {
+func (r *VoyageRepository) Find(number shipping.VoyageNumber) (*shipping.Voyage, error) {
 	r.FindInvoked = true
 	return r.FindFn(number)
 }
 
 // HandlingEventRepository is a mock handling events repository.
 type HandlingEventRepository struct {
-	StoreFn      func(cargo.HandlingEvent)
+	StoreFn      func(shipping.HandlingEvent)
 	StoreInvoked bool
 
-	QueryHandlingHistoryFn      func(cargo.TrackingID) cargo.HandlingHistory
+	QueryHandlingHistoryFn      func(shipping.TrackingID) shipping.HandlingHistory
 	QueryHandlingHistoryInvoked bool
 }
 
 // Store calls the StoreFn.
-func (r *HandlingEventRepository) Store(e cargo.HandlingEvent) {
+func (r *HandlingEventRepository) Store(e shipping.HandlingEvent) {
 	r.StoreInvoked = true
 	r.StoreFn(e)
 }
 
 // QueryHandlingHistory calls the QueryHandlingHistoryFn.
-func (r *HandlingEventRepository) QueryHandlingHistory(id cargo.TrackingID) cargo.HandlingHistory {
+func (r *HandlingEventRepository) QueryHandlingHistory(id shipping.TrackingID) shipping.HandlingHistory {
 	r.QueryHandlingHistoryInvoked = true
 	return r.QueryHandlingHistoryFn(id)
 }
 
 // RoutingService provides a mock routing service.
 type RoutingService struct {
-	FetchRoutesFn      func(cargo.RouteSpecification) []cargo.Itinerary
+	FetchRoutesFn      func(shipping.RouteSpecification) []shipping.Itinerary
 	FetchRoutesInvoked bool
 }
 
 // FetchRoutesForSpecification calls the FetchRoutesFn.
-func (s *RoutingService) FetchRoutesForSpecification(rs cargo.RouteSpecification) []cargo.Itinerary {
+func (s *RoutingService) FetchRoutesForSpecification(rs shipping.RouteSpecification) []shipping.Itinerary {
 	s.FetchRoutesInvoked = true
 	return s.FetchRoutesFn(rs)
 }

@@ -1,5 +1,5 @@
-// Package cargo contains the heart of the domain model.
-package cargo
+// Package shipping contains the heart of the domain model.
+package shipping
 
 import (
 	"errors"
@@ -7,8 +7,6 @@ import (
 	"time"
 
 	"github.com/pborman/uuid"
-
-	"github.com/marcusolsson/goddd/location"
 )
 
 // TrackingID uniquely identifies a particular cargo.
@@ -17,7 +15,7 @@ type TrackingID string
 // Cargo is the central class in the domain model.
 type Cargo struct {
 	TrackingID         TrackingID
-	Origin             location.UNLocode
+	Origin             UNLocode
 	RouteSpecification RouteSpecification
 	Itinerary          Itinerary
 	Delivery           Delivery
@@ -41,8 +39,8 @@ func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
 	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
 }
 
-// New creates a new, unrouted cargo.
-func New(id TrackingID, rs RouteSpecification) *Cargo {
+// NewCargo creates a new, unrouted cargo.
+func NewCargo(id TrackingID, rs RouteSpecification) *Cargo {
 	itinerary := Itinerary{}
 	history := HandlingHistory{make([]HandlingEvent, 0)}
 
@@ -54,15 +52,15 @@ func New(id TrackingID, rs RouteSpecification) *Cargo {
 	}
 }
 
-// Repository provides access a cargo store.
-type Repository interface {
+// CargoRepository provides access a cargo store.
+type CargoRepository interface {
 	Store(cargo *Cargo) error
 	Find(id TrackingID) (*Cargo, error)
 	FindAll() []*Cargo
 }
 
-// ErrUnknown is used when a cargo could not be found.
-var ErrUnknown = errors.New("unknown cargo")
+// ErrUnknownCargo is used when a cargo could not be found.
+var ErrUnknownCargo = errors.New("unknown cargo")
 
 // NextTrackingID generates a new tracking ID.
 // TODO: Move to infrastructure(?)
@@ -73,8 +71,8 @@ func NextTrackingID() TrackingID {
 // RouteSpecification Contains information about a route: its origin,
 // destination and arrival deadline.
 type RouteSpecification struct {
-	Origin          location.UNLocode
-	Destination     location.UNLocode
+	Origin          UNLocode
+	Destination     UNLocode
 	ArrivalDeadline time.Time
 }
 

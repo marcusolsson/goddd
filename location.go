@@ -1,5 +1,4 @@
-// Package location provides the Location aggregate.
-package location
+package shipping
 
 import "errors"
 
@@ -17,11 +16,11 @@ type Location struct {
 	Name     string
 }
 
-// ErrUnknown is used when a location could not be found.
-var ErrUnknown = errors.New("unknown location")
+// ErrUnknownLocation is used when a location could not be found.
+var ErrUnknownLocation = errors.New("unknown location")
 
-// Repository provides access a location store.
-type Repository interface {
+// LocationRepository provides access a location store.
+type LocationRepository interface {
 	Find(locode UNLocode) (*Location, error)
 	FindAll() []*Location
 }

@@ -1,4 +1,4 @@
-package location
+package shipping
 
 // Sample UN locodes.
 var (

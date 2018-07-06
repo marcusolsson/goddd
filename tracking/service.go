@@ -1,4 +1,4 @@
-// Package tracking provides the use-case of tracking a cargo. Used by views
+// Package tracking provides the use-case of tracking a shipping. Used by views
 // facing the end-user.
 package tracking
 
@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/marcusolsson/goddd/cargo"
+	shipping "github.com/marcusolsson/goddd"
 )
 
 // ErrInvalidArgument is returned when one or more arguments are invalid.
@@ -21,15 +21,15 @@ type Service interface {
 }
 
 type service struct {
-	cargos         cargo.Repository
-	handlingEvents cargo.HandlingEventRepository
+	cargos         shipping.CargoRepository
+	handlingEvents shipping.HandlingEventRepository
 }
 
 func (s *service) Track(id string) (Cargo, error) {
 	if id == "" {
 		return Cargo{}, ErrInvalidArgument
 	}
-	c, err := s.cargos.Find(cargo.TrackingID(id))
+	c, err := s.cargos.Find(shipping.TrackingID(id))
 	if err != nil {
 		return Cargo{}, err
 	}
@@ -37,7 +37,7 @@ func (s *service) Track(id string) (Cargo, error) {
 }
 
 // NewService returns a new instance of the default Service.
-func NewService(cargos cargo.Repository, events cargo.HandlingEventRepository) Service {
+func NewService(cargos shipping.CargoRepository, events shipping.HandlingEventRepository) Service {
 	return &service{
 		cargos:         cargos,
 		handlingEvents: events,
@@ -71,7 +71,7 @@ type Event struct {
 	Expected    bool   `json:"expected"`
 }
 
-func assemble(c *cargo.Cargo, events cargo.HandlingEventRepository) Cargo {
+func assemble(c *shipping.Cargo, events shipping.HandlingEventRepository) Cargo {
 	return Cargo{
 		TrackingID:           string(c.TrackingID),
 		Origin:               string(c.Origin),
@@ -84,7 +84,7 @@ func assemble(c *cargo.Cargo, events cargo.HandlingEventRepository) Cargo {
 	}
 }
 
-func assembleLegs(c cargo.Cargo) []Leg {
+func assembleLegs(c shipping.Cargo) []Leg {
 	var legs []Leg
 	for _, l := range c.Itinerary.Legs {
 		legs = append(legs, Leg{
@@ -98,38 +98,38 @@ func assembleLegs(c cargo.Cargo) []Leg {
 	return legs
 }
 
-func nextExpectedActivity(c *cargo.Cargo) string {
+func nextExpectedActivity(c *shipping.Cargo) string {
 	a := c.Delivery.NextExpectedActivity
 	prefix := "Next expected activity is to"
 
 	switch a.Type {
-	case cargo.Load:
+	case shipping.Load:
 		return fmt.Sprintf("%s %s cargo onto voyage %s in %s.", prefix, strings.ToLower(a.Type.String()), a.VoyageNumber, a.Location)
-	case cargo.Unload:
+	case shipping.Unload:
 		return fmt.Sprintf("%s %s cargo off of voyage %s in %s.", prefix, strings.ToLower(a.Type.String()), a.VoyageNumber, a.Location)
-	case cargo.NotHandled:
-		return "There are currently no expected activities for this cargo."
+	case shipping.NotHandled:
+		return "There are currently no expected activities for this shipping."
 	}
 
 	return fmt.Sprintf("%s %s cargo in %s.", prefix, strings.ToLower(a.Type.String()), a.Location)
 }
 
-func assembleStatusText(c *cargo.Cargo) string {
+func assembleStatusText(c *shipping.Cargo) string {
 	switch c.Delivery.TransportStatus {
-	case cargo.NotReceived:
+	case shipping.NotReceived:
 		return "Not received"
-	case cargo.InPort:
+	case shipping.InPort:
 		return fmt.Sprintf("In port %s", c.Delivery.LastKnownLocation)
-	case cargo.OnboardCarrier:
+	case shipping.OnboardCarrier:
 		return fmt.Sprintf("Onboard voyage %s", c.Delivery.CurrentVoyage)
-	case cargo.Claimed:
+	case shipping.Claimed:
 		return "Claimed"
 	default:
 		return "Unknown"
 	}
 }
 
-func assembleEvents(c *cargo.Cargo, handlingEvents cargo.HandlingEventRepository) []Event {
+func assembleEvents(c *shipping.Cargo, handlingEvents shipping.HandlingEventRepository) []Event {
 	h := handlingEvents.QueryHandlingHistory(c.TrackingID)
 
 	var events []Event
@@ -137,17 +137,17 @@ func assembleEvents(c *cargo.Cargo, handlingEvents cargo.HandlingEventRepository
 		var description string
 
 		switch e.Activity.Type {
-		case cargo.NotHandled:
+		case shipping.NotHandled:
 			description = "Cargo has not yet been received."
-		case cargo.Receive:
+		case shipping.Receive:
 			description = fmt.Sprintf("Received in %s, at %s", e.Activity.Location, time.Now().Format(time.RFC3339))
-		case cargo.Load:
+		case shipping.Load:
 			description = fmt.Sprintf("Loaded onto voyage %s in %s, at %s.", e.Activity.VoyageNumber, e.Activity.Location, time.Now().Format(time.RFC3339))
-		case cargo.Unload:
+		case shipping.Unload:
 			description = fmt.Sprintf("Unloaded off voyage %s in %s, at %s.", e.Activity.VoyageNumber, e.Activity.Location, time.Now().Format(time.RFC3339))
-		case cargo.Claim:
+		case shipping.Claim:
 			description = fmt.Sprintf("Claimed in %s, at %s.", e.Activity.Location, time.Now().Format(time.RFC3339))
-		case cargo.Customs:
+		case shipping.Customs:
 			description = fmt.Sprintf("Cleared customs in %s, at %s.", e.Activity.Location, time.Now().Format(time.RFC3339))
 		default:
 			description = "[Unknown status]"

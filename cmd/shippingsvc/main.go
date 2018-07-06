@@ -17,16 +17,14 @@ import (
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 
+	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/booking"
-	"github.com/marcusolsson/goddd/cargo"
 	"github.com/marcusolsson/goddd/handling"
 	"github.com/marcusolsson/goddd/inmem"
 	"github.com/marcusolsson/goddd/inspection"
-	"github.com/marcusolsson/goddd/location"
 	"github.com/marcusolsson/goddd/mongo"
 	"github.com/marcusolsson/goddd/routing"
 	"github.com/marcusolsson/goddd/tracking"
-	"github.com/marcusolsson/goddd/voyage"
 )
 
 const (
@@ -60,10 +58,10 @@ func main() {
 
 	// Setup repositories
 	var (
-		cargos         cargo.Repository
-		locations      location.Repository
-		voyages        voyage.Repository
-		handlingEvents cargo.HandlingEventRepository
+		cargos         shipping.CargoRepository
+		locations      shipping.LocationRepository
+		voyages        shipping.VoyageRepository
+		handlingEvents shipping.HandlingEventRepository
 	)
 
 	if *inmemory {
@@ -88,7 +86,7 @@ func main() {
 
 	// Configure some questionable dependencies.
 	var (
-		handlingEventFactory = cargo.HandlingEventFactory{
+		handlingEventFactory = shipping.HandlingEventFactory{
 			CargoRepository:    cargos,
 			VoyageRepository:   voyages,
 			LocationRepository: locations,
@@ -210,19 +208,19 @@ func envString(env, fallback string) string {
 	return e
 }
 
-func storeTestData(r cargo.Repository) {
-	test1 := cargo.New("FTL456", cargo.RouteSpecification{
-		Origin:          location.AUMEL,
-		Destination:     location.SESTO,
+func storeTestData(r shipping.CargoRepository) {
+	test1 := shipping.NewCargo("FTL456", shipping.RouteSpecification{
+		Origin:          shipping.AUMEL,
+		Destination:     shipping.SESTO,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 7),
 	})
 	if err := r.Store(test1); err != nil {
 		panic(err)
 	}
 
-	test2 := cargo.New("ABC123", cargo.RouteSpecification{
-		Origin:          location.SESTO,
-		Destination:     location.CNHKG,
+	test2 := shipping.NewCargo("ABC123", shipping.RouteSpecification{
+		Origin:          shipping.SESTO,
+		Destination:     shipping.CNHKG,
 		ArrivalDeadline: time.Now().AddDate(0, 0, 14),
 	})
 	if err := r.Store(test2); err != nil {

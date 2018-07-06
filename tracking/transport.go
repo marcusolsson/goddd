@@ -11,7 +11,7 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 
-	"github.com/marcusolsson/goddd/cargo"
+	shipping "github.com/marcusolsson/goddd"
 )
 
 // MakeHandler returns a handler for the tracking service.
@@ -62,7 +62,7 @@ type errorer interface {
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	switch err {
-	case cargo.ErrUnknown:
+	case shipping.ErrUnknownCargo:
 		w.WriteHeader(http.StatusNotFound)
 	case ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)

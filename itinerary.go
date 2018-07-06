@@ -1,23 +1,20 @@
-package cargo
+package shipping
 
 import (
 	"time"
-
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
 )
 
-// Leg describes the transportation between two locations on a voyage.
+// Leg describes the transportation between two locations on a voyage
 type Leg struct {
-	VoyageNumber   voyage.Number     `json:"voyage_number"`
-	LoadLocation   location.UNLocode `json:"from"`
-	UnloadLocation location.UNLocode `json:"to"`
-	LoadTime       time.Time         `json:"load_time"`
-	UnloadTime     time.Time         `json:"unload_time"`
+	VoyageNumber   VoyageNumber `json:"voyage_number"`
+	LoadLocation   UNLocode     `json:"from"`
+	UnloadLocation UNLocode     `json:"to"`
+	LoadTime       time.Time    `json:"load_time"`
+	UnloadTime     time.Time    `json:"unload_time"`
 }
 
 // NewLeg creates a new itinerary leg.
-func NewLeg(voyageNumber voyage.Number, loadLocation, unloadLocation location.UNLocode, loadTime, unloadTime time.Time) Leg {
+func NewLeg(voyageNumber VoyageNumber, loadLocation, unloadLocation UNLocode, loadTime, unloadTime time.Time) Leg {
 	return Leg{
 		VoyageNumber:   voyageNumber,
 		LoadLocation:   loadLocation,
@@ -34,17 +31,17 @@ type Itinerary struct {
 }
 
 // InitialDepartureLocation returns the start of the itinerary.
-func (i Itinerary) InitialDepartureLocation() location.UNLocode {
+func (i Itinerary) InitialDepartureLocation() UNLocode {
 	if i.IsEmpty() {
-		return location.UNLocode("")
+		return UNLocode("")
 	}
 	return i.Legs[0].LoadLocation
 }
 
 // FinalArrivalLocation returns the end of the itinerary.
-func (i Itinerary) FinalArrivalLocation() location.UNLocode {
+func (i Itinerary) FinalArrivalLocation() UNLocode {
 	if i.IsEmpty() {
-		return location.UNLocode("")
+		return UNLocode("")
 	}
 	return i.Legs[len(i.Legs)-1].UnloadLocation
 }

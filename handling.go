@@ -1,4 +1,4 @@
-package cargo
+package shipping
 
 // TODO: It would make sense to have this in its own package. Unfortunately,
 // then there would be a circular dependency between the cargo and handling
@@ -11,9 +11,6 @@ package cargo
 import (
 	"errors"
 	"time"
-
-	"github.com/marcusolsson/goddd/location"
-	"github.com/marcusolsson/goddd/voyage"
 )
 
 // HandlingActivity represents how and where a cargo can be handled, and can
@@ -21,8 +18,8 @@ import (
 // in the future.
 type HandlingActivity struct {
 	Type         HandlingEventType
-	Location     location.UNLocode
-	VoyageNumber voyage.Number
+	Location     UNLocode
+	VoyageNumber VoyageNumber
 }
 
 // HandlingEvent is used to register the event when, for instance, a cargo is
@@ -86,14 +83,14 @@ type HandlingEventRepository interface {
 
 // HandlingEventFactory creates handling events.
 type HandlingEventFactory struct {
-	CargoRepository    Repository
-	VoyageRepository   voyage.Repository
-	LocationRepository location.Repository
+	CargoRepository    CargoRepository
+	VoyageRepository   VoyageRepository
+	LocationRepository LocationRepository
 }
 
 // CreateHandlingEvent creates a validated handling event.
 func (f *HandlingEventFactory) CreateHandlingEvent(registered time.Time, completed time.Time, id TrackingID,
-	voyageNumber voyage.Number, unLocode location.UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
+	voyageNumber VoyageNumber, unLocode UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
 
 	if _, err := f.CargoRepository.Find(id); err != nil {
 		return HandlingEvent{}, err
