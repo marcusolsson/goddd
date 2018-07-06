@@ -4,9 +4,6 @@ DOCKER_IMAGE_NAME=marcusolsson/goddd
 
 .DEFAULT_GOAL := help
 
-build: ## Build the binary
-	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o ${BINARY} .
-
 check: test lint vet ## Runs all tests
 
 test: ## Run the unit tests
