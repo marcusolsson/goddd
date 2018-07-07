@@ -17,7 +17,7 @@ import (
 type proxyService struct {
 	context.Context
 	FetchRoutesEndpoint endpoint.Endpoint
-	Service
+	shipping.RoutingService
 }
 
 func (s proxyService) FetchRoutesForSpecification(rs shipping.RouteSpecification) []shipping.Itinerary {
@@ -51,11 +51,11 @@ func (s proxyService) FetchRoutesForSpecification(rs shipping.RouteSpecification
 }
 
 // ServiceMiddleware defines a middleware for a routing service.
-type ServiceMiddleware func(Service) Service
+type ServiceMiddleware func(shipping.RoutingService) shipping.RoutingService
 
 // NewProxyingMiddleware returns a new instance of a proxying middleware.
 func NewProxyingMiddleware(ctx context.Context, proxyURL string) ServiceMiddleware {
-	return func(next Service) Service {
+	return func(next shipping.RoutingService) shipping.RoutingService {
 		var e endpoint.Endpoint
 		e = makeFetchRoutesEndpoint(ctx, proxyURL)
 		e = circuitbreaker.Hystrix("fetch-routes")(e)

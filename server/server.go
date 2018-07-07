@@ -10,7 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// Server holds
+// Server holds the dependencies for a HTTP server.
 type Server struct {
 	Booking  booking.Service
 	Tracking tracking.Service
@@ -21,6 +21,7 @@ type Server struct {
 	mux *http.ServeMux
 }
 
+// New returns a new HTTP server.
 func New(bs booking.Service, ts tracking.Service, hs handling.Service, logger kitlog.Logger) *Server {
 	s := &Server{
 		Booking:  bs,
