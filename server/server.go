@@ -1,13 +1,18 @@
 package server
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 
+	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/booking"
 	"github.com/marcusolsson/goddd/handling"
 	"github.com/marcusolsson/goddd/tracking"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // Server holds the dependencies for a HTTP server.
@@ -18,7 +23,7 @@ type Server struct {
 
 	Logger kitlog.Logger
 
-	mux *http.ServeMux
+	router chi.Router
 }
 
 // New returns a new HTTP server.
@@ -30,22 +35,32 @@ func New(bs booking.Service, ts tracking.Service, hs handling.Service, logger ki
 		Logger:   logger,
 	}
 
-	mux := http.NewServeMux()
+	r := chi.NewRouter()
 
-	mux.Handle("/booking/v1/", makeBookingHandler(s.Booking, s.Logger))
-	mux.Handle("/tracking/v1/", makeTrackingHandler(s.Tracking, s.Logger))
-	mux.Handle("/handling/v1/", makeHandlingHandler(s.Handling, s.Logger))
-	mux.Handle("/metrics", promhttp.Handler())
+	r.Use(accessControl)
 
-	mux.Handle("/", accessControl(mux))
+	r.Route("/booking", func(r chi.Router) {
+		h := bookingHandler{s.Booking, s.Logger}
+		r.Mount("/v1", h.router())
+	})
+	r.Route("/tracking", func(r chi.Router) {
+		h := trackingHandler{s.Tracking, s.Logger}
+		r.Mount("/v1", h.router())
+	})
+	r.Route("/handling", func(r chi.Router) {
+		h := handlingHandler{s.Handling, s.Logger}
+		r.Mount("/v1", h.router())
+	})
 
-	s.mux = mux
+	r.Method("GET", "/metrics", promhttp.Handler())
+
+	s.router = r
 
 	return s
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	s.mux.ServeHTTP(w, r)
+	s.router.ServeHTTP(w, r)
 }
 
 func accessControl(h http.Handler) http.Handler {
@@ -59,5 +74,20 @@ func accessControl(h http.Handler) http.Handler {
 		}
 
 		h.ServeHTTP(w, r)
+	})
+}
+
+func encodeError(_ context.Context, err error, w http.ResponseWriter) {
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	switch err {
+	case shipping.ErrUnknownCargo:
+		w.WriteHeader(http.StatusNotFound)
+	case tracking.ErrInvalidArgument:
+		w.WriteHeader(http.StatusBadRequest)
+	default:
+		w.WriteHeader(http.StatusInternalServerError)
+	}
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"error": err.Error(),
 	})
 }
