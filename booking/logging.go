@@ -10,7 +10,7 @@ import (
 
 type loggingService struct {
 	logger log.Logger
-	Service
+	next   Service
 }
 
 // NewLoggingService returns a new instance of a logging Service.
@@ -29,7 +29,7 @@ func (s *loggingService) BookNewCargo(origin shipping.UNLocode, destination ship
 			"err", err,
 		)
 	}(time.Now())
-	return s.Service.BookNewCargo(origin, destination, deadline)
+	return s.next.BookNewCargo(origin, destination, deadline)
 }
 
 func (s *loggingService) LoadCargo(id shipping.TrackingID) (c Cargo, err error) {
@@ -41,7 +41,7 @@ func (s *loggingService) LoadCargo(id shipping.TrackingID) (c Cargo, err error) 
 			"err", err,
 		)
 	}(time.Now())
-	return s.Service.LoadCargo(id)
+	return s.next.LoadCargo(id)
 }
 
 func (s *loggingService) RequestPossibleRoutesForCargo(id shipping.TrackingID) []shipping.Itinerary {
@@ -52,7 +52,7 @@ func (s *loggingService) RequestPossibleRoutesForCargo(id shipping.TrackingID) [
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	return s.Service.RequestPossibleRoutesForCargo(id)
+	return s.next.RequestPossibleRoutesForCargo(id)
 }
 
 func (s *loggingService) AssignCargoToRoute(id shipping.TrackingID, itinerary shipping.Itinerary) (err error) {
@@ -64,7 +64,7 @@ func (s *loggingService) AssignCargoToRoute(id shipping.TrackingID, itinerary sh
 			"err", err,
 		)
 	}(time.Now())
-	return s.Service.AssignCargoToRoute(id, itinerary)
+	return s.next.AssignCargoToRoute(id, itinerary)
 }
 
 func (s *loggingService) ChangeDestination(id shipping.TrackingID, l shipping.UNLocode) (err error) {
@@ -77,7 +77,7 @@ func (s *loggingService) ChangeDestination(id shipping.TrackingID, l shipping.UN
 			"err", err,
 		)
 	}(time.Now())
-	return s.Service.ChangeDestination(id, l)
+	return s.next.ChangeDestination(id, l)
 }
 
 func (s *loggingService) Cargos() []Cargo {
@@ -87,7 +87,7 @@ func (s *loggingService) Cargos() []Cargo {
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	return s.Service.Cargos()
+	return s.next.Cargos()
 }
 
 func (s *loggingService) Locations() []Location {
@@ -97,5 +97,5 @@ func (s *loggingService) Locations() []Location {
 			"took", time.Since(begin),
 		)
 	}(time.Now())
-	return s.Service.Locations()
+	return s.next.Locations()
 }

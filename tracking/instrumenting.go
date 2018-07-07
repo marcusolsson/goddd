@@ -9,7 +9,7 @@ import (
 type instrumentingService struct {
 	requestCount   metrics.Counter
 	requestLatency metrics.Histogram
-	Service
+	next           Service
 }
 
 // NewInstrumentingService returns an instance of an instrumenting Service.
@@ -17,7 +17,7 @@ func NewInstrumentingService(counter metrics.Counter, latency metrics.Histogram,
 	return &instrumentingService{
 		requestCount:   counter,
 		requestLatency: latency,
-		Service:        s,
+		next:           s,
 	}
 }
 
@@ -27,5 +27,5 @@ func (s *instrumentingService) Track(id string) (Cargo, error) {
 		s.requestLatency.With("method", "track").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.Service.Track(id)
+	return s.next.Track(id)
 }

@@ -8,7 +8,7 @@ import (
 
 type loggingService struct {
 	logger log.Logger
-	Service
+	next   Service
 }
 
 // NewLoggingService returns a new instance of a logging Service.
@@ -20,5 +20,5 @@ func (s *loggingService) Track(id string) (c Cargo, err error) {
 	defer func(begin time.Time) {
 		s.logger.Log("method", "track", "tracking_id", id, "took", time.Since(begin), "err", err)
 	}(time.Now())
-	return s.Service.Track(id)
+	return s.next.Track(id)
 }
