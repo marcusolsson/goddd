@@ -11,7 +11,7 @@ import (
 type instrumentingService struct {
 	requestCount   metrics.Counter
 	requestLatency metrics.Histogram
-	Service
+	next           Service
 }
 
 // NewInstrumentingService returns an instance of an instrumenting Service.
@@ -19,7 +19,7 @@ func NewInstrumentingService(counter metrics.Counter, latency metrics.Histogram,
 	return &instrumentingService{
 		requestCount:   counter,
 		requestLatency: latency,
-		Service:        s,
+		next:           s,
 	}
 }
 
@@ -31,5 +31,5 @@ func (s *instrumentingService) RegisterHandlingEvent(completed time.Time, id shi
 		s.requestLatency.With("method", "register_incident").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.Service.RegisterHandlingEvent(completed, id, voyageNumber, loc, eventType)
+	return s.next.RegisterHandlingEvent(completed, id, voyageNumber, loc, eventType)
 }

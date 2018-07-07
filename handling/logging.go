@@ -10,7 +10,7 @@ import (
 
 type loggingService struct {
 	logger log.Logger
-	Service
+	next   Service
 }
 
 // NewLoggingService returns a new instance of a logging Service.
@@ -32,5 +32,5 @@ func (s *loggingService) RegisterHandlingEvent(completed time.Time, id shipping.
 			"err", err,
 		)
 	}(time.Now())
-	return s.Service.RegisterHandlingEvent(completed, id, voyageNumber, unLocode, eventType)
+	return s.next.RegisterHandlingEvent(completed, id, voyageNumber, unLocode, eventType)
 }
