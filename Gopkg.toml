@@ -26,8 +26,8 @@
   version = "0.5.0"
 
 [[constraint]]
-  name = "github.com/gorilla/mux"
-  version = "1.4.0"
+  name = "github.com/go-chi/chi"
+  version = "3.3.2"
 
 [[constraint]]
   name = "github.com/pborman/uuid"

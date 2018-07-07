@@ -3,291 +3,202 @@ package server
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"net/http"
 	"time"
 
-	"github.com/go-kit/kit/endpoint"
+	"github.com/go-chi/chi"
 	kitlog "github.com/go-kit/kit/log"
-	kithttp "github.com/go-kit/kit/transport/http"
-	"github.com/gorilla/mux"
 
 	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/booking"
 )
 
-type bookCargoRequest struct {
-	Origin          shipping.UNLocode
-	Destination     shipping.UNLocode
-	ArrivalDeadline time.Time
+type bookingHandler struct {
+	s booking.Service
+
+	logger kitlog.Logger
 }
 
-type bookCargoResponse struct {
-	ID  shipping.TrackingID `json:"tracking_id,omitempty"`
-	Err error               `json:"error,omitempty"`
-}
+func (h *bookingHandler) router() chi.Router {
+	r := chi.NewRouter()
 
-func (r bookCargoResponse) error() error { return r.Err }
+	r.Route("/cargos", func(r chi.Router) {
+		r.Post("/", h.bookCargo)
+		r.Get("/", h.listCargos)
+		r.Route("/{trackingID}", func(r chi.Router) {
+			r.Get("/", h.loadCargo)
+			r.Get("/request_routes", h.requestRoutes)
+			r.Post("/assign_to_route", h.assignToRoute)
+			r.Post("/change_destination", h.changeDestination)
+		})
 
-func makeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(bookCargoRequest)
-		id, err := s.BookNewCargo(req.Origin, req.Destination, req.ArrivalDeadline)
-		return bookCargoResponse{ID: id, Err: err}, nil
-	}
-}
+	})
+	r.Get("/locations", h.listLocations)
 
-type loadCargoRequest struct {
-	ID shipping.TrackingID
-}
-
-type loadCargoResponse struct {
-	Cargo *booking.Cargo `json:"cargo,omitempty"`
-	Err   error          `json:"error,omitempty"`
-}
-
-func (r loadCargoResponse) error() error { return r.Err }
-
-func makeLoadCargoEndpoint(s booking.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(loadCargoRequest)
-		c, err := s.LoadCargo(req.ID)
-		return loadCargoResponse{Cargo: &c, Err: err}, nil
-	}
-}
-
-type requestRoutesRequest struct {
-	ID shipping.TrackingID
-}
-
-type requestRoutesResponse struct {
-	Routes []shipping.Itinerary `json:"routes,omitempty"`
-	Err    error                `json:"error,omitempty"`
-}
-
-func (r requestRoutesResponse) error() error { return r.Err }
-
-func makeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(requestRoutesRequest)
-		itin := s.RequestPossibleRoutesForCargo(req.ID)
-		return requestRoutesResponse{Routes: itin, Err: nil}, nil
-	}
-}
-
-type assignToRouteRequest struct {
-	ID        shipping.TrackingID
-	Itinerary shipping.Itinerary
-}
-
-type assignToRouteResponse struct {
-	Err error `json:"error,omitempty"`
-}
-
-func (r assignToRouteResponse) error() error { return r.Err }
-
-func makeAssignToRouteEndpoint(s booking.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(assignToRouteRequest)
-		err := s.AssignCargoToRoute(req.ID, req.Itinerary)
-		return assignToRouteResponse{Err: err}, nil
-	}
-}
-
-type changeDestinationRequest struct {
-	ID          shipping.TrackingID
-	Destination shipping.UNLocode
-}
-
-type changeDestinationResponse struct {
-	Err error `json:"error,omitempty"`
-}
-
-func (r changeDestinationResponse) error() error { return r.Err }
-
-func makeChangeDestinationEndpoint(s booking.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		req := request.(changeDestinationRequest)
-		err := s.ChangeDestination(req.ID, req.Destination)
-		return changeDestinationResponse{Err: err}, nil
-	}
-}
-
-type listCargosRequest struct{}
-
-type listCargosResponse struct {
-	Cargos []booking.Cargo `json:"cargos,omitempty"`
-	Err    error           `json:"error,omitempty"`
-}
-
-func (r listCargosResponse) error() error { return r.Err }
-
-func makeListCargosEndpoint(s booking.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		_ = request.(listCargosRequest)
-		return listCargosResponse{Cargos: s.Cargos(), Err: nil}, nil
-	}
-}
-
-type listLocationsRequest struct {
-}
-
-type listLocationsResponse struct {
-	Locations []booking.Location `json:"locations,omitempty"`
-	Err       error              `json:"error,omitempty"`
-}
-
-func makeListLocationsEndpoint(s booking.Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		_ = request.(listLocationsRequest)
-		return listLocationsResponse{Locations: s.Locations(), Err: nil}, nil
-	}
-}
-
-func makeBookingHandler(bs booking.Service, logger kitlog.Logger) http.Handler {
-	opts := []kithttp.ServerOption{
-		kithttp.ServerErrorLogger(logger),
-		kithttp.ServerErrorEncoder(encodeError),
-	}
-
-	bookCargoHandler := kithttp.NewServer(
-		makeBookCargoEndpoint(bs),
-		decodeBookCargoRequest,
-		encodeResponse,
-		opts...,
-	)
-	loadCargoHandler := kithttp.NewServer(
-		makeLoadCargoEndpoint(bs),
-		decodeLoadCargoRequest,
-		encodeResponse,
-		opts...,
-	)
-	requestRoutesHandler := kithttp.NewServer(
-		makeRequestRoutesEndpoint(bs),
-		decodeRequestRoutesRequest,
-		encodeResponse,
-		opts...,
-	)
-	assignToRouteHandler := kithttp.NewServer(
-		makeAssignToRouteEndpoint(bs),
-		decodeAssignToRouteRequest,
-		encodeResponse,
-		opts...,
-	)
-	changeDestinationHandler := kithttp.NewServer(
-		makeChangeDestinationEndpoint(bs),
-		decodeChangeDestinationRequest,
-		encodeResponse,
-		opts...,
-	)
-	listCargosHandler := kithttp.NewServer(
-		makeListCargosEndpoint(bs),
-		decodeListCargosRequest,
-		encodeResponse,
-		opts...,
-	)
-	listLocationsHandler := kithttp.NewServer(
-		makeListLocationsEndpoint(bs),
-		decodeListLocationsRequest,
-		encodeResponse,
-		opts...,
-	)
-
-	r := mux.NewRouter()
-
-	r.Handle("/booking/v1/cargos", bookCargoHandler).Methods("POST")
-	r.Handle("/booking/v1/cargos", listCargosHandler).Methods("GET")
-	r.Handle("/booking/v1/cargos/{id}", loadCargoHandler).Methods("GET")
-	r.Handle("/booking/v1/cargos/{id}/request_routes", requestRoutesHandler).Methods("GET")
-	r.Handle("/booking/v1/cargos/{id}/assign_to_route", assignToRouteHandler).Methods("POST")
-	r.Handle("/booking/v1/cargos/{id}/change_destination", changeDestinationHandler).Methods("POST")
-	r.Handle("/booking/v1/locations", listLocationsHandler).Methods("GET")
-	r.Handle("/booking/v1/docs", http.StripPrefix("/booking/v1/docs", http.FileServer(http.Dir("booking/docs"))))
+	r.Method("GET", "/docs", http.StripPrefix("/booking/v1/docs", http.FileServer(http.Dir("booking/docs"))))
 
 	return r
 }
 
-var errBadRoute = errors.New("bad route")
+func (h *bookingHandler) bookCargo(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 
-func decodeBookCargoRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	var body struct {
-		Origin          string    `json:"origin"`
-		Destination     string    `json:"destination"`
-		ArrivalDeadline time.Time `json:"arrival_deadline"`
+	var request struct {
+		Origin          shipping.UNLocode
+		Destination     shipping.UNLocode
+		ArrivalDeadline time.Time
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		return nil, err
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
 	}
 
-	return bookCargoRequest{
-		Origin:          shipping.UNLocode(body.Origin),
-		Destination:     shipping.UNLocode(body.Destination),
-		ArrivalDeadline: body.ArrivalDeadline,
-	}, nil
+	id, err := h.s.BookNewCargo(request.Origin, request.Destination, request.ArrivalDeadline)
+	if err != nil {
+		encodeError(ctx, err, w)
+		return
+	}
+
+	var response = struct {
+		ID shipping.TrackingID `json:"tracking_id"`
+	}{
+		ID: id,
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
+	}
 }
 
-func decodeLoadCargoRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	id, ok := vars["id"]
-	if !ok {
-		return nil, errBadRoute
+func (h *bookingHandler) loadCargo(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	trackingID := shipping.TrackingID(chi.URLParam(r, "trackingID"))
+
+	c, err := h.s.LoadCargo(trackingID)
+	if err != nil {
+		encodeError(ctx, err, w)
+		return
 	}
-	return loadCargoRequest{ID: shipping.TrackingID(id)}, nil
+
+	var response = struct {
+		Cargo booking.Cargo `json:"cargo"`
+	}{
+		Cargo: c,
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
+	}
 }
 
-func decodeRequestRoutesRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	id, ok := vars["id"]
-	if !ok {
-		return nil, errBadRoute
+func (h *bookingHandler) requestRoutes(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	trackingID := shipping.TrackingID(chi.URLParam(r, "trackingID"))
+
+	itin := h.s.RequestPossibleRoutesForCargo(trackingID)
+
+	var response = struct {
+		Routes []shipping.Itinerary `json:"routes"`
+	}{
+		Routes: itin,
 	}
-	return requestRoutesRequest{ID: shipping.TrackingID(id)}, nil
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
+	}
 }
 
-func decodeAssignToRouteRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	id, ok := vars["id"]
-	if !ok {
-		return nil, errBadRoute
+func (h *bookingHandler) assignToRoute(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	trackingID := shipping.TrackingID(chi.URLParam(r, "trackingID"))
+
+	var request struct {
+		Itinerary shipping.Itinerary `json:"route"`
 	}
 
-	var itinerary shipping.Itinerary
-	if err := json.NewDecoder(r.Body).Decode(&itinerary); err != nil {
-		return nil, err
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
 	}
 
-	return assignToRouteRequest{
-		ID:        shipping.TrackingID(id),
-		Itinerary: itinerary,
-	}, nil
+	err := h.s.AssignCargoToRoute(trackingID, request.Itinerary)
+	if err != nil {
+		encodeError(ctx, err, w)
+		return
+	}
 }
 
-func decodeChangeDestinationRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	vars := mux.Vars(r)
-	id, ok := vars["id"]
-	if !ok {
-		return nil, errBadRoute
+func (h *bookingHandler) changeDestination(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	trackingID := shipping.TrackingID(chi.URLParam(r, "trackingID"))
+
+	var request struct {
+		Destination shipping.UNLocode `json:"destination"`
 	}
 
-	var body struct {
-		Destination string `json:"destination"`
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
 	}
 
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
-		return nil, err
+	err := h.s.ChangeDestination(trackingID, request.Destination)
+	if err != nil {
+		encodeError(ctx, err, w)
+		return
 	}
-
-	return changeDestinationRequest{
-		ID:          shipping.TrackingID(id),
-		Destination: shipping.UNLocode(body.Destination),
-	}, nil
 }
 
-func decodeListCargosRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	return listCargosRequest{}, nil
+func (h *bookingHandler) listCargos(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	cs := h.s.Cargos()
+
+	var response = struct {
+		Cargos []booking.Cargo `json:"cargos"`
+	}{
+		Cargos: cs,
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
+	}
 }
 
-func decodeListLocationsRequest(_ context.Context, r *http.Request) (interface{}, error) {
-	return listLocationsRequest{}, nil
+func (h *bookingHandler) listLocations(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	ls := h.s.Locations()
+
+	var response = struct {
+		Locations []booking.Location `json:"cargos"`
+	}{
+		Locations: ls,
+	}
+
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		h.logger.Log("error", err)
+		encodeError(ctx, err, w)
+		return
+	}
 }

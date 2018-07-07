@@ -36,7 +36,7 @@ func TestTrackCargo(t *testing.T) {
 
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := makeTrackingHandler(s, logger)
+	h := New(nil, s, nil, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/TEST", nil)
 	rec := httptest.NewRecorder()
@@ -51,7 +51,10 @@ func TestTrackCargo(t *testing.T) {
 		t.Errorf("Content-Type = %q; want = %q", content, "application/json; charset=utf-8")
 	}
 
-	var response trackCargoResponse
+	var response struct {
+		Cargo *tracking.Cargo `json:"cargo"`
+		Err   error           `json:"err"`
+	}
 	if err := json.NewDecoder(rec.Body).Decode(&response); err != nil {
 		t.Error(err)
 	}
@@ -90,7 +93,7 @@ func TestTrackUnknownCargo(t *testing.T) {
 
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := makeTrackingHandler(s, logger)
+	h := New(nil, s, nil, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/not_found", nil)
 	rec := httptest.NewRecorder()
