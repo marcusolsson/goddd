@@ -10,12 +10,10 @@ import (
 	"syscall"
 	"time"
 
-	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"gopkg.in/mgo.v2"
-
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
+	stdprometheus "github.com/prometheus/client_golang/prometheus"
+	"gopkg.in/mgo.v2"
 
 	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/booking"
@@ -24,6 +22,7 @@ import (
 	"github.com/marcusolsson/goddd/inspection"
 	"github.com/marcusolsson/goddd/mongo"
 	"github.com/marcusolsson/goddd/routing"
+	"github.com/marcusolsson/goddd/server"
 	"github.com/marcusolsson/goddd/tracking"
 )
 
@@ -161,21 +160,12 @@ func main() {
 		hs,
 	)
 
-	httpLogger := log.With(logger, "component", "http")
-
-	mux := http.NewServeMux()
-
-	mux.Handle("/booking/v1/", booking.MakeHandler(bs, httpLogger))
-	mux.Handle("/tracking/v1/", tracking.MakeHandler(ts, httpLogger))
-	mux.Handle("/handling/v1/", handling.MakeHandler(hs, httpLogger))
-
-	http.Handle("/", accessControl(mux))
-	http.Handle("/metrics", promhttp.Handler())
+	srv := server.New(bs, ts, hs, log.With(logger, "component", "http"))
 
 	errs := make(chan error, 2)
 	go func() {
 		logger.Log("transport", "http", "address", *httpAddr, "msg", "listening")
-		errs <- http.ListenAndServe(*httpAddr, nil)
+		errs <- http.ListenAndServe(*httpAddr, srv)
 	}()
 	go func() {
 		c := make(chan os.Signal, 1)
@@ -184,20 +174,6 @@ func main() {
 	}()
 
 	logger.Log("terminated", <-errs)
-}
-
-func accessControl(h http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-		w.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type")
-
-		if r.Method == "OPTIONS" {
-			return
-		}
-
-		h.ServeHTTP(w, r)
-	})
 }
 
 func envString(env, fallback string) string {
