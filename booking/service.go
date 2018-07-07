@@ -7,7 +7,6 @@ import (
 	"time"
 
 	shipping "github.com/marcusolsson/goddd"
-	"github.com/marcusolsson/goddd/routing"
 )
 
 // ErrInvalidArgument is returned when one or more arguments are invalid.
@@ -44,7 +43,7 @@ type service struct {
 	cargos         shipping.CargoRepository
 	locations      shipping.LocationRepository
 	handlingEvents shipping.HandlingEventRepository
-	routingService routing.Service
+	routingService shipping.RoutingService
 }
 
 func (s *service) AssignCargoToRoute(id shipping.TrackingID, itinerary shipping.Itinerary) error {
@@ -157,7 +156,7 @@ func (s *service) Locations() []Location {
 }
 
 // NewService creates a booking service with necessary dependencies.
-func NewService(cargos shipping.CargoRepository, locations shipping.LocationRepository, events shipping.HandlingEventRepository, rs routing.Service) Service {
+func NewService(cargos shipping.CargoRepository, locations shipping.LocationRepository, events shipping.HandlingEventRepository, rs shipping.RoutingService) Service {
 	return &service{
 		cargos:         cargos,
 		locations:      locations,
