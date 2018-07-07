@@ -1,4 +1,4 @@
-package tracking
+package server
 
 import (
 	"encoding/json"
@@ -13,6 +13,7 @@ import (
 
 	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/mock"
+	"github.com/marcusolsson/goddd/tracking"
 )
 
 func TestTrackCargo(t *testing.T) {
@@ -23,7 +24,7 @@ func TestTrackCargo(t *testing.T) {
 		return shipping.HandlingHistory{}
 	}
 
-	s := NewService(&cargos, &events)
+	s := tracking.NewService(&cargos, &events)
 
 	c := shipping.NewCargo("TEST", shipping.RouteSpecification{
 		Origin:          "SESTO",
@@ -35,7 +36,7 @@ func TestTrackCargo(t *testing.T) {
 
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := MakeHandler(s, logger)
+	h := makeTrackingHandler(s, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/TEST", nil)
 	rec := httptest.NewRecorder()
@@ -61,7 +62,7 @@ func TestTrackCargo(t *testing.T) {
 
 	var eta time.Time
 
-	want := Cargo{
+	want := tracking.Cargo{
 		TrackingID:           "TEST",
 		Origin:               "SESTO",
 		Destination:          "FIHEL",
@@ -85,11 +86,11 @@ func TestTrackUnknownCargo(t *testing.T) {
 		return shipping.HandlingHistory{}
 	}
 
-	s := NewService(&cargos, &events)
+	s := tracking.NewService(&cargos, &events)
 
 	logger := log.NewLogfmtLogger(ioutil.Discard)
 
-	h := MakeHandler(s, logger)
+	h := makeTrackingHandler(s, logger)
 
 	req, _ := http.NewRequest("GET", "http://example.com/tracking/v1/cargos/not_found", nil)
 	rec := httptest.NewRecorder()

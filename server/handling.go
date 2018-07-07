@@ -1,4 +1,4 @@
-package handling
+package server
 
 import (
 	"context"
@@ -8,14 +8,37 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/go-kit/kit/endpoint"
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 
 	shipping "github.com/marcusolsson/goddd"
+	"github.com/marcusolsson/goddd/handling"
 )
 
-// MakeHandler returns a handler for the handling service.
-func MakeHandler(hs Service, logger kitlog.Logger) http.Handler {
+type registerIncidentRequest struct {
+	ID             shipping.TrackingID
+	Location       shipping.UNLocode
+	Voyage         shipping.VoyageNumber
+	EventType      shipping.HandlingEventType
+	CompletionTime time.Time
+}
+
+type registerIncidentResponse struct {
+	Err error `json:"error,omitempty"`
+}
+
+func (r registerIncidentResponse) error() error { return r.Err }
+
+func makeRegisterIncidentEndpoint(hs handling.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(registerIncidentRequest)
+		err := hs.RegisterHandlingEvent(req.CompletionTime, req.ID, req.Voyage, req.Location, req.EventType)
+		return registerIncidentResponse{Err: err}, nil
+	}
+}
+
+func makeHandlingHandler(hs handling.Service, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
 	opts := []kithttp.ServerOption{
@@ -67,33 +90,4 @@ func stringToEventType(s string) shipping.HandlingEventType {
 		shipping.Claim.String():   shipping.Claim,
 	}
 	return types[s]
-}
-
-func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-	if e, ok := response.(errorer); ok && e.error() != nil {
-		encodeError(ctx, e.error(), w)
-		return nil
-	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	return json.NewEncoder(w).Encode(response)
-}
-
-type errorer interface {
-	error() error
-}
-
-// encode errors from business-logic
-func encodeError(_ context.Context, err error, w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	switch err {
-	case shipping.ErrUnknownCargo:
-		w.WriteHeader(http.StatusNotFound)
-	case ErrInvalidArgument:
-		w.WriteHeader(http.StatusBadRequest)
-	default:
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"error": err.Error(),
-	})
 }

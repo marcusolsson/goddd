@@ -1,4 +1,4 @@
-package tracking
+package server
 
 import (
 	"context"
@@ -8,14 +8,35 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/go-kit/kit/endpoint"
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 
 	shipping "github.com/marcusolsson/goddd"
+	"github.com/marcusolsson/goddd/tracking"
 )
 
-// MakeHandler returns a handler for the tracking service.
-func MakeHandler(ts Service, logger kitlog.Logger) http.Handler {
+type trackCargoRequest struct {
+	ID string
+}
+
+type trackCargoResponse struct {
+	Cargo *tracking.Cargo `json:"cargo,omitempty"`
+	Err   error           `json:"error,omitempty"`
+}
+
+func (r trackCargoResponse) error() error { return r.Err }
+
+func makeTrackCargoEndpoint(ts tracking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(trackCargoRequest)
+		c, err := ts.Track(req.ID)
+		return trackCargoResponse{Cargo: &c, Err: err}, nil
+	}
+}
+
+// makeTrackingHandler returns a handler for the tracking service.
+func makeTrackingHandler(ts tracking.Service, logger kitlog.Logger) http.Handler {
 	r := mux.NewRouter()
 
 	opts := []kithttp.ServerOption{
@@ -64,7 +85,7 @@ func encodeError(_ context.Context, err error, w http.ResponseWriter) {
 	switch err {
 	case shipping.ErrUnknownCargo:
 		w.WriteHeader(http.StatusNotFound)
-	case ErrInvalidArgument:
+	case tracking.ErrInvalidArgument:
 		w.WriteHeader(http.StatusBadRequest)
 	default:
 		w.WriteHeader(http.StatusInternalServerError)

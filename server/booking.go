@@ -1,4 +1,4 @@
-package booking
+package server
 
 import (
 	"context"
@@ -7,15 +7,144 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-kit/kit/endpoint"
 	kitlog "github.com/go-kit/kit/log"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
 
 	shipping "github.com/marcusolsson/goddd"
+	"github.com/marcusolsson/goddd/booking"
 )
 
-// MakeHandler returns a handler for the booking service.
-func MakeHandler(bs Service, logger kitlog.Logger) http.Handler {
+type bookCargoRequest struct {
+	Origin          shipping.UNLocode
+	Destination     shipping.UNLocode
+	ArrivalDeadline time.Time
+}
+
+type bookCargoResponse struct {
+	ID  shipping.TrackingID `json:"tracking_id,omitempty"`
+	Err error               `json:"error,omitempty"`
+}
+
+func (r bookCargoResponse) error() error { return r.Err }
+
+func makeBookCargoEndpoint(s booking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(bookCargoRequest)
+		id, err := s.BookNewCargo(req.Origin, req.Destination, req.ArrivalDeadline)
+		return bookCargoResponse{ID: id, Err: err}, nil
+	}
+}
+
+type loadCargoRequest struct {
+	ID shipping.TrackingID
+}
+
+type loadCargoResponse struct {
+	Cargo *booking.Cargo `json:"cargo,omitempty"`
+	Err   error          `json:"error,omitempty"`
+}
+
+func (r loadCargoResponse) error() error { return r.Err }
+
+func makeLoadCargoEndpoint(s booking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(loadCargoRequest)
+		c, err := s.LoadCargo(req.ID)
+		return loadCargoResponse{Cargo: &c, Err: err}, nil
+	}
+}
+
+type requestRoutesRequest struct {
+	ID shipping.TrackingID
+}
+
+type requestRoutesResponse struct {
+	Routes []shipping.Itinerary `json:"routes,omitempty"`
+	Err    error                `json:"error,omitempty"`
+}
+
+func (r requestRoutesResponse) error() error { return r.Err }
+
+func makeRequestRoutesEndpoint(s booking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(requestRoutesRequest)
+		itin := s.RequestPossibleRoutesForCargo(req.ID)
+		return requestRoutesResponse{Routes: itin, Err: nil}, nil
+	}
+}
+
+type assignToRouteRequest struct {
+	ID        shipping.TrackingID
+	Itinerary shipping.Itinerary
+}
+
+type assignToRouteResponse struct {
+	Err error `json:"error,omitempty"`
+}
+
+func (r assignToRouteResponse) error() error { return r.Err }
+
+func makeAssignToRouteEndpoint(s booking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(assignToRouteRequest)
+		err := s.AssignCargoToRoute(req.ID, req.Itinerary)
+		return assignToRouteResponse{Err: err}, nil
+	}
+}
+
+type changeDestinationRequest struct {
+	ID          shipping.TrackingID
+	Destination shipping.UNLocode
+}
+
+type changeDestinationResponse struct {
+	Err error `json:"error,omitempty"`
+}
+
+func (r changeDestinationResponse) error() error { return r.Err }
+
+func makeChangeDestinationEndpoint(s booking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req := request.(changeDestinationRequest)
+		err := s.ChangeDestination(req.ID, req.Destination)
+		return changeDestinationResponse{Err: err}, nil
+	}
+}
+
+type listCargosRequest struct{}
+
+type listCargosResponse struct {
+	Cargos []booking.Cargo `json:"cargos,omitempty"`
+	Err    error           `json:"error,omitempty"`
+}
+
+func (r listCargosResponse) error() error { return r.Err }
+
+func makeListCargosEndpoint(s booking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		_ = request.(listCargosRequest)
+		return listCargosResponse{Cargos: s.Cargos(), Err: nil}, nil
+	}
+}
+
+type listLocationsRequest struct {
+}
+
+type listLocationsResponse struct {
+	Locations []booking.Location `json:"locations,omitempty"`
+	Err       error              `json:"error,omitempty"`
+}
+
+func makeListLocationsEndpoint(s booking.Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		_ = request.(listLocationsRequest)
+		return listLocationsResponse{Locations: s.Locations(), Err: nil}, nil
+	}
+}
+
+func makeBookingHandler(bs booking.Service, logger kitlog.Logger) http.Handler {
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorLogger(logger),
 		kithttp.ServerErrorEncoder(encodeError),
@@ -161,33 +290,4 @@ func decodeListCargosRequest(_ context.Context, r *http.Request) (interface{}, e
 
 func decodeListLocationsRequest(_ context.Context, r *http.Request) (interface{}, error) {
 	return listLocationsRequest{}, nil
-}
-
-func encodeResponse(ctx context.Context, w http.ResponseWriter, response interface{}) error {
-	if e, ok := response.(errorer); ok && e.error() != nil {
-		encodeError(ctx, e.error(), w)
-		return nil
-	}
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	return json.NewEncoder(w).Encode(response)
-}
-
-type errorer interface {
-	error() error
-}
-
-// encode errors from business-logic
-func encodeError(_ context.Context, err error, w http.ResponseWriter) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	switch err {
-	case shipping.ErrUnknownCargo:
-		w.WriteHeader(http.StatusNotFound)
-	case ErrInvalidArgument:
-		w.WriteHeader(http.StatusBadRequest)
-	default:
-		w.WriteHeader(http.StatusInternalServerError)
-	}
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"error": err.Error(),
-	})
 }
