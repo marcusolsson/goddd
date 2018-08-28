@@ -56,15 +56,6 @@ type Cargo struct {
 	Events               []Event   `json:"events"`
 }
 
-// Leg is a read model for booking views.
-type Leg struct {
-	VoyageNumber string    `json:"voyage_number"`
-	From         string    `json:"from"`
-	To           string    `json:"to"`
-	LoadTime     time.Time `json:"load_time"`
-	UnloadTime   time.Time `json:"unload_time"`
-}
-
 // Event is a read model for tracking views.
 type Event struct {
 	Description string `json:"description"`
@@ -82,20 +73,6 @@ func assemble(c *cargo.Cargo, events cargo.HandlingEventRepository) Cargo {
 		StatusText:           assembleStatusText(c),
 		Events:               assembleEvents(c, events),
 	}
-}
-
-func assembleLegs(c cargo.Cargo) []Leg {
-	var legs []Leg
-	for _, l := range c.Itinerary.Legs {
-		legs = append(legs, Leg{
-			VoyageNumber: string(l.VoyageNumber),
-			From:         string(l.LoadLocation),
-			To:           string(l.UnloadLocation),
-			LoadTime:     l.LoadTime,
-			UnloadTime:   l.UnloadTime,
-		})
-	}
-	return legs
 }
 
 func nextExpectedActivity(c *cargo.Cargo) string {
