@@ -9,9 +9,10 @@ import (
 )
 
 type commandExecution struct {
-	Types       []string      `json:"types"`
-	Start       time.Time     `json:"start_time"`
-	RunDuration time.Duration `json:"run_duration"`
+	Types            []string      `json:"types"`
+	Start            time.Time     `json:"start_time"`
+	RunDuration      time.Duration `json:"run_duration"`
+	ConcurrencyInUse float64       `json:"concurrency_inuse"`
 }
 
 type metricExchange struct {
@@ -67,47 +68,45 @@ func (m *metricExchange) Monitor() {
 
 func (m *metricExchange) IncrementMetrics(wg *sync.WaitGroup, collector metricCollector.MetricCollector, update *commandExecution, totalDuration time.Duration) {
 	// granular metrics
-	if update.Types[0] == "success" {
-		collector.IncrementAttempts()
-		collector.IncrementSuccesses()
+	r := metricCollector.MetricResult{
+		Attempts:         1,
+		TotalDuration:    totalDuration,
+		RunDuration:      update.RunDuration,
+		ConcurrencyInUse: update.ConcurrencyInUse,
 	}
-	if update.Types[0] == "failure" {
-		collector.IncrementFailures()
 
-		collector.IncrementAttempts()
-		collector.IncrementErrors()
-	}
-	if update.Types[0] == "rejected" {
-		collector.IncrementRejects()
-
-		collector.IncrementAttempts()
-		collector.IncrementErrors()
-	}
-	if update.Types[0] == "short-circuit" {
-		collector.IncrementShortCircuits()
-
-		collector.IncrementAttempts()
-		collector.IncrementErrors()
-	}
-	if update.Types[0] == "timeout" {
-		collector.IncrementTimeouts()
-
-		collector.IncrementAttempts()
-		collector.IncrementErrors()
+	switch update.Types[0] {
+	case "success":
+		r.Successes = 1
+	case "failure":
+		r.Failures = 1
+		r.Errors = 1
+	case "rejected":
+		r.Rejects = 1
+		r.Errors = 1
+	case "short-circuit":
+		r.ShortCircuits = 1
+		r.Errors = 1
+	case "timeout":
+		r.Timeouts = 1
+		r.Errors = 1
+	case "context_canceled":
+		r.ContextCanceled = 1
+	case "context_deadline_exceeded":
+		r.ContextDeadlineExceeded = 1
 	}
 
 	if len(update.Types) > 1 {
 		// fallback metrics
 		if update.Types[1] == "fallback-success" {
-			collector.IncrementFallbackSuccesses()
+			r.FallbackSuccesses = 1
 		}
 		if update.Types[1] == "fallback-failure" {
-			collector.IncrementFallbackFailures()
+			r.FallbackFailures = 1
 		}
 	}
 
-	collector.UpdateTotalDuration(totalDuration)
-	collector.UpdateRunDuration(update.RunDuration)
+	collector.Update(r)
 
 	wg.Done()
 }
