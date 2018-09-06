@@ -1,0 +1,58 @@
+# github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
+github.com/afex/hystrix-go/hystrix
+github.com/afex/hystrix-go/hystrix/metric_collector
+github.com/afex/hystrix-go/hystrix/rolling
+# github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
+github.com/beorn7/perks/quantile
+# github.com/go-chi/chi v3.3.3+incompatible
+github.com/go-chi/chi
+# github.com/go-kit/kit v0.7.0
+github.com/go-kit/kit/log
+github.com/go-kit/kit/metrics
+github.com/go-kit/kit/metrics/prometheus
+github.com/go-kit/kit/circuitbreaker
+github.com/go-kit/kit/endpoint
+github.com/go-kit/kit/transport/http
+github.com/go-kit/kit/metrics/internal/lv
+# github.com/go-logfmt/logfmt v0.3.0
+github.com/go-logfmt/logfmt
+# github.com/go-stack/stack v1.8.0
+github.com/go-stack/stack
+# github.com/golang/protobuf v1.2.0
+github.com/golang/protobuf/proto
+# github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515
+github.com/kr/logfmt
+# github.com/kr/pretty v0.1.0
+github.com/kr/pretty
+# github.com/kr/text v0.1.0
+github.com/kr/text
+# github.com/matttproud/golang_protobuf_extensions v1.0.1
+github.com/matttproud/golang_protobuf_extensions/pbutil
+# github.com/pborman/uuid v0.0.0-20180827223501-4c1ecd6722e8
+github.com/pborman/uuid
+# github.com/prometheus/client_golang v0.8.0
+github.com/prometheus/client_golang/prometheus
+github.com/prometheus/client_golang/prometheus/promhttp
+# github.com/prometheus/client_model v0.0.0-20180712105110-5c3871d89910
+github.com/prometheus/client_model/go
+# github.com/prometheus/common v0.0.0-20180801064454-c7de2306084e
+github.com/prometheus/common/expfmt
+github.com/prometheus/common/model
+github.com/prometheus/common/internal/bitbucket.org/ww/goautoneg
+# github.com/prometheus/procfs v0.0.0-20180725123919-05ee40e3a273
+github.com/prometheus/procfs
+github.com/prometheus/procfs/nfs
+github.com/prometheus/procfs/xfs
+github.com/prometheus/procfs/internal/util
+# github.com/sony/gobreaker v0.0.0-20180905101324-b2a34562d02c
+github.com/sony/gobreaker
+# github.com/streadway/handy v0.0.0-20160402200321-f450267a206e
+github.com/streadway/handy/breaker
+# gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127
+gopkg.in/check.v1
+# gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
+gopkg.in/mgo.v2
+gopkg.in/mgo.v2/bson
+gopkg.in/mgo.v2/internal/sasl
+gopkg.in/mgo.v2/internal/scram
+gopkg.in/mgo.v2/internal/json
