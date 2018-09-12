@@ -1,4 +1,4 @@
-# GoDDD 
+# GoDDD
 
 [![Build Status](https://travis-ci.org/marcusolsson/goddd.svg?branch=master)](https://travis-ci.org/marcusolsson/goddd)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-blue.svg?style=flat)](https://godoc.org/github.com/marcusolsson/goddd)
@@ -8,7 +8,7 @@
 
 This is an attempt to port the [DDD Sample App](https://github.com/citerus/dddsample-core) to idiomatic Go. This project aims to:
 
-- Demonstrate how the tactical design patterns from Domain Driven Design may be implemented in Go. 
+- Demonstrate how the tactical design patterns from Domain Driven Design may be implemented in Go.
 - Serve as an example of a modern production-ready enterprise application.
 
 ### Important note
@@ -26,7 +26,7 @@ I started out by first rewriting the original application, as is, in Go. The res
 Start the application on port 8080 (or whatever the `PORT` variable is set to).
 
 ```
-go run main.go -inmem
+go run cmd/shippingsvc/main.go -inmem
 ```
 
 If you only want to try it out, this is enough. If you are looking for full functionality, you will need to have a [routing service](https://github.com/marcusolsson/pathfinder) running and start the application with `ROUTINGSERVICE_URL` (default: `http://localhost:7878`).

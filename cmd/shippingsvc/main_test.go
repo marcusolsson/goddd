@@ -251,17 +251,17 @@ func (s *stubRoutingService) FetchRoutesForSpecification(rs shipping.RouteSpecif
 	if rs.Origin == shipping.CNHKG {
 		return []shipping.Itinerary{
 			{Legs: []shipping.Leg{
-				shipping.NewLeg("V100", shipping.CNHKG, shipping.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)),
-				shipping.NewLeg("V200", shipping.USNYC, shipping.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)),
-				shipping.NewLeg("V300", shipping.USCHI, shipping.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)),
+				shipping.MakeLeg("V100", shipping.CNHKG, shipping.USNYC, toDate(2009, time.March, 3), toDate(2009, time.March, 9)),
+				shipping.MakeLeg("V200", shipping.USNYC, shipping.USCHI, toDate(2009, time.March, 10), toDate(2009, time.March, 14)),
+				shipping.MakeLeg("V300", shipping.USCHI, shipping.SESTO, toDate(2009, time.March, 7), toDate(2009, time.March, 11)),
 			}},
 		}
 	}
 
 	return []shipping.Itinerary{
 		{Legs: []shipping.Leg{
-			shipping.NewLeg("V300", shipping.JNTKO, shipping.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)),
-			shipping.NewLeg("V400", shipping.DEHAM, shipping.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)),
+			shipping.MakeLeg("V300", shipping.JNTKO, shipping.DEHAM, toDate(2009, time.March, 8), toDate(2009, time.March, 12)),
+			shipping.MakeLeg("V400", shipping.DEHAM, shipping.SESTO, toDate(2009, time.March, 14), toDate(2009, time.March, 15)),
 		}},
 	}
 }

@@ -24,7 +24,7 @@ type Delivery struct {
 // routing, i.e. when the route specification or the itinerary has changed but
 // no additional handling of the cargo has been performed.
 func (d Delivery) UpdateOnRouting(rs RouteSpecification, itinerary Itinerary) Delivery {
-	return newDelivery(d.LastEvent, itinerary, rs)
+	return makeDelivery(d.LastEvent, itinerary, rs)
 }
 
 // IsOnTrack checks if the delivery is on track.
@@ -32,17 +32,17 @@ func (d Delivery) IsOnTrack() bool {
 	return d.RoutingStatus == Routed && !d.IsMisdirected
 }
 
-// DeriveDeliveryFrom creates a new delivery snapshot based on the complete
+// deriveDeliveryFrom creates a new delivery snapshot based on the complete
 // handling history of a cargo, as well as its route specification and
 // itinerary.
-func DeriveDeliveryFrom(rs RouteSpecification, itinerary Itinerary, history HandlingHistory) Delivery {
+func deriveDeliveryFrom(rs RouteSpecification, itinerary Itinerary, history HandlingHistory) Delivery {
 	lastEvent, _ := history.MostRecentlyCompletedEvent()
-	return newDelivery(lastEvent, itinerary, rs)
+	return makeDelivery(lastEvent, itinerary, rs)
 }
 
-// newDelivery creates a up-to-date delivery based on an handling event,
+// makeDelivery creates a up-to-date delivery based on an handling event,
 // itinerary and a route specification.
-func newDelivery(lastEvent HandlingEvent, itinerary Itinerary, rs RouteSpecification) Delivery {
+func makeDelivery(lastEvent HandlingEvent, itinerary Itinerary, rs RouteSpecification) Delivery {
 	var (
 		routingStatus           = calculateRoutingStatus(itinerary, rs)
 		transportStatus         = calculateTransportStatus(lastEvent)

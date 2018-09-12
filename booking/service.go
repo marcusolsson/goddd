@@ -46,6 +46,16 @@ type service struct {
 	routingService shipping.RoutingService
 }
 
+// NewService creates a booking service with necessary dependencies.
+func NewService(cargos shipping.CargoRepository, locations shipping.LocationRepository, events shipping.HandlingEventRepository, rs shipping.RoutingService) Service {
+	return &service{
+		cargos:         cargos,
+		locations:      locations,
+		handlingEvents: events,
+		routingService: rs,
+	}
+}
+
 func (s *service) AssignCargoToRoute(id shipping.TrackingID, itinerary shipping.Itinerary) error {
 	if id == "" || len(itinerary.Legs) == 0 {
 		return ErrInvalidArgument
@@ -66,7 +76,7 @@ func (s *service) BookNewCargo(origin, destination shipping.UNLocode, deadline t
 		return "", ErrInvalidArgument
 	}
 
-	id := shipping.NextTrackingID()
+	id := shipping.MakeTrackingID()
 	rs := shipping.RouteSpecification{
 		Origin:          origin,
 		Destination:     destination,
@@ -137,32 +147,24 @@ func (s *service) RequestPossibleRoutesForCargo(id shipping.TrackingID) []shippi
 }
 
 func (s *service) Cargos() []Cargo {
-	var result []Cargo
-	for _, c := range s.cargos.FindAll() {
+	cargos := s.cargos.FindAll()
+	result := make([]Cargo, 0, len(cargos))
+	for _, c := range cargos {
 		result = append(result, assemble(c, s.handlingEvents))
 	}
 	return result
 }
 
 func (s *service) Locations() []Location {
-	var result []Location
-	for _, v := range s.locations.FindAll() {
+	locations := s.locations.FindAll()
+	result := make([]Location, 0, len(locations))
+	for _, v := range locations {
 		result = append(result, Location{
 			UNLocode: string(v.UNLocode),
 			Name:     v.Name,
 		})
 	}
 	return result
-}
-
-// NewService creates a booking service with necessary dependencies.
-func NewService(cargos shipping.CargoRepository, locations shipping.LocationRepository, events shipping.HandlingEventRepository, rs shipping.RoutingService) Service {
-	return &service{
-		cargos:         cargos,
-		locations:      locations,
-		handlingEvents: events,
-		routingService: rs,
-	}
 }
 
 // Location is a read model for booking views.
