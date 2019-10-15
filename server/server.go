@@ -21,6 +21,9 @@ type Server struct {
 	Tracking tracking.Service
 	Handling handling.Service
 
+	
+	
+	
 	Logger kitlog.Logger
 
 	router chi.Router
