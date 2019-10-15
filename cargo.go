@@ -12,6 +12,8 @@ import (
 // TrackingID uniquely identifies a particular cargo.
 type TrackingID string
 
+
+
 // Cargo is the central class in the domain model.
 type Cargo struct {
 	TrackingID         TrackingID
