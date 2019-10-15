@@ -9,8 +9,6 @@ import (
 	"github.com/pborman/uuid"
 )
 
-
-
 // TrackingID uniquely identifies a particular cargo.
 type TrackingID string
 
