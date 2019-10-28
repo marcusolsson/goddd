@@ -190,7 +190,7 @@ func (h *bookingHandler) listLocations(w http.ResponseWriter, r *http.Request) {
 	ls := h.s.Locations()
 
 	var response = struct {
-		Locations []booking.Location `json:"cargos"`
+		Locations []booking.Location `json:"locations"`
 	}{
 		Locations: ls,
 	}
