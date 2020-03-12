@@ -88,8 +88,8 @@ type HandlingEventFactory struct {
 	LocationRepository LocationRepository
 }
 
-// CreateHandlingEvent creates a validated handling event.
-func (f *HandlingEventFactory) CreateHandlingEvent(registered time.Time, completed time.Time, id TrackingID,
+// MakeHandlingEvent creates a validated handling event.
+func (f *HandlingEventFactory) MakeHandlingEvent(registered time.Time, completed time.Time, id TrackingID,
 	voyageNumber VoyageNumber, unLocode UNLocode, eventType HandlingEventType) (HandlingEvent, error) {
 
 	if _, err := f.CargoRepository.Find(id); err != nil {

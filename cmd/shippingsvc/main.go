@@ -10,10 +10,10 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/globalsign/mgo"
 	"github.com/go-kit/kit/log"
 	kitprometheus "github.com/go-kit/kit/metrics/prometheus"
 	stdprometheus "github.com/prometheus/client_golang/prometheus"
-	"gopkg.in/mgo.v2"
 
 	shipping "github.com/marcusolsson/goddd"
 	"github.com/marcusolsson/goddd/booking"
@@ -101,12 +101,12 @@ func main() {
 	fieldKeys := []string{"method"}
 
 	var rs shipping.RoutingService
-	rs = routing.NewProxyingMiddleware(ctx, *routingServiceURL)(rs)
+	rs = routing.NewProxyMiddleware(ctx, *routingServiceURL)(rs)
 
 	var bs booking.Service
 	bs = booking.NewService(cargos, locations, handlingEvents, rs)
-	bs = booking.NewLoggingService(log.With(logger, "component", "booking"), bs)
-	bs = booking.NewInstrumentingService(
+	bs = booking.NewLoggingMiddleware(log.With(logger, "component", "booking"), bs)
+	bs = booking.NewInstrumentingMiddleware(
 		kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 			Namespace: "api",
 			Subsystem: "booking_service",
@@ -124,8 +124,8 @@ func main() {
 
 	var ts tracking.Service
 	ts = tracking.NewService(cargos, handlingEvents)
-	ts = tracking.NewLoggingService(log.With(logger, "component", "tracking"), ts)
-	ts = tracking.NewInstrumentingService(
+	ts = tracking.NewLoggingMiddleware(log.With(logger, "component", "tracking"), ts)
+	ts = tracking.NewInstrumentingMiddleware(
 		kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 			Namespace: "api",
 			Subsystem: "tracking_service",
@@ -143,8 +143,8 @@ func main() {
 
 	var hs handling.Service
 	hs = handling.NewService(handlingEvents, handlingEventFactory, handlingEventHandler)
-	hs = handling.NewLoggingService(log.With(logger, "component", "handling"), hs)
-	hs = handling.NewInstrumentingService(
+	hs = handling.NewLoggingMiddleware(log.With(logger, "component", "handling"), hs)
+	hs = handling.NewInstrumentingMiddleware(
 		kitprometheus.NewCounterFrom(stdprometheus.CounterOpts{
 			Namespace: "api",
 			Subsystem: "handling_service",

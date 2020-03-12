@@ -32,13 +32,22 @@ type service struct {
 	handlingEventHandler    EventHandler
 }
 
+// NewService creates a handling event service with necessary dependencies.
+func NewService(r shipping.HandlingEventRepository, f shipping.HandlingEventFactory, h EventHandler) Service {
+	return &service{
+		handlingEventRepository: r,
+		handlingEventFactory:    f,
+		handlingEventHandler:    h,
+	}
+}
+
 func (s *service) RegisterHandlingEvent(completed time.Time, id shipping.TrackingID, voyageNumber shipping.VoyageNumber,
 	loc shipping.UNLocode, eventType shipping.HandlingEventType) error {
 	if completed.IsZero() || id == "" || loc == "" || eventType == shipping.NotHandled {
 		return ErrInvalidArgument
 	}
 
-	e, err := s.handlingEventFactory.CreateHandlingEvent(time.Now(), completed, id, voyageNumber, loc, eventType)
+	e, err := s.handlingEventFactory.MakeHandlingEvent(time.Now(), completed, id, voyageNumber, loc, eventType)
 	if err != nil {
 		return err
 	}
@@ -47,15 +56,6 @@ func (s *service) RegisterHandlingEvent(completed time.Time, id shipping.Trackin
 	s.handlingEventHandler.CargoWasHandled(e)
 
 	return nil
-}
-
-// NewService creates a handling event service with necessary dependencies.
-func NewService(r shipping.HandlingEventRepository, f shipping.HandlingEventFactory, h EventHandler) Service {
-	return &service{
-		handlingEventRepository: r,
-		handlingEventFactory:    f,
-		handlingEventHandler:    h,
-	}
 }
 
 type handlingEventHandler struct {

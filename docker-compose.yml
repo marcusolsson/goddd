@@ -1,18 +1,18 @@
 goddd:
-    image: marcusolsson/goddd
-    ports:
-        - 8080:8080
-    environment:
-        ROUTINGSERVICE_URL: http://pathfinder:8080
-        MONGODB_URL: mongodb
-    links:
-        - pathfinder
-        - mongodb
+  image: marcusolsson/goddd
+  ports:
+    - 8080:8080
+  environment:
+    ROUTINGSERVICE_URL: http://pathfinder:8080
+    MONGODB_URL: mongodb
+  links:
+    - pathfinder
+    - mongodb
 
 pathfinder:
-    image: marcusolsson/pathfinder
+  image: marcusolsson/pathfinder
 
 mongodb:
-    image: mongo
-    ports:
-        - 27017:27017
+  image: mongo
+  ports:
+    - 27017:27017
