@@ -4,6 +4,12 @@ github.com/afex/hystrix-go/hystrix/metric_collector
 github.com/afex/hystrix-go/hystrix/rolling
 # github.com/beorn7/perks v0.0.0-20180321164747-3a771d992973
 github.com/beorn7/perks/quantile
+# github.com/globalsign/mgo v0.0.0-20180905125535-1ca0a4f7cbcb
+github.com/globalsign/mgo
+github.com/globalsign/mgo/bson
+github.com/globalsign/mgo/internal/sasl
+github.com/globalsign/mgo/internal/scram
+github.com/globalsign/mgo/internal/json
 # github.com/go-chi/chi v3.3.3+incompatible
 github.com/go-chi/chi
 # github.com/go-kit/kit v0.7.0
@@ -20,6 +26,8 @@ github.com/go-logfmt/logfmt
 github.com/go-stack/stack
 # github.com/golang/protobuf v1.2.0
 github.com/golang/protobuf/proto
+# github.com/google/uuid v1.0.0
+github.com/google/uuid
 # github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515
 github.com/kr/logfmt
 # github.com/kr/pretty v0.1.0
@@ -28,7 +36,7 @@ github.com/kr/pretty
 github.com/kr/text
 # github.com/matttproud/golang_protobuf_extensions v1.0.1
 github.com/matttproud/golang_protobuf_extensions/pbutil
-# github.com/pborman/uuid v0.0.0-20180827223501-4c1ecd6722e8
+# github.com/pborman/uuid v0.0.0-20180909234540-25cd46ecac86
 github.com/pborman/uuid
 # github.com/prometheus/client_golang v0.8.0
 github.com/prometheus/client_golang/prometheus
@@ -50,9 +58,3 @@ github.com/sony/gobreaker
 github.com/streadway/handy/breaker
 # gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127
 gopkg.in/check.v1
-# gopkg.in/mgo.v2 v2.0.0-20180705113604-9856a29383ce
-gopkg.in/mgo.v2
-gopkg.in/mgo.v2/bson
-gopkg.in/mgo.v2/internal/sasl
-gopkg.in/mgo.v2/internal/scram
-gopkg.in/mgo.v2/internal/json

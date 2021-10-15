@@ -6,7 +6,7 @@ import (
 )
 
 func TestConstruction(t *testing.T) {
-	id := NextTrackingID()
+	id := MakeTrackingID()
 	spec := RouteSpecification{
 		Origin:          SESTO,
 		Destination:     AUMEL,

@@ -12,6 +12,12 @@ import (
 // TrackingID uniquely identifies a particular cargo.
 type TrackingID string
 
+// MakeTrackingID generates a new tracking ID.
+// TODO: Move to infrastructure(?)
+func MakeTrackingID() TrackingID {
+	return TrackingID(strings.Split(strings.ToUpper(uuid.New()), "-")[0])
+}
+
 // Cargo is the central class in the domain model.
 type Cargo struct {
 	TrackingID         TrackingID
@@ -19,6 +25,19 @@ type Cargo struct {
 	RouteSpecification RouteSpecification
 	Itinerary          Itinerary
 	Delivery           Delivery
+}
+
+// NewCargo creates a new, unrouted cargo.
+func NewCargo(id TrackingID, rs RouteSpecification) *Cargo {
+	itinerary := Itinerary{}
+	history := HandlingHistory{make([]HandlingEvent, 0)}
+
+	return &Cargo{
+		TrackingID:         id,
+		Origin:             rs.Origin,
+		RouteSpecification: rs,
+		Delivery:           deriveDeliveryFrom(rs, itinerary, history),
+	}
 }
 
 // SpecifyNewRoute specifies a new route for this cargo.
@@ -36,20 +55,7 @@ func (c *Cargo) AssignToRoute(itinerary Itinerary) {
 // DeriveDeliveryProgress updates all aspects of the cargo aggregate status
 // based on the current route specification, itinerary and handling of the cargo.
 func (c *Cargo) DeriveDeliveryProgress(history HandlingHistory) {
-	c.Delivery = DeriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
-}
-
-// NewCargo creates a new, unrouted cargo.
-func NewCargo(id TrackingID, rs RouteSpecification) *Cargo {
-	itinerary := Itinerary{}
-	history := HandlingHistory{make([]HandlingEvent, 0)}
-
-	return &Cargo{
-		TrackingID:         id,
-		Origin:             rs.Origin,
-		RouteSpecification: rs,
-		Delivery:           DeriveDeliveryFrom(rs, itinerary, history),
-	}
+	c.Delivery = deriveDeliveryFrom(c.RouteSpecification, c.Itinerary, history)
 }
 
 // CargoRepository provides access a cargo store.
@@ -61,12 +67,6 @@ type CargoRepository interface {
 
 // ErrUnknownCargo is used when a cargo could not be found.
 var ErrUnknownCargo = errors.New("unknown cargo")
-
-// NextTrackingID generates a new tracking ID.
-// TODO: Move to infrastructure(?)
-func NextTrackingID() TrackingID {
-	return TrackingID(strings.Split(strings.ToUpper(uuid.New()), "-")[0])
-}
 
 // RouteSpecification Contains information about a route: its origin,
 // destination and arrival deadline.

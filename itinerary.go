@@ -4,7 +4,7 @@ import (
 	"time"
 )
 
-// Leg describes the transportation between two locations on a voyage
+// Leg describes the transportation between two locations on a voyage.
 type Leg struct {
 	VoyageNumber   VoyageNumber `json:"voyage_number"`
 	LoadLocation   UNLocode     `json:"from"`
@@ -13,8 +13,8 @@ type Leg struct {
 	UnloadTime     time.Time    `json:"unload_time"`
 }
 
-// NewLeg creates a new itinerary leg.
-func NewLeg(voyageNumber VoyageNumber, loadLocation, unloadLocation UNLocode, loadTime, unloadTime time.Time) Leg {
+// MakeLeg creates a new itinerary leg.
+func MakeLeg(voyageNumber VoyageNumber, loadLocation, unloadLocation UNLocode, loadTime, unloadTime time.Time) Leg {
 	return Leg{
 		VoyageNumber:   voyageNumber,
 		LoadLocation:   loadLocation,
@@ -53,7 +53,7 @@ func (i Itinerary) FinalArrivalTime() time.Time {
 
 // IsEmpty checks if the itinerary contains at least one leg.
 func (i Itinerary) IsEmpty() bool {
-	return i.Legs == nil || len(i.Legs) == 0
+	return len(i.Legs) == 0
 }
 
 // IsExpected checks if the given handling event is expected when executing

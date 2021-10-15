@@ -8,20 +8,20 @@ import (
 	shipping "github.com/marcusolsson/goddd"
 )
 
-type loggingService struct {
+type loggingMiddleware struct {
 	logger log.Logger
 	next   Service
 }
 
-// NewLoggingService returns a new instance of a logging Service.
-func NewLoggingService(logger log.Logger, s Service) Service {
-	return &loggingService{logger, s}
+// NewLoggingMiddleware returns a new instance of a logging middleware.
+func NewLoggingMiddleware(logger log.Logger, next Service) Service {
+	return &loggingMiddleware{logger, next}
 }
 
-func (s *loggingService) RegisterHandlingEvent(completed time.Time, id shipping.TrackingID, voyageNumber shipping.VoyageNumber,
+func (mw *loggingMiddleware) RegisterHandlingEvent(completed time.Time, id shipping.TrackingID, voyageNumber shipping.VoyageNumber,
 	unLocode shipping.UNLocode, eventType shipping.HandlingEventType) (err error) {
 	defer func(begin time.Time) {
-		s.logger.Log(
+		mw.logger.Log(
 			"method", "register_incident",
 			"tracking_id", id,
 			"location", unLocode,
@@ -32,5 +32,5 @@ func (s *loggingService) RegisterHandlingEvent(completed time.Time, id shipping.
 			"err", err,
 		)
 	}(time.Now())
-	return s.next.RegisterHandlingEvent(completed, id, voyageNumber, unLocode, eventType)
+	return mw.next.RegisterHandlingEvent(completed, id, voyageNumber, unLocode, eventType)
 }

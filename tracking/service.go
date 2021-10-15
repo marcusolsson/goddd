@@ -25,6 +25,14 @@ type service struct {
 	handlingEvents shipping.HandlingEventRepository
 }
 
+// NewService returns a new instance of the default Service.
+func NewService(cargos shipping.CargoRepository, events shipping.HandlingEventRepository) Service {
+	return &service{
+		cargos:         cargos,
+		handlingEvents: events,
+	}
+}
+
 func (s *service) Track(id string) (Cargo, error) {
 	if id == "" {
 		return Cargo{}, ErrInvalidArgument
@@ -34,14 +42,6 @@ func (s *service) Track(id string) (Cargo, error) {
 		return Cargo{}, err
 	}
 	return assemble(c, s.handlingEvents), nil
-}
-
-// NewService returns a new instance of the default Service.
-func NewService(cargos shipping.CargoRepository, events shipping.HandlingEventRepository) Service {
-	return &service{
-		cargos:         cargos,
-		handlingEvents: events,
-	}
 }
 
 // Cargo is a read model for tracking views.
@@ -82,20 +82,6 @@ func assemble(c *shipping.Cargo, events shipping.HandlingEventRepository) Cargo 
 		StatusText:           assembleStatusText(c),
 		Events:               assembleEvents(c, events),
 	}
-}
-
-func assembleLegs(c shipping.Cargo) []Leg {
-	var legs []Leg
-	for _, l := range c.Itinerary.Legs {
-		legs = append(legs, Leg{
-			VoyageNumber: string(l.VoyageNumber),
-			From:         string(l.LoadLocation),
-			To:           string(l.UnloadLocation),
-			LoadTime:     l.LoadTime,
-			UnloadTime:   l.UnloadTime,
-		})
-	}
-	return legs
 }
 
 func nextExpectedActivity(c *shipping.Cargo) string {

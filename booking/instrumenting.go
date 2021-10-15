@@ -8,80 +8,80 @@ import (
 	shipping "github.com/marcusolsson/goddd"
 )
 
-type instrumentingService struct {
+type instrumentingMiddleware struct {
 	requestCount   metrics.Counter
 	requestLatency metrics.Histogram
 	next           Service
 }
 
-// NewInstrumentingService returns an instance of an instrumenting Service.
-func NewInstrumentingService(counter metrics.Counter, latency metrics.Histogram, s Service) Service {
-	return &instrumentingService{
+// NewInstrumentingMiddleware returns an instance of an instrumenting middleware.
+func NewInstrumentingMiddleware(counter metrics.Counter, latency metrics.Histogram, next Service) Service {
+	return &instrumentingMiddleware{
 		requestCount:   counter,
 		requestLatency: latency,
-		next:           s,
+		next:           next,
 	}
 }
 
-func (s *instrumentingService) BookNewCargo(origin, destination shipping.UNLocode, deadline time.Time) (shipping.TrackingID, error) {
+func (mw *instrumentingMiddleware) BookNewCargo(origin, destination shipping.UNLocode, deadline time.Time) (shipping.TrackingID, error) {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "book").Add(1)
-		s.requestLatency.With("method", "book").Observe(time.Since(begin).Seconds())
+		mw.requestCount.With("method", "book").Add(1)
+		mw.requestLatency.With("method", "book").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.next.BookNewCargo(origin, destination, deadline)
+	return mw.next.BookNewCargo(origin, destination, deadline)
 }
 
-func (s *instrumentingService) LoadCargo(id shipping.TrackingID) (c Cargo, err error) {
+func (mw *instrumentingMiddleware) LoadCargo(id shipping.TrackingID) (c Cargo, err error) {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "load").Add(1)
-		s.requestLatency.With("method", "load").Observe(time.Since(begin).Seconds())
+		mw.requestCount.With("method", "load").Add(1)
+		mw.requestLatency.With("method", "load").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.next.LoadCargo(id)
+	return mw.next.LoadCargo(id)
 }
 
-func (s *instrumentingService) RequestPossibleRoutesForCargo(id shipping.TrackingID) []shipping.Itinerary {
+func (mw *instrumentingMiddleware) RequestPossibleRoutesForCargo(id shipping.TrackingID) []shipping.Itinerary {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "request_routes").Add(1)
-		s.requestLatency.With("method", "request_routes").Observe(time.Since(begin).Seconds())
+		mw.requestCount.With("method", "request_routes").Add(1)
+		mw.requestLatency.With("method", "request_routes").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.next.RequestPossibleRoutesForCargo(id)
+	return mw.next.RequestPossibleRoutesForCargo(id)
 }
 
-func (s *instrumentingService) AssignCargoToRoute(id shipping.TrackingID, itinerary shipping.Itinerary) (err error) {
+func (mw *instrumentingMiddleware) AssignCargoToRoute(id shipping.TrackingID, itinerary shipping.Itinerary) (err error) {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "assign_to_route").Add(1)
-		s.requestLatency.With("method", "assign_to_route").Observe(time.Since(begin).Seconds())
+		mw.requestCount.With("method", "assign_to_route").Add(1)
+		mw.requestLatency.With("method", "assign_to_route").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.next.AssignCargoToRoute(id, itinerary)
+	return mw.next.AssignCargoToRoute(id, itinerary)
 }
 
-func (s *instrumentingService) ChangeDestination(id shipping.TrackingID, l shipping.UNLocode) (err error) {
+func (mw *instrumentingMiddleware) ChangeDestination(id shipping.TrackingID, l shipping.UNLocode) (err error) {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "change_destination").Add(1)
-		s.requestLatency.With("method", "change_destination").Observe(time.Since(begin).Seconds())
+		mw.requestCount.With("method", "change_destination").Add(1)
+		mw.requestLatency.With("method", "change_destination").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.next.ChangeDestination(id, l)
+	return mw.next.ChangeDestination(id, l)
 }
 
-func (s *instrumentingService) Cargos() []Cargo {
+func (mw *instrumentingMiddleware) Cargos() []Cargo {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "list_cargos").Add(1)
-		s.requestLatency.With("method", "list_cargos").Observe(time.Since(begin).Seconds())
+		mw.requestCount.With("method", "list_cargos").Add(1)
+		mw.requestLatency.With("method", "list_cargos").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.next.Cargos()
+	return mw.next.Cargos()
 }
 
-func (s *instrumentingService) Locations() []Location {
+func (mw *instrumentingMiddleware) Locations() []Location {
 	defer func(begin time.Time) {
-		s.requestCount.With("method", "list_locations").Add(1)
-		s.requestLatency.With("method", "list_locations").Observe(time.Since(begin).Seconds())
+		mw.requestCount.With("method", "list_locations").Add(1)
+		mw.requestLatency.With("method", "list_locations").Observe(time.Since(begin).Seconds())
 	}(time.Now())
 
-	return s.next.Locations()
+	return mw.next.Locations()
 }
